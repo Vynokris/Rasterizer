@@ -1,6 +1,5 @@
 TARGET  ?= $(shell $(CXX) -dumpmachine)
 
-BIN      =  Rasterizer
 CXXFLAGS = -O0 -g -Wall -Wno-unused-variable
 CPPFLAGS = -Iexternals/include -Iexternals/include/MyMath -Iinclude -MMD
 LDFLAGS  = -Lexternals/libs-$(TARGET)
@@ -8,11 +7,19 @@ LDFLAGS  = -Lexternals/libs-$(TARGET)
 # CYGWIN SPECIFICS
 ifeq ($(TARGET), x86_64-pc-cygwin)
 LDLIBS = -lglfw3 -lgdi32 -lglu32
+BIN    =  Rasterizer
 externals/src/imgui_impl_opengl3.o: CXXFLAGS+="-DIMGUI_IMPL_OPENGL_LOADER_CUSTOM"
+
+# CLANG SPECIFICS
+ifeq ($(CXX),clang)
+CXXFLAGS += -D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH=1 -nostdlib
+LDLIBS    = -lglfw3 -lglu32 -luser32 -lshell32 -lgdi32
+BIN       = Rasterizer.exe
 
 # LINUX SPECIFICS
 else ifneq (,$(filter x86_64%linux-gnu,$(TARGET)))
 LDLIBS = -lglfw3 -ldl -lX11 -lssl -lpthread -lGLU
+BIN    =  Rasterizer
 
 endif
 
