@@ -12,7 +12,6 @@
 #include <Renderer.hpp>
 #include <Scene.hpp>
 
-#include <maths.hpp>
 #include <Camera.hpp>
 
 #include <Framebuffer.hpp>

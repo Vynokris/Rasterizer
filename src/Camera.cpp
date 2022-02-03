@@ -1,9 +1,8 @@
 
 #include <imgui.h>
 
-#include <maths.hpp>
-
 #include <Camera.hpp>
+using namespace matrix;
 
 Camera::Camera(const uint width, const uint height)
 {
@@ -16,16 +15,16 @@ void Camera::Update(const float p_deltaTime, const CameraInputs& inputs)
     //TODO
 }
 
-mat4x4 Camera::GetViewMatrix()
+Mat4 Camera::GetViewMatrix()
 {
     //TODO
-    return mat4::identity();
+    return Mat4(true);
 }
 
-mat4x4 Camera::GetProjection()
+Mat4 Camera::GetProjection()
 {
     //TODO
-    return mat4::identity();
+    return Mat4(true);
 }
 
 void Camera::ShowImGuiControls()
