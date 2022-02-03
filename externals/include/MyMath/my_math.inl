@@ -9,61 +9,61 @@ using namespace geometry3D;
 
 // Vector2 addition.
 template <typename T>
-Vector2 Vector2::operator+(const T& val) const
+inline Vector2 Vector2::operator+(const T& val) const
 {
     return Vector2(x + val, y + val);
 }
 template<>
-Vector2 Vector2::operator+<Vector2>(const Vector2& val) const
+inline Vector2 Vector2::operator+<Vector2>(const Vector2& val) const
 {
     return Vector2(x + val.x, y + val.y);
 }
 
 // Vector2 substraction.
 template <typename T>
-Vector2 Vector2::operator-(const T& val) const
+inline Vector2 Vector2::operator-(const T& val) const
 {
     return Vector2(x - val,   y - val  );
 }
 template <>
-Vector2 Vector2::operator-<Vector2>(const Vector2& val) const
+inline Vector2 Vector2::operator-<Vector2>(const Vector2& val) const
 {
     return Vector2(x - val.x, y - val.y);
 }
 
 // Vector2 multiplication.
 template <typename T>
-Vector2 Vector2::operator*(const T& val) const
+inline Vector2 Vector2::operator*(const T& val) const
 {
     return Vector2(x * val,   y * val  );
 }
 template <>
-Vector2 Vector2::operator*<Vector2>(const Vector2& val) const
+inline Vector2 Vector2::operator*<Vector2>(const Vector2& val) const
 {
     return Vector2(x * val.x, y * val.y);
 }
 
 // Vector2 division.
 template <typename T>
-Vector2 Vector2::operator/(const T& val) const
+inline Vector2 Vector2::operator/(const T& val) const
 {
     return Vector2(x / val,   y / val  );
 }
 template <>
-Vector2 Vector2::operator/<Vector2>(const Vector2& val) const
+inline Vector2 Vector2::operator/<Vector2>(const Vector2& val) const
 {
     return Vector2(x / val.x, y / val.y);
 }
 
 // Vector2 addition assignement.
 template <typename T>
-void Vector2::operator+=(const T& val)
+inline void Vector2::operator+=(const T& val)
 {
     x += val;
     y += val;
 }
 template <>
-void Vector2::operator+=<Vector2>(const Vector2& val)
+inline void Vector2::operator+=<Vector2>(const Vector2& val)
 {
     x += val.x; 
     y += val.y;
@@ -71,13 +71,13 @@ void Vector2::operator+=<Vector2>(const Vector2& val)
 
 // Vector2 substraction assignement.
 template <typename T>
-void Vector2::operator-=(const T& val)
+inline void Vector2::operator-=(const T& val)
 {
     x -= val;
     y -= val;
 }
 template <>
-void Vector2::operator-=<Vector2>(const Vector2& val)
+inline void Vector2::operator-=<Vector2>(const Vector2& val)
 {
     x -= val.x; 
     y -= val.y;
@@ -85,13 +85,13 @@ void Vector2::operator-=<Vector2>(const Vector2& val)
 
 // Vector2 multiplication assignement.
 template <typename T>
-void Vector2::operator*=(const T& val)
+inline void Vector2::operator*=(const T& val)
 {
     x *= val;
     y *= val;
 }
 template <>
-void Vector2::operator*=<Vector2>(const Vector2& val)
+inline void Vector2::operator*=<Vector2>(const Vector2& val)
 {
     x *= val.x; 
     y *= val.y;
@@ -99,13 +99,13 @@ void Vector2::operator*=<Vector2>(const Vector2& val)
 
 // Vector2 division assignement.
 template <typename T>
-void Vector2::operator/=(const T& val)
+inline void Vector2::operator/=(const T& val)
 {
     x /= val;
     y /= val;
 }
 template <>
-void Vector2::operator/=<Vector2>(const Vector2& val)
+inline void Vector2::operator/=<Vector2>(const Vector2& val)
 {
     x /= val.x; 
     y /= val.y;
@@ -115,62 +115,62 @@ void Vector2::operator/=<Vector2>(const Vector2& val)
 
 // Vector3 addition.
 template <typename T>
-Vector3 Vector3::operator+(const T& val) const
+inline Vector3 Vector3::operator+(const T& val) const
 {
     return Vector3(x + val, y + val, z + val);
 }
 template<>
-Vector3 Vector3::operator+<Vector3>(const Vector3& val) const
+inline Vector3 Vector3::operator+<Vector3>(const Vector3& val) const
 {
     return Vector3(x + val.x, y + val.y, z + val.z);
 }
 
 // Vector3 substraction.
 template <typename T>
-Vector3 Vector3::operator-(const T& val) const
+inline Vector3 Vector3::operator-(const T& val) const
 {
     return Vector3(x - val, y - val, z - val);
 }
 template <>
-Vector3 Vector3::operator-<Vector3>(const Vector3& val) const
+inline Vector3 Vector3::operator-<Vector3>(const Vector3& val) const
 {
     return Vector3(x - val.x, y - val.y, z - val.z);
 }
 
 // Vector3 multiplication.
 template <typename T>
-Vector3 Vector3::operator*(const T& val) const
+inline Vector3 Vector3::operator*(const T& val) const
 {
     return Vector3(x * val, y * val, z * val);
 }
 template <>
-Vector3 Vector3::operator*<Vector3>(const Vector3& val) const
+inline Vector3 Vector3::operator*<Vector3>(const Vector3& val) const
 {
     return Vector3(x * val.x, y * val.y, z * val.z);
 }
 
 // Vector3 division.
 template <typename T>
-Vector3 Vector3::operator/(const T& val) const
+inline Vector3 Vector3::operator/(const T& val) const
 {
     return Vector3(x / val, y / val, z / val);
 }
 template <>
-Vector3 Vector3::operator/<Vector3>(const Vector3& val) const
+inline Vector3 Vector3::operator/<Vector3>(const Vector3& val) const
 {
     return Vector3(x / val.x, y / val.y, z / val.z);
 }
 
 // Vector3 addition assignement.
 template <typename T>
-void Vector3::operator+=(const T& val)
+inline void Vector3::operator+=(const T& val)
 {
     x += val;
     y += val;
     z += val;
 }
 template <>
-void Vector3::operator+=<Vector3>(const Vector3& val)
+inline void Vector3::operator+=<Vector3>(const Vector3& val)
 {
     x += val.x; 
     y += val.y;
@@ -179,14 +179,14 @@ void Vector3::operator+=<Vector3>(const Vector3& val)
 
 // Vector3 substraction assignement.
 template <typename T>
-void Vector3::operator-=(const T& val)
+inline void Vector3::operator-=(const T& val)
 {
     x -= val;
     y -= val;
     z -= val;
 }
 template <>
-void Vector3::operator-=<Vector3>(const Vector3& val)
+inline void Vector3::operator-=<Vector3>(const Vector3& val)
 {
     x -= val.x; 
     y -= val.y;
@@ -195,14 +195,14 @@ void Vector3::operator-=<Vector3>(const Vector3& val)
 
 // Vector3 multiplication assignement.
 template <typename T>
-void Vector3::operator*=(const T& val)
+inline void Vector3::operator*=(const T& val)
 {
     x *= val;
     y *= val;
     z *= val;
 }
 template <>
-void Vector3::operator*=<Vector3>(const Vector3& val)
+inline void Vector3::operator*=<Vector3>(const Vector3& val)
 {
     x *= val.x; 
     y *= val.y;
@@ -211,14 +211,14 @@ void Vector3::operator*=<Vector3>(const Vector3& val)
 
 // Vector3 division assignement.
 template <typename T>
-void Vector3::operator/=(const T& val)
+inline void Vector3::operator/=(const T& val)
 {
     x /= val;
     y /= val;
     z /= val;
 }
 template <>
-void Vector3::operator/=<Vector3>(const Vector3& val)
+inline void Vector3::operator/=<Vector3>(const Vector3& val)
 {
     x /= val.x; 
     y /= val.y;
@@ -229,56 +229,56 @@ void Vector3::operator/=<Vector3>(const Vector3& val)
 
 // Vector4 addition.
 template <typename T>
-Vector4 Vector4::operator+(const T& val) const
+inline Vector4 Vector4::operator+(const T& val) const
 {
     return Vector4(x + val, y + val, z + val, w + val);
 }
 template<>
-Vector4 Vector4::operator+<Vector4>(const Vector4& val) const
+inline Vector4 Vector4::operator+<Vector4>(const Vector4& val) const
 {
     return Vector4(x + val.x, y + val.y, z + val.z, w + val.w);
 }
 
 // Vector4 substraction.
 template <typename T>
-Vector4 Vector4::operator-(const T& val) const
+inline Vector4 Vector4::operator-(const T& val) const
 {
     return Vector4(x - val, y - val, z - val, w - val);
 }
 template <>
-Vector4 Vector4::operator-<Vector4>(const Vector4& val) const
+inline Vector4 Vector4::operator-<Vector4>(const Vector4& val) const
 {
     return Vector4(x - val.x, y - val.y, z - val.z, w - val.w);
 }
 
 // Vector4 multiplication.
 template <typename T>
-Vector4 Vector4::operator*(const T& val) const
+inline Vector4 Vector4::operator*(const T& val) const
 {
     return Vector4(x * val, y * val, z * val, w * val);
 }
 
 template <>
-Vector4 Vector4::operator*<Vector4>(const Vector4& val) const
+inline Vector4 Vector4::operator*<Vector4>(const Vector4& val) const
 {
     return Vector4(x * val.x, y * val.y, z * val.z, w * val.w);
 }
 
 // Vector4 division.
 template <typename T>
-Vector4 Vector4::operator/(const T& val) const
+inline Vector4 Vector4::operator/(const T& val) const
 {
     return Vector4(x / val, y / val, z / val, w / val);
 }
 template <>
-Vector4 Vector4::operator/<Vector4>(const Vector4& val) const
+inline Vector4 Vector4::operator/<Vector4>(const Vector4& val) const
 {
     return Vector4(x / val.x, y / val.y, z / val.z, w / val.w);
 }
 
 // Vector4 addition assignement.
 template <typename T>
-void Vector4::operator+=(const T& val)
+inline void Vector4::operator+=(const T& val)
 {
     x += val;
     y += val;
@@ -286,7 +286,7 @@ void Vector4::operator+=(const T& val)
     w += val;
 }
 template <>
-void Vector4::operator+=<Vector4>(const Vector4& val)
+inline void Vector4::operator+=<Vector4>(const Vector4& val)
 {
     x += val.x; 
     y += val.y;
@@ -296,7 +296,7 @@ void Vector4::operator+=<Vector4>(const Vector4& val)
 
 // Vector4 substraction assignement.
 template <typename T>
-void Vector4::operator-=(const T& val)
+inline void Vector4::operator-=(const T& val)
 {
     x -= val;
     y -= val;
@@ -304,7 +304,7 @@ void Vector4::operator-=(const T& val)
     w -= val;
 }
 template <>
-void Vector4::operator-=<Vector4>(const Vector4& val)
+inline void Vector4::operator-=<Vector4>(const Vector4& val)
 {
     x -= val.x; 
     y -= val.y;
@@ -314,7 +314,7 @@ void Vector4::operator-=<Vector4>(const Vector4& val)
 
 // Vector4 multiplication assignement.
 template <typename T>
-void Vector4::operator*=(const T& val)
+inline void Vector4::operator*=(const T& val)
 {
     x *= val;
     y *= val;
@@ -322,7 +322,7 @@ void Vector4::operator*=(const T& val)
     w *= val;
 }
 template <>
-void Vector4::operator*=<Vector4>(const Vector4& val)
+inline void Vector4::operator*=<Vector4>(const Vector4& val)
 {
     x *= val.x; 
     y *= val.y;
@@ -332,7 +332,7 @@ void Vector4::operator*=<Vector4>(const Vector4& val)
 
 // Vector4 division assignement.
 template <typename T>
-void Vector4::operator/=(const T& val)
+inline void Vector4::operator/=(const T& val)
 {
     x /= val;
     y /= val;
@@ -341,7 +341,7 @@ void Vector4::operator/=(const T& val)
 }
 
 template <>
-void Vector4::operator/=<Vector4>(const Vector4& val)
+inline void Vector4::operator/=<Vector4>(const Vector4& val)
 {
     x /= val.x; 
     y /= val.y;
@@ -352,7 +352,7 @@ void Vector4::operator/=<Vector4>(const Vector4& val)
 // ----------- MATRIX 4 ----------- //
 
 template <>
-Vector4 Vector4::operator*<Matrix<4,4>>(const Matrix<4,4>& val) const
+inline Vector4 Vector4::operator*<Matrix<4,4>>(const Matrix<4,4>& val) const
 {
     return Vector4
     (
@@ -367,7 +367,7 @@ Vector4 Vector4::operator*<Matrix<4,4>>(const Matrix<4,4>& val) const
 
 // Returns the smallest rectangle that contanins the given shape.
 template <typename T>
-Rectangle collisions2D::getBoundingBox(T shape)
+inline Rectangle collisions2D::getBoundingBox(T shape)
 {
     // Get the shape's vertices information.
     int vertices_num = shape.getVerticesNum();
@@ -397,7 +397,7 @@ Rectangle collisions2D::getBoundingBox(T shape)
 
 // Bounding box specialization for a circle.
 template <>
-Rectangle collisions2D::getBoundingBox<geometry2D::Circle>(geometry2D::Circle shape)
+inline Rectangle collisions2D::getBoundingBox<geometry2D::Circle>(geometry2D::Circle shape)
 {
     Rectangle bounding_box = Rectangle(shape.origin - shape.radius, 
                                            shape.radius * 2, 
@@ -408,7 +408,7 @@ Rectangle collisions2D::getBoundingBox<geometry2D::Circle>(geometry2D::Circle sh
 
 // Returns an axis that passes through the center of the given circle and the center of the given shape.
 template <typename T>
-geometry2D::Segment2 collisions2D::CircleGetAxis(Circle circle, T shape)
+inline geometry2D::Segment2 collisions2D::CircleGetAxis(Circle circle, T shape)
 {
     // Make a Segment2 that starts at the center of the circle, goes in the direction of the center of the shape and is of length 1.
     return Segment2(circle.origin, Vector2(circle.origin, shape.getCenterOfMass()).getNormalized(), true);
@@ -416,7 +416,7 @@ geometry2D::Segment2 collisions2D::CircleGetAxis(Circle circle, T shape)
 
 // Returns the axis of the given shapes that corresponds to the given index.
 template <typename T1, typename T2>
-Segment2 collisions2D::ShapesGetAxis(T1 shape1, T2 shape2, int index)
+inline Segment2 collisions2D::ShapesGetAxis(T1 shape1, T2 shape2, int index)
 {
     assert (0 <= index && index < shape1.getSidesNum() + shape2.getSidesNum());
 
@@ -447,7 +447,7 @@ Segment2 collisions2D::ShapesGetAxis(T1 shape1, T2 shape2, int index)
 
 // Shapes axis specialization for a circle and a shape.
 template <>
-Segment2 collisions2D::ShapesGetAxis<Circle, Segment2>(Circle shape1, Segment2 shape2, int index)
+inline Segment2 collisions2D::ShapesGetAxis<Circle, Segment2>(Circle shape1, Segment2 shape2, int index)
 {
     assert (0 <= index && index < shape1.getSidesNum() + shape2.getSidesNum());
 
@@ -475,7 +475,7 @@ Segment2 collisions2D::ShapesGetAxis<Circle, Segment2>(Circle shape1, Segment2 s
 
 // Shapes axis specialization for a circle and a shape.
 template <>
-Segment2 collisions2D::ShapesGetAxis<Circle, Triangle2>(Circle shape1, Triangle2 shape2, int index)
+inline Segment2 collisions2D::ShapesGetAxis<Circle, Triangle2>(Circle shape1, Triangle2 shape2, int index)
 {
     assert (0 <= index && index < shape1.getSidesNum() + shape2.getSidesNum());
 
@@ -503,7 +503,7 @@ Segment2 collisions2D::ShapesGetAxis<Circle, Triangle2>(Circle shape1, Triangle2
 
 // Shapes axis specialization for a circle and a shape.
 template <>
-Segment2 collisions2D::ShapesGetAxis<Circle, Rectangle>(Circle shape1, Rectangle shape2, int index)
+inline Segment2 collisions2D::ShapesGetAxis<Circle, Rectangle>(Circle shape1, Rectangle shape2, int index)
 {
     assert (0 <= index && index < shape1.getSidesNum() + shape2.getSidesNum());
 
@@ -531,7 +531,7 @@ Segment2 collisions2D::ShapesGetAxis<Circle, Rectangle>(Circle shape1, Rectangle
 
 // Shapes axis specialization for a circle and a shape.
 template <>
-Segment2 collisions2D::ShapesGetAxis<Circle, Polygon>(Circle shape1, Polygon shape2, int index)
+inline Segment2 collisions2D::ShapesGetAxis<Circle, Polygon>(Circle shape1, Polygon shape2, int index)
 {
     assert (0 <= index && index < shape1.getSidesNum() + shape2.getSidesNum());
 
@@ -559,7 +559,7 @@ Segment2 collisions2D::ShapesGetAxis<Circle, Polygon>(Circle shape1, Polygon sha
 
 // Shapes axis specialization for a shape and a circle.
 template <>
-Segment2 collisions2D::ShapesGetAxis<Segment2, Circle>(Segment2 shape1, Circle shape2, int index)
+inline Segment2 collisions2D::ShapesGetAxis<Segment2, Circle>(Segment2 shape1, Circle shape2, int index)
 {
     assert (0 <= index && index < shape1.getSidesNum() + shape2.getSidesNum());
 
@@ -586,7 +586,7 @@ Segment2 collisions2D::ShapesGetAxis<Segment2, Circle>(Segment2 shape1, Circle s
 }
 
 template <>
-Segment2 collisions2D::ShapesGetAxis<Triangle2, Circle>(Triangle2 shape1, Circle shape2, int index)
+inline Segment2 collisions2D::ShapesGetAxis<Triangle2, Circle>(Triangle2 shape1, Circle shape2, int index)
 {
     assert (0 <= index && index < shape1.getSidesNum() + shape2.getSidesNum());
 
@@ -613,7 +613,7 @@ Segment2 collisions2D::ShapesGetAxis<Triangle2, Circle>(Triangle2 shape1, Circle
 }
 
 template <>
-Segment2 collisions2D::ShapesGetAxis<Rectangle, Circle>(Rectangle shape1, Circle shape2, int index)
+inline Segment2 collisions2D::ShapesGetAxis<Rectangle, Circle>(Rectangle shape1, Circle shape2, int index)
 {
     assert (0 <= index && index < shape1.getSidesNum() + shape2.getSidesNum());
 
@@ -641,7 +641,7 @@ Segment2 collisions2D::ShapesGetAxis<Rectangle, Circle>(Rectangle shape1, Circle
 
 
 template <>
-Segment2 collisions2D::ShapesGetAxis<Polygon, Circle>(Polygon shape1, Circle shape2, int index)
+inline Segment2 collisions2D::ShapesGetAxis<Polygon, Circle>(Polygon shape1, Circle shape2, int index)
 {
     assert (0 <= index && index < shape1.getSidesNum() + shape2.getSidesNum());
 
@@ -669,7 +669,7 @@ Segment2 collisions2D::ShapesGetAxis<Polygon, Circle>(Polygon shape1, Circle sha
 
 // Shapes axis specialization for 2 circles.
 template <>
-Segment2 collisions2D::ShapesGetAxis<Circle, Circle>(Circle shape1, Circle shape2, int index)
+inline Segment2 collisions2D::ShapesGetAxis<Circle, Circle>(Circle shape1, Circle shape2, int index)
 {
     assert (0 <= index && index < shape1.getSidesNum() + shape2.getSidesNum());
 
@@ -694,7 +694,7 @@ Segment2 collisions2D::ShapesGetAxis<Circle, Circle>(Circle shape1, Circle shape
 
 // Project a shape onto a given axis.
 template <typename T>
-Segment2 collisions2D::projectShapeOnAxis(Segment2 axis, T shape)
+inline Segment2 collisions2D::projectShapeOnAxis(Segment2 axis, T shape)
 {
     // Get the axis' vector.
     Vector2 axis_vec = Vector2(axis);
@@ -740,7 +740,7 @@ Segment2 collisions2D::projectShapeOnAxis(Segment2 axis, T shape)
 
 // Projection specialization for a circle.
 template <>
-Segment2 collisions2D::projectShapeOnAxis<Circle>(Segment2 axis, Circle shape)
+inline Segment2 collisions2D::projectShapeOnAxis<Circle>(Segment2 axis, Circle shape)
 {
     // Get the axis' vector.
     Vector2 axis_vec = Vector2(axis);
@@ -757,7 +757,7 @@ Segment2 collisions2D::projectShapeOnAxis<Circle>(Segment2 axis, Circle shape)
 
 // Checks for collision between two given shapes.
 template<typename T1, typename T2>
-bool collisions2D::collisionSAT(T1 shape1, T2 shape2)
+inline bool collisions2D::collisionSAT(T1 shape1, T2 shape2)
 {
     // Check for collisions2D on the shapes' bounding boxes to not have to check if they are not in collision.
     if (collisionAABB(getBoundingBox(shape1), getBoundingBox(shape2)))
@@ -783,14 +783,14 @@ bool collisions2D::collisionSAT(T1 shape1, T2 shape2)
 
 // SAT specialization for circles.
 template<>
-bool collisions2D::collisionSAT<Circle, Circle>(Circle shape1, Circle shape2)
+inline bool collisions2D::collisionSAT<Circle, Circle>(Circle shape1, Circle shape2)
 {
     return collisionCircles(shape1, shape2);
 }
 
 // SAT specialization for rectangles.
 template<>
-bool collisions2D::collisionSAT<Rectangle, Rectangle>(Rectangle shape1, Rectangle shape2)
+inline bool collisions2D::collisionSAT<Rectangle, Rectangle>(Rectangle shape1, Rectangle shape2)
 {
     return collisionAABB(shape1, shape2);
 }

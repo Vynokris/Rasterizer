@@ -1,6 +1,7 @@
 #pragma once
 
 #include <types.hpp>
+#include <my_math.hpp>
 
 struct CameraInputs
 {
@@ -17,8 +18,8 @@ public:
     Camera(const uint p_width, const uint p_height);
 
     void Update(const float p_deltaTime, const CameraInputs& p_inputs);
-    mat4x4 GetViewMatrix();
-    mat4x4 GetProjection();
+    matrix::Mat4 GetViewMatrix();
+    matrix::Mat4 GetProjection();
 
     void ShowImGuiControls();
 };

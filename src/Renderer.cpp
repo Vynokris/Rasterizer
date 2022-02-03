@@ -5,7 +5,7 @@
 
 #include <imgui.h>
 
-#include <maths.hpp>
+#include <my_math.hpp>
 
 #include <Renderer.hpp>
 
@@ -107,7 +107,7 @@ void Renderer::DrawTriangles(rdrVertex* p_vertices, const uint p_count)
 {
     // calculate mvp from matrices
     // Transform vertex list to triangles into colorBuffer
-    for (int i = 0; i < p_count; i += 3)
+    for (int i = 0; i < (int)p_count; i += 3)
     {
         DrawTriangle(&p_vertices[i]);
     }

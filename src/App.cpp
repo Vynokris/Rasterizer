@@ -3,6 +3,7 @@
 #include <Framebuffer.hpp>
 #include <Camera.hpp>
 #include <Scene.hpp>
+using namespace matrix;
 
 
 //Get back Events and setup ImGUI frame
@@ -143,10 +144,10 @@ void App::Update()
         framebuffer.Clear();
 
         // Setup matrices
-        mat4x4 projection = camera.GetProjection();
-        mat4x4 view       = camera.GetViewMatrix();
-        renderer.SetProjection(projection.e);
-        renderer.SetView(view.e);
+        Mat4 projection = camera.GetProjection();
+        Mat4 view       = camera.GetViewMatrix();
+        // renderer.SetProjection(projection.e);
+        // renderer.SetView(view.e);
 
         // Render scene
         scene.Update(ImGui::GetIO().DeltaTime, renderer);
