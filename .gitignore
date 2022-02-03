@@ -1,0 +1,6 @@
+*.o
+*.d
+*.vs
+*.out
+*.exe
+Rasterizer*
