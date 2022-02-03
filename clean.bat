@@ -1,2 +1,2 @@
-del *.ilk *.pdb *.o *.d
+del /S /Q *.ilk *.pdb *.o *.d
 cls

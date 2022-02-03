@@ -1,17 +1,13 @@
-
 #include <cstdio>
 #include <cstring>
 #include <cassert>
 
 #include <imgui.h>
-
 #include <my_math.hpp>
 
-#include <Renderer.hpp>
+#include "Renderer.hpp"
 
-
-
-Renderer::Renderer(float* p_colorBuffer32Bits, float* p_depthBuffer, const uint p_width, const uint p_height)
+Renderer::Renderer(float* p_colorBuffer32Bits, float* p_depthBuffer, const unsigned int p_width, const unsigned int p_height)
            : fb(p_width, p_height),viewport(0,0,p_width, p_height)
 {
     //fb.colorBuffer = reinterpret_cast<float4*>(p_colorBuffer32Bits);
@@ -39,17 +35,17 @@ void Renderer::SetModel(const Mat4& p_modelMatrix)
     // TODO
 }
 
-void Renderer::SetViewport(const int p_x, const int p_y, const uint p_width, const uint p_height)
+void Renderer::SetViewport(const int p_x, const int p_y, const unsigned int p_width, const unsigned int p_height)
 {
     // TODO
 }
 
-void Renderer::SetTexture(float* p_colors32Bits, const uint p_width, const uint p_height)
+void Renderer::SetTexture(float* p_colors32Bits, const unsigned int p_width, const unsigned int p_height)
 {
     // TODO
 }
 
-void DrawPixel(Color* p_colorBuffer, uint p_width, uint p_height, uint p_x, uint p_y, Color p_color)
+void DrawPixel(Color* p_colorBuffer, unsigned int p_width, unsigned int p_height, unsigned int p_x, unsigned int p_y, Color p_color)
 {
     // TODO
 }
@@ -103,7 +99,7 @@ void Renderer::DrawTriangle(rdrVertex* vertices)
     DrawLine(screenCoords[2], screenCoords[0], lineColor);
 }
 
-void Renderer::DrawTriangles(rdrVertex* p_vertices, const uint p_count)
+void Renderer::DrawTriangles(rdrVertex* p_vertices, const unsigned int p_count)
 {
     // calculate mvp from matrices
     // Transform vertex list to triangles into colorBuffer
@@ -112,11 +108,6 @@ void Renderer::DrawTriangles(rdrVertex* p_vertices, const uint p_count)
         DrawTriangle(&p_vertices[i]);
     }
 }
-/*
-void rdrSetImGuiContext(rdrImpl* renderer, struct ImGuiContext* context)
-{
-    ImGui::SetCurrentContext(context);
-}*/
 
 void Renderer::ShowImGuiControls()
 {

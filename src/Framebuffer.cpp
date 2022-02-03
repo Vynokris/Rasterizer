@@ -1,6 +1,6 @@
-#include<cstring>
+#include <cstring>
 
-#include <Framebuffer.hpp>
+#include "Framebuffer.hpp"
 
 Framebuffer::Framebuffer(int p_width, int p_height)
     : width(p_width)
