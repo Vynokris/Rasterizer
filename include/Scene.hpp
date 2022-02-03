@@ -18,5 +18,3 @@ private:
     void ShowImGuiControls();
 
 };
-
-

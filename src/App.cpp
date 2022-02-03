@@ -160,7 +160,7 @@ void App::Update()
         {
             if (ImGui::CollapsingHeader("Framebuffer", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                ImGui::ColorEdit4("clearColor", framebuffer.clearColor.e);
+                ImGui::ColorEdit4("clearColor", framebuffer.clearColor.val);
             }
             if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
             {

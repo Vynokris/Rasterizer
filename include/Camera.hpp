@@ -1,6 +1,5 @@
 #pragma once
 
-#include <types.hpp>
 #include <my_math.hpp>
 
 struct CameraInputs

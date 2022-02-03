@@ -1,8 +1,8 @@
 #pragma once
 
 #include <vector>
+#include "common.hpp"
 #include <glad/gl.h>
-#include <types.hpp>
 
 class Framebuffer
 {
@@ -11,14 +11,14 @@ private:
     int height = 0;
 
     // In-RAM buffers
-    std::vector<float4> colorBuffer;
+    std::vector<Color> colorBuffer;
     std::vector<float> depthBuffer;
 
     // OpenGL texture (in VRAM)
     GLuint colorTexture = 0;
 
 public:
-    float4 clearColor = { 0.f, 0.f, 0.f, 1.f };
+    Color clearColor = { 0.f, 0.f, 0.f, 1.f };
 
     Framebuffer(int width, int height);
     ~Framebuffer();
