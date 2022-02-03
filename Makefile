@@ -11,7 +11,7 @@ BIN    =  Rasterizer
 externals/src/imgui_impl_opengl3.o: CXXFLAGS+="-DIMGUI_IMPL_OPENGL_LOADER_CUSTOM"
 
 # CLANG SPECIFICS
-ifeq ($(CXX),clang)
+else ifeq ($(CXX),clang)
 CXXFLAGS += -D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH=1 -nostdlib
 LDLIBS    = -lglfw3 -lglu32 -luser32 -lshell32 -lgdi32
 BIN       = Rasterizer.exe
