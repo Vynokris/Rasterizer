@@ -1,17 +1,17 @@
 #include <imgui.h>
 #include <my_math.hpp>
-#include <Scene.hpp>
 
+#include "Scene.hpp"
 
 Scene::Scene()
 {
     // HERE: Load the scene
     // Setup some vertices to test
     vertices = {
-        //       pos                  normal                  color              uv
-        {-0.5f,-0.5f, 0.0f,      0.0f, 0.0f, 0.0f,      1.0f, 0.0f, 0.0f,     0.0f, 0.0f },
-        { 0.5f,-0.5f, 0.0f,      0.0f, 0.0f, 0.0f,      0.0f, 1.0f, 0.0f,     0.0f, 0.0f },
-        { 0.0f, 0.5f, 0.0f,      0.0f, 0.0f, 0.0f,      0.0f, 0.0f, 1.0f,     0.0f, 0.0f },
+    //  |       pos        |      normal     |      color      |    uv     |
+        {-0.5f,-0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f },
+        { 0.5f,-0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f },
+        { 0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f },
     };
 }
 

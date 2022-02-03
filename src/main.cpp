@@ -9,14 +9,11 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-#include <Renderer.hpp>
-#include <Scene.hpp>
-
-#include <Camera.hpp>
-
-#include <Framebuffer.hpp>
-
-#include <App.hpp>
+#include "Renderer.hpp"
+#include "Scene.hpp"
+#include "Camera.hpp"
+#include "Framebuffer.hpp"
+#include "App.hpp"
 
 
 int main(int argc, char* argv[])

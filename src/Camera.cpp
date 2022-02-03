@@ -4,7 +4,7 @@
 #include <Camera.hpp>
 using namespace matrix;
 
-Camera::Camera(const uint width, const uint height)
+Camera::Camera(const unsigned int width, const unsigned int height)
 {
     //TODO
     // width and height are useful to compute projection matrix with the right aspect ratio

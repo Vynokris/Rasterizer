@@ -14,7 +14,7 @@ struct CameraInputs
 class Camera
 {
 public:
-    Camera(const uint p_width, const uint p_height);
+    Camera(const unsigned int p_width, const unsigned int p_height);
 
     void Update(const float p_deltaTime, const CameraInputs& p_inputs);
     matrix::Mat4 GetViewMatrix();
