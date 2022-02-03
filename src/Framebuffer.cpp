@@ -28,15 +28,15 @@ void Framebuffer::Clear()
 
     // Clear color buffer
     {
-        float4* colors = colorBuffer.data();
+        Color* colors = colorBuffer.data();
 
         // Fill the first line with the clear color
         for (std::size_t i = 0; i < (std::size_t)width; ++i)
-            std::memcpy(&colors[i], &clearColor, sizeof(float4));
+            std::memcpy(&colors[i], &clearColor, sizeof(Color));
 
         // Copy the first line onto every line
         for (std::size_t i = 1; i < (std::size_t)height; ++i)
-            std::memcpy(&colors[i * width], &colors[0], width * sizeof(float4));
+            std::memcpy(&colors[i * width], &colors[0], width * sizeof(Color));
     }
 
     // Clear depth buffer

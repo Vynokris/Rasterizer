@@ -1,6 +1,5 @@
 #pragma once
 
-#include <types.hpp>
 #include <Framebuffer.hpp>
 
 // Vertex format (only one supported for now)
@@ -32,7 +31,7 @@ private:
     Framebuffer fb;
     Viewport viewport;
 
-    float4 lineColor = { 1.f, 1.f, 1.f, 1.f };
+    Color lineColor = { 1.f, 1.f, 1.f, 1.f };
 
 public:
 // Color and depth buffer have to be valid until the shutdown of the renderer
@@ -42,12 +41,12 @@ public:
     ~Renderer();
 
     //TODO
-    void SetProjection(float* p_projectionMatrix);
-    void SetView(float* p_viewMatrix);
-    void SetModel(float* p_modelMatrix);
+    void SetProjection(const Mat4& p_projectionMatrix);
+    void SetView(const Mat4& p_viewMatrix);
+    void SetModel(const Mat4& p_modelMatrix);
     void SetViewport(const int p_x, const int p_y, const uint p_width, const uint p_height);
     void SetTexture(float* p_colors32Bits, const uint p_width, const uint p_height);
-    void DrawLine(const float3& p_0, const float3& p_1, const float4& p_color);
+    void DrawLine(const Vector3& p_0, const Vector3& p_1, const Color& p_color);
     void DrawTriangles(rdrVertex* p_vertices, const uint p_count);
 
 
