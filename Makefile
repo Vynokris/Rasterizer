@@ -12,10 +12,10 @@ externals/src/imgui_impl_opengl3.o: CXXFLAGS+="-DIMGUI_IMPL_OPENGL_LOADER_CUSTOM
 
 # CLANG SPECIFICS
 else ifeq ($(CXX),clang)
+BIN       =  Rasterizer.exe
 CXXFLAGS += -D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH=1 -nostdlib
 LDLIBS    = -lglfw3 -lglu32 -luser32 -lshell32 -lgdi32
 LDFLAGS   = -Lexternals/libs-vc2019
-BIN       = Rasterizer.exe
 
 # LINUX SPECIFICS
 else ifneq (,$(filter x86_64%linux-gnu,$(TARGET)))
@@ -50,7 +50,7 @@ all: $(BIN)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
 
 %.o: %.c
-	gcc $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
 
 $(BIN): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ $(LDLIBS) -o $@
