@@ -18,7 +18,7 @@
 
 int main(int argc, char* argv[])
 {
-    //Prepare the init structure
+    // Prepare the initialization structure.
     AppInit init =
     {
         1200, 
@@ -34,11 +34,11 @@ int main(int argc, char* argv[])
         }
     };
 
-    // Init App
+    // Initialize the app.
     App myApp(init);
 
-    //Check state app
-    switch (myApp.GetState())
+    // Check app state.
+    switch (myApp.getState())
     {
     case EAppState::NONE:
     case EAppState::GLFWFAILED:
@@ -53,8 +53,7 @@ int main(int argc, char* argv[])
         break;
     }
 
-    myApp.Update();
-
+    myApp.update();
 
 
     return 0;

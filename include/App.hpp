@@ -15,40 +15,39 @@
 //Structure d'initialisation de l'app
 struct AppInit
 {
-    int width;
-    int height; 
+    int width, height; 
     const char* title;
     void (*ErrorCallback)(int errorCode, const char* description);
     void (*DebugMessageCallback)(GLenum source, GLenum type, GLuint id, GLenum severity, 
-                                GLsizei length, const GLchar* message, const void* userParam);
+                                 GLsizei length, const GLchar* message, const void* userParam);
 };
 
 //Enum state of Init app
-enum EAppState
-{
-    NONE = 0,
-    GLFWFAILED = 1,
-    WINDOWFAILED = 2,
-    GLADFAILED = 3,
-    SUCCESS = 4
-};
+enum EAppState { NONE, GLFWFAILED, WINDOWFAILED, GLADFAILED, SUCCESS };
 
 //Unique Class of l'app
 class App
 {
 private:
-    GLFWwindow* window;
+    // Tracks the state of the app.
     EAppState state = NONE;
+
 public:
+    // The app's main window.
+    GLFWwindow* window;
+
+    // Constructor/Destructor.
     App(const AppInit& p_init);
     ~App();
 
-    void Update();
-    inline GLFWwindow* GetWindow() {return window;}
-    inline EAppState GetState() {return state;}
+    // The app's main loop.
+    void update();
+
+    // Getter.
+    inline EAppState getState() { return state; }
 
 private:
-    void NewFrame(bool mouseCaptured = true);
-    void EndFrame();
+    // Frame creation and addition.
+    void newFrame(bool mouseCaptured = true);
+    void endFrame();
 };
-

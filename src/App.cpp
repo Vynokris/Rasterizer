@@ -7,7 +7,7 @@
 using namespace matrix;
 
 //Get back Events and setup ImGUI frame
-void App::NewFrame(bool mouseCaptured)
+void App::newFrame(bool mouseCaptured)
 {
     glfwPollEvents();
     ImGui_ImplOpenGL3_NewFrame();
@@ -18,7 +18,7 @@ void App::NewFrame(bool mouseCaptured)
 }
 
 //Clear buffer et render ImGUI
-void App::EndFrame()
+void App::endFrame()
 {
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui::Render();
@@ -87,24 +87,19 @@ App::App(const AppInit& p_init)
 }
 
 //Update device and call the renderer
-void App::Update()
+void App::update()
 {
-
     bool mouse = false;
 
     // Create renderer framebuffer (color+depth+opengl texture)
     // We need an OpenGL texture to display the result of the renderer to the screen
-    Framebuffer framebuffer(800, 600);
     // Init renderer
-    Renderer renderer(
-        framebuffer.GetColorBuffer(),
-        framebuffer.GetDepthBuffer(),
-        framebuffer.GetWidth(), framebuffer.GetHeight());  
+    Renderer renderer(800, 600);
 
     Scene scene;
 
     CameraInputs inputs;
-    Camera camera(framebuffer.GetWidth(), framebuffer.GetHeight());
+    Camera camera(renderer.framebuffer.getWidth(), renderer.framebuffer.getHeight());
 
     bool mouseCaptured = false;
     double mouseX = 0.0;
@@ -113,7 +108,7 @@ void App::Update()
     float mouseDeltaY = 0.0;
     while (glfwWindowShouldClose(window) == false)
     {
-        NewFrame(mouseCaptured); //ImGui
+        newFrame(mouseCaptured); //ImGui
 
         {
             double newMouseX, newMouseY;
@@ -137,34 +132,34 @@ void App::Update()
             inputs.deltaY = mouseDeltaY;
             inputs.moveForward  = ImGui::IsKeyDown(GLFW_KEY_UP);
             inputs.moveBackward = ImGui::IsKeyDown(GLFW_KEY_DOWN);
-            camera.Update(ImGui::GetIO().DeltaTime, inputs);
+            camera.update(ImGui::GetIO().DeltaTime, inputs);
         }
 
         // Clear buffers
-        framebuffer.Clear();
+        renderer.framebuffer.clear();
 
         // Setup matrices
-        Mat4 projection = camera.GetProjection();
-        Mat4 view       = camera.GetViewMatrix();
-        // renderer.SetProjection(projection.e);
-        // renderer.SetView(view.e);
+        Mat4 projection = camera.getProjection();
+        Mat4 view       = camera.getViewMatrix();
+        renderer.setProjection(projection);
+        renderer.setView(view);
 
         // Render scene
-        scene.Update(ImGui::GetIO().DeltaTime, renderer);
+        scene.update(ImGui::GetIO().DeltaTime, renderer);
 
-        // Upload texture
-        framebuffer.UpdateTexture();
+        // Update texture
+        renderer.framebuffer.updateTexture();
 
         // Display debug controls
         if (ImGui::Begin("Config"))
         {
             if (ImGui::CollapsingHeader("Framebuffer", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                ImGui::ColorEdit4("clearColor", framebuffer.clearColor.val);
+                ImGui::ColorEdit4("clearColor", renderer.framebuffer.clearColor.val);
             }
             if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                camera.ShowImGuiControls();
+                camera.showImGuiControls();
             }
         }
         ImGui::End();
@@ -172,14 +167,14 @@ void App::Update()
         ImGui::Begin("Framebuffer");
         ImGui::Text("(Right click to capture mouse, Esc to un-capture)");
         // Display framebuffer (renderer output)
-        ImGui::Image((ImTextureID)(size_t)framebuffer.GetColorTexture(), { (float)framebuffer.GetWidth(), (float)framebuffer.GetHeight() });
+        ImGui::Image((ImTextureID)(size_t)renderer.framebuffer.getColorTexture(), { (float)renderer.framebuffer.getWidth(), (float)renderer.framebuffer.getHeight() });
         if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
         {
             mouseCaptured = true;
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         }
         ImGui::End();
-        EndFrame();
+        endFrame();
     }
 }
 

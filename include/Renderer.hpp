@@ -14,45 +14,39 @@ struct rdrVertex
 
 struct Viewport
 {
+    Viewport(const int _x, const int _y, unsigned int _width, unsigned int _height)
+        : x(_x), y(_y), width(_width), height(_height) {}
 
-    Viewport(const int p_x, const int p_y, unsigned int p_width, unsigned int p_height):
-    x(p_x),y(p_y),width(p_width),height(p_height){}
-
-    const int x;
-    const int y;
-    unsigned int width;
-    unsigned int height;
+    const int x, y;
+    unsigned int width, height;
 };
 
 
 class Renderer
 {
 private:
-    Framebuffer fb;
     Viewport viewport;
-
     Color lineColor = { 1.f, 1.f, 1.f, 1.f };
 
 public:
-// Color and depth buffer have to be valid until the shutdown of the renderer
-// Color buffer is RGBA, each component is a 32 bits float
-// Depth buffer is a buffer of 32bits floats
-    Renderer(float* p_colorBuffer32Bits, float* p_depthBuffer, unsigned int p_width, unsigned int p_height);
+    Framebuffer framebuffer;
+    
+    Renderer(const unsigned int& width, const unsigned int& height);
     ~Renderer();
 
     //TODO
-    void SetProjection(const Mat4& p_projectionMatrix);
-    void SetView(const Mat4& p_viewMatrix);
-    void SetModel(const Mat4& p_modelMatrix);
-    void SetViewport(const int p_x, const int p_y, const unsigned int p_width, const unsigned int p_height);
-    void SetTexture(float* p_colors32Bits, const unsigned int p_width, const unsigned int p_height);
-    void DrawLine(const Vector3& p_0, const Vector3& p_1, const Color& p_color);
-    void DrawTriangles(rdrVertex* p_vertices, const unsigned int p_count);
-
+    void setProjection(const Mat4& projectionMatrix);
+    void setView(const Mat4& viewMatrix);
+    void setModel(const Mat4& modelMatrix);
+    void setViewport(const int x, const int y, const unsigned int width, const unsigned int height);
+    void setTexture(float* colors32Bits, const unsigned int width, const unsigned int height);
+    void drawPixel(unsigned int x, unsigned int y, Color color);
+    void drawLine(const Vector3& p0, const Vector3& p1, const Color& color);
+    void drawTriangles(rdrVertex* vertices, const unsigned int count);
 
 private:
-    void DrawTriangle(rdrVertex* p_vertices);
-    void ShowImGuiControls();
+    void drawTriangle(rdrVertex* vertices);
+    void showImGuiControls();
 };
 
 

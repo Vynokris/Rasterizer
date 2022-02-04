@@ -12,9 +12,9 @@ private:
 public:
     Scene();
     ~Scene();
-    void Update(float p_deltaTime, Renderer& p_renderer);
+    void update(float p_deltaTime, Renderer& p_renderer);
 
 private:
-    void ShowImGuiControls();
+    void showImGuiControls();
 
 };
