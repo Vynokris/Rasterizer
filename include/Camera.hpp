@@ -16,9 +16,9 @@ class Camera
 public:
     Camera(const unsigned int p_width, const unsigned int p_height);
 
-    void Update(const float p_deltaTime, const CameraInputs& p_inputs);
-    matrix::Mat4 GetViewMatrix();
-    matrix::Mat4 GetProjection();
+    void update(const float p_deltaTime, const CameraInputs& p_inputs);
+    matrix::Mat4 getViewMatrix();
+    matrix::Mat4 getProjection();
 
-    void ShowImGuiControls();
+    void showImGuiControls();
 };

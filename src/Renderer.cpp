@@ -7,51 +7,77 @@
 
 #include "Renderer.hpp"
 
-Renderer::Renderer(float* p_colorBuffer32Bits, float* p_depthBuffer, const unsigned int p_width, const unsigned int p_height)
-           : fb(p_width, p_height),viewport(0,0,p_width, p_height)
+Renderer::Renderer(const unsigned int& width, const unsigned int& height)
+    : viewport(0, 0, width, height)
+    , framebuffer(width, height)
 {
-    //fb.colorBuffer = reinterpret_cast<float4*>(p_colorBuffer32Bits);
-    //fb.depthBuffer = p_depthBuffer;
-
 }
 
 Renderer::~Renderer()
 {
-
 }
 
-void Renderer::SetProjection(const Mat4& p_projectionMatrix)
+void Renderer::setProjection(const Mat4& projectionMatrix)
 {
     // TODO
 }
 
-void Renderer::SetView(const Mat4& p_viewMatrix)
+void Renderer::setView(const Mat4& viewMatrix)
 {
     // TODO
 }
 
-void Renderer::SetModel(const Mat4& p_modelMatrix)
+void Renderer::setModel(const Mat4& modelMatrix)
 {
     // TODO
 }
 
-void Renderer::SetViewport(const int p_x, const int p_y, const unsigned int p_width, const unsigned int p_height)
+void Renderer::setViewport(const int x, const int y, const unsigned int width, const unsigned int height)
 {
     // TODO
 }
 
-void Renderer::SetTexture(float* p_colors32Bits, const unsigned int p_width, const unsigned int p_height)
+void Renderer::setTexture(float* colors32Bits, const unsigned int width, const unsigned int height)
 {
     // TODO
 }
 
-void DrawPixel(Color* p_colorBuffer, unsigned int p_width, unsigned int p_height, unsigned int p_x, unsigned int p_y, Color p_color)
+void Renderer::drawPixel(unsigned int x, unsigned int y, Color color)
 {
-    // TODO
+    framebuffer.colorBuffer[y * framebuffer.getWidth() + x] = color;
 }
-void Renderer::DrawLine(const Vector3& p0, const Vector3& p1, const Color& color)
+
+void Renderer::drawLine(const Vector3& p0, const Vector3& p1, const Color& color)
 {
-   //TODO
+    // Optimized Bresenham algorithm.
+    
+    // Get the direction between the points.
+    int xDir = 1, yDir = 1;
+    if (p0.x > p1.x) xDir = -1;
+    if (p0.y > p1.y) yDir = -1;
+
+    // Get the slope coefficient.
+    int coeff       = 2     * (p1.y >= p0.y ? p1.y - p0.y : p0.y - p1.y);
+
+    // Get the slope shifting in pixels.
+    int slope_error = coeff - (p1.x >= p0.x ? p1.x - p0.x : p0.x - p1.x);
+    
+    // Trace line.
+    for (int x = p0.x, y = p0.y; (xDir > 0 ? x <= p1.x : x >= p1.x); x += xDir)
+    {
+        // Draw current pixel.
+        drawPixel(x, y, color);
+        
+        // Add slope to increment angle formed.
+        slope_error += coeff;
+
+        // Slope error reached 0, increment y and update slope error.
+        if (slope_error >= 0)
+        {
+            y += yDir;
+            slope_error -= 2 * (p1.x >= p0.x ? p1.x - p0.x : p0.x - p1.x);
+        }
+    }
 }
 
 Vector3 ndcToScreenCoords(Vector3 ndc, const Viewport& viewport)
@@ -60,7 +86,7 @@ Vector3 ndcToScreenCoords(Vector3 ndc, const Viewport& viewport)
     return ndc;
 }
 
-void Renderer::DrawTriangle(rdrVertex* vertices)
+void Renderer::drawTriangle(rdrVertex* vertices)
 {
     // Store triangle vertices positions
     Vector3 localCoords[3] = {
@@ -94,22 +120,22 @@ void Renderer::DrawTriangle(rdrVertex* vertices)
     };
 
     // Draw triangle wireframe
-    DrawLine(screenCoords[0], screenCoords[1], lineColor);
-    DrawLine(screenCoords[1], screenCoords[2], lineColor);
-    DrawLine(screenCoords[2], screenCoords[0], lineColor);
+    drawLine(screenCoords[0], screenCoords[1], lineColor);
+    drawLine(screenCoords[1], screenCoords[2], lineColor);
+    drawLine(screenCoords[2], screenCoords[0], lineColor);
 }
 
-void Renderer::DrawTriangles(rdrVertex* p_vertices, const unsigned int p_count)
+void Renderer::drawTriangles(rdrVertex* vertices, const unsigned int count)
 {
     // calculate mvp from matrices
     // Transform vertex list to triangles into colorBuffer
-    for (int i = 0; i < (int)p_count; i += 3)
+    for (int i = 0; i < (int)count; i += 3)
     {
-        DrawTriangle(&p_vertices[i]);
+        drawTriangle(&vertices[i]);
     }
 }
 
-void Renderer::ShowImGuiControls()
+void Renderer::showImGuiControls()
 {
     ImGui::ColorEdit4("lineColor", lineColor.val);
 }
