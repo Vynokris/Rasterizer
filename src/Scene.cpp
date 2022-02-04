@@ -20,7 +20,7 @@ Scene::~Scene()
     // HERE: Unload the scene
 }
 
-void Scene::Update(float deltaTime, Renderer& renderer)
+void Scene::update(float deltaTime, Renderer& renderer)
 {
     // HERE: Update (if needed) and display the scene
 
@@ -32,15 +32,17 @@ void Scene::Update(float deltaTime, Renderer& renderer)
                 (float)cos(time) * 0.5f, (float)sin(time) * 0.1f, 0.f, 1.f);
 
 
-    renderer.SetModel(matrix);
+    renderer.setModel(matrix);
 
     // Draw
-    renderer.DrawTriangles(vertices.data(), (int)vertices.size());
+    // renderer.drawTriangles(vertices.data(), (int)vertices.size());
+    renderer.drawPixel(0, 0, { 1, 1, 1, 1 });
+    renderer.drawLine({ 600, 400, 0 }, { 50, 50, 0 }, { 1, 1, 1, 1 });
 
     time += deltaTime;
 }
 
-void Scene::ShowImGuiControls()
+void Scene::showImGuiControls()
 {
     ImGui::SliderFloat("scale", &scale, 0.f, 10.f);
 }
