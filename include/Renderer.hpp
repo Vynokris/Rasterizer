@@ -28,6 +28,10 @@ private:
     Viewport viewport;
     Color lineColor = { 1.f, 1.f, 1.f, 1.f };
 
+    Mat4 projectionMat;
+    Mat4 viewMat;
+    Mat4 modelMat;
+
 public:
     Framebuffer framebuffer;
     
@@ -41,7 +45,7 @@ public:
     void setViewport(const int x, const int y, const unsigned int width, const unsigned int height);
     void setTexture(float* colors32Bits, const unsigned int width, const unsigned int height);
     void drawPixel(unsigned int x, unsigned int y, Color color);
-    void drawLine(const Vector3& p0, const Vector3& p1, const Color& color);
+    void drawLine(Vector3 p0, Vector3 p1, const Color& color);
     void drawTriangles(rdrVertex* vertices, const unsigned int count);
 
 private:
