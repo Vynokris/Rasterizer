@@ -35,9 +35,10 @@ void Scene::update(float deltaTime, Renderer& renderer)
     renderer.setModel(matrix);
 
     // Draw
+    // renderer.drawPixel(0, 0, { 1, 1, 1, 1 });
+    // renderer.drawLine({ 600, 400, 0 }, { 50, 50, 0 }, { 1, 1, 1, 1 });
+    renderer.drawTriangles(vertices.data(), (int)vertices.size());
     // renderer.drawTriangles(vertices.data(), (int)vertices.size());
-    renderer.drawPixel(0, 0, { 1, 1, 1, 1 });
-    renderer.drawLine({ 600, 400, 0 }, { 50, 50, 0 }, { 1, 1, 1, 1 });
 
     time += deltaTime;
 }

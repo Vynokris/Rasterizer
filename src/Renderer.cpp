@@ -19,17 +19,17 @@ Renderer::~Renderer()
 
 void Renderer::setProjection(const Mat4& projectionMatrix)
 {
-    // TODO
+    projectionMat = projectionMatrix;
 }
 
 void Renderer::setView(const Mat4& viewMatrix)
 {
-    // TODO
+    viewMat = viewMatrix;
 }
 
 void Renderer::setModel(const Mat4& modelMatrix)
 {
-    // TODO
+    modelMat = modelMatrix;
 }
 
 void Renderer::setViewport(const int x, const int y, const unsigned int width, const unsigned int height)
@@ -47,19 +47,17 @@ void Renderer::drawPixel(unsigned int x, unsigned int y, Color color)
     framebuffer.colorBuffer[y * framebuffer.getWidth() + x] = color;
 }
 
-void Renderer::drawLine(const Vector3& p0, const Vector3& p1, const Color& color)
+void Renderer::drawLine(Vector3 p0, Vector3 p1, const Color& color)
 {
     // Optimized Bresenham algorithm.
-    
+    /*
     // Get the direction between the points.
     int xDir = 1, yDir = 1;
     if (p0.x > p1.x) xDir = -1;
     if (p0.y > p1.y) yDir = -1;
 
-    // Get the slope coefficient.
+    // Get the slope coefficient and error margin.
     int coeff       = 2     * (p1.y >= p0.y ? p1.y - p0.y : p0.y - p1.y);
-
-    // Get the slope shifting in pixels.
     int slope_error = coeff - (p1.x >= p0.x ? p1.x - p0.x : p0.x - p1.x);
     
     // Trace line.
@@ -76,6 +74,32 @@ void Renderer::drawLine(const Vector3& p0, const Vector3& p1, const Color& color
         {
             y += yDir;
             slope_error -= 2 * (p1.x >= p0.x ? p1.x - p0.x : p0.x - p1.x);
+        }
+    }
+    */
+
+    // Filipe Del Pedro algorithm.
+    int dx =  abs(p1.x - p0.x);
+    int dy = -abs(p1.y - p0.y);
+    int sx = p0.x < p1.x ? 1 : -1;
+    int sy = p0.y < p1.y ? 1 : -1;
+    int err = dx + dy;
+    int e2;
+
+    while (true)
+    {
+        drawPixel(p0.x, p0.y, { 1, 0, 0, 1 });
+        drawPixel(p1.x, p1.y, { 0, 1, 0, 1 });
+        e2 = 2 * err;
+        if (e2 >= dy)
+        {
+            if (p0.x == p1.x) break;
+            err += dy; p0.x += sx;
+        }
+        if (e2 <= dx)
+        {
+            if (p0.y == p1.y) break;
+            err += dx; p0.y += sy;
         }
     }
 }
@@ -95,6 +119,7 @@ void Renderer::drawTriangle(rdrVertex* vertices)
         { vertices[2].x, vertices[2].y, vertices[2].z },
     };
 
+    /*
     // Local space (v3) -> Clip space (v4)
     // TODO
     Vector4 clipCoords[3] = {
@@ -118,11 +143,18 @@ void Renderer::drawTriangle(rdrVertex* vertices)
         { ndcToScreenCoords(ndcCoords[1], viewport) },
         { ndcToScreenCoords(ndcCoords[2], viewport) },
     };
+    */
+
+    Vector3 screenCoords[3] = {
+        { vertices[0].x * 100 + 100, vertices[0].y * 100 + 100, vertices[0].z * 100 + 100 },
+        { vertices[1].x * 100 + 100, vertices[1].y * 100 + 100, vertices[1].z * 100 + 100 },
+        { vertices[2].x * 100 + 100, vertices[2].y * 100 + 100, vertices[2].z * 100 + 100 },
+    };
 
     // Draw triangle wireframe
-    drawLine(screenCoords[0], screenCoords[1], lineColor);
-    drawLine(screenCoords[1], screenCoords[2], lineColor);
-    drawLine(screenCoords[2], screenCoords[0], lineColor);
+    drawLine(screenCoords[0], screenCoords[1], lineColor/*{ 1, 0, 0, 1 }*/);
+    drawLine(screenCoords[1], screenCoords[2], lineColor/*{ 0, 1, 0, 1 }*/);
+    drawLine(screenCoords[2], screenCoords[0], lineColor/*{ 0, 0, 1, 1 }*/);
 }
 
 void Renderer::drawTriangles(rdrVertex* vertices, const unsigned int count)
