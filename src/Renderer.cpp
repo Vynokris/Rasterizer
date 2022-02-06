@@ -34,7 +34,10 @@ void Renderer::setModel(const Mat4& modelMatrix)
 
 void Renderer::setViewport(const int x, const int y, const unsigned int width, const unsigned int height)
 {
-    // TODO
+    viewport.x = x;
+    viewport.y = x;
+    viewport.width = width;
+    viewport.height = height;
 }
 
 void Renderer::setTexture(float* colors32Bits, const unsigned int width, const unsigned int height)
@@ -78,7 +81,6 @@ void Renderer::drawLine(Vector3 p0, Vector3 p1, const Color& color)
     }
     */
 
-    // Filipe Del Pedro algorithm.
     int dx =  abs(p1.x - p0.x);
     int dy = -abs(p1.y - p0.y);
     int sx = p0.x < p1.x ? 1 : -1;

@@ -17,7 +17,7 @@ struct Viewport
     Viewport(const int _x, const int _y, unsigned int _width, unsigned int _height)
         : x(_x), y(_y), width(_width), height(_height) {}
 
-    const int x, y;
+    int x, y;
     unsigned int width, height;
 };
 
