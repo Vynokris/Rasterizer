@@ -347,7 +347,7 @@ class Matrix
         }
 
 
-        void print()
+        void print() const
         {
             // Print data
             printf("Matrix<%d,%d>\n", R, C);
