@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
     AppInit init =
     {
         1200, 
-        800, 
+        1200, 
         "Software renderer tester",
         [](int errorCode, const char* description)
         { 
@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
         printf("Y a eu un soucis");
         break;
     case EAppState::SUCCESS:
-        printf("ça fonctionne");
+        printf("Ca fonctionne");
         break;
     default:
         break;

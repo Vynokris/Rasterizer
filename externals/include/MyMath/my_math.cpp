@@ -530,7 +530,7 @@ Vector4 Vector3::toVector4() { return Vector4(x, y, z, 1); }
 Vector4::Vector4()                                                                   : x(0),                 y(0),                 z(0),                 w(1)  {}; // Null vector.
 Vector4::Vector4(const float& _x, const float& _y, const float& _z, const float& _w) : x(_x),                y(_y),                z(_z),                w(_w) {}; // Vector with 3 coordinates.
 Vector4::Vector4(const Vector4& p1, const Vector4& p2, const float& _w)              : x(p2.x - p1.x),       y(p2.y - p1.y),       z(p2.z - p1.z),       w(_w) {}; // Vector from 2 points.
-Vector4::Vector4(const Vector3&  vec, const float& _w)                               : x(vec.x - vec.x),     y(vec.y - vec.y),     z(vec.z - vec.z),     w(_w) {}; // Vector from Segment3.
+Vector4::Vector4(const Vector3&  vec, const float& _w)                               : x(vec.x),             y(vec.y),             z(vec.z),             w(_w) {}; // Vector from Segment3.
 Vector4::Vector4(const Segment3& seg, const float& _w)                               : x(seg.b.x - seg.a.x), y(seg.b.y - seg.a.y), z(seg.b.z - seg.a.z), w(_w) {}; // Vector from Segment3.
 Vector4::Vector4(const float& theta, const float& phi, const float& length, const float& _w, const bool& isAngle) // Vector from angle (useless bool).
 {
