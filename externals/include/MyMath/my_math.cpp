@@ -775,42 +775,42 @@ bool collisions2D::collisionProjections(geometry2D::Segment2 projection1, geomet
 
 matrix::Matrix<4, 4> render3D::getTranslationMatrix(const Vector3& translation)
 {
-    return matrix::Matrix<4,4>(1, 0, 0, translation.x,
-                                   0, 1, 0, translation.y,
-                                   0, 0, 1, translation.z,
-                                   0, 0, 0, 1);
+    return matrix::Matrix<4,4>(1, 0, 0, 0,
+                               0, 1, 0, 0,
+                               0, 0, 1, 0,
+                               translation.x, translation.y, translation.z, 1);
 }
 
 matrix::Matrix<4, 4> render3D::getScaleMatrix(const Vector3& scale)
 {
     return matrix::Matrix<4,4>(scale.x, 0, 0, 0,
-                                   0, scale.y, 0, 0,
-                                   0, 0, scale.z, 0,
-                                   0, 0, 0, 1);
+                               0, scale.y, 0, 0,
+                               0, 0, scale.z, 0,
+                               0, 0, 0, 1);
 }
 
 matrix::Matrix<4, 4> render3D::getXRotationMatrix(float angle)
 {
     return matrix::Matrix<4,4>(1, 0, 0, 0,
-                                   0, cosf(angle), -sinf(angle), 0,
-                                   0, sinf(angle),  cosf(angle), 0,
-                                   0, 0, 0, 1);
+                               0, cosf(angle), -sinf(angle), 0,
+                               0, sinf(angle),  cosf(angle), 0,
+                               0, 0, 0, 1);
 }
 
 matrix::Matrix<4, 4> render3D::getYRotationMatrix(float angle)
 {
     return matrix::Matrix<4,4>(cosf(angle), 0, sinf(angle), 0,
-                                   0, 1, 0, 0,
-                                   -sinf(angle), 0, cosf(angle), 0,
-                                   0, 0, 0, 1);
+                               0, 1, 0, 0,
+                               -sinf(angle), 0, cosf(angle), 0,
+                               0, 0, 0, 1);
 }
 
 matrix::Matrix<4, 4> render3D::getZRotationMatrix(float angle)
 {
     return matrix::Matrix<4,4>(cosf(angle), -sinf(angle), 0, 0,
-                                   sinf(angle), cosf(angle), 0, 0,
-                                   0, 0, 1, 0 ,
-                                   0, 0, 0, 1 );
+                               sinf(angle), cosf(angle), 0, 0,
+                               0, 0, 1, 0 ,
+                               0, 0, 0, 1 );
 }
 
 matrix::Matrix<4, 4> render3D::getTransformMatrix(const Vector3& position, const Vector3& rotation, const Vector3& scale)
