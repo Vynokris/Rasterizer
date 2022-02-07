@@ -24,15 +24,15 @@ public:
 
     // Main methods.
     void update(const float deltaTime, const CameraInputs& inputs);
-    matrix::Mat4 getProjection();
-    Mat4         getWorldTransform();
+    matrix::Mat4 getProjection()     const;
+    Mat4         getWorldTransform() const;
 
     // FP camera methods.
-    Vector2      getFPRotation();
-    matrix::Mat4 getFPViewMatrix();
+    Vector2      getFPRotation()   const;
+    matrix::Mat4 getFPViewMatrix() const;
 
     // Look at camera methods.
-    matrix::Mat4 getLookAtMatrix(Vector3 m_at, Vector3 m_up);
+    matrix::Mat4 getLookAtMatrix(Vector3 m_at, Vector3 m_up) const;
 
     // Misc.
     void showImGuiControls();
