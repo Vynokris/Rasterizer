@@ -8,19 +8,35 @@
 using namespace arithmetic;
 using namespace matrix;
 
-Camera::Camera(const unsigned int width, const unsigned int height, const float fov, const float near, const float far)
-      : m_width(width), m_height(height), m_fov(fov), m_near(near), m_far(far)
+Camera::Camera(const unsigned int width, const unsigned int height,
+               const float fov, const float near, const float far,
+               const float acceleration)
+      : m_width(width), m_height(height),
+        m_fov(fov), m_near(near), m_far(far),
+        m_acceleration(acceleration)
 {
     m_aspect = m_width / m_height;
-    m_pitch = m_yaw = 0.f;
+    m_pitch = m_yaw = m_speed = 0.f;
 }
 
 //* ---------- MAIN CAMERA METHODS ---------- *//
 
-void Camera::update(const float p_deltaTime, const CameraInputs& inputs)
+void Camera::update(const float deltaTime, const CameraInputs& inputs)
 {
-    //TODO
+    // Rotate camera first.
+    setRotation(inputs.deltaY / 3.f, inputs.deltaX / 3.f);
+
+    // Then move the camera.
+    m_speed = deltaTime * m_acceleration;
+    if (inputs.moveForward)  setPosition({m_pos.x, m_pos.y, m_pos.z + m_speed});
+    if (inputs.moveBackward) setPosition({m_pos.x, m_pos.y, m_pos.z - m_speed});
 }
+
+//* -------- CAMERA GETTERS METHODS --------- *//
+
+Mat4 Camera::getWorldTransform() const { return getViewMatrix().inv4(); }
+float Camera::getPitch()         const { return m_pitch; }
+float Camera::getYaw()           const { return m_pitch; }
 
 Mat4 Camera::getProjection() const
 {
@@ -35,14 +51,7 @@ Mat4 Camera::getProjection() const
     );
 }
 
-Mat4 Camera::getWorldTransform() const
-{
-    return getFPViewMatrix().inv4();
-}
-
-//* ------------ FP CAMERA METHODS ---------- *//
-
-Mat4 Camera::getFPViewMatrix() const
+Mat4 Camera::getViewMatrix() const
 {
     Vector2 pitchAngle = { cosf(m_pitch), sinf(m_pitch)};
     Vector2 yawAngle   = { cosf(m_yaw),   sinf(m_yaw)};
@@ -57,13 +66,20 @@ Mat4 Camera::getFPViewMatrix() const
         xaxis.z,          yaxis.z,          zaxis.z,        0.f,
         xaxis.x,          yaxis.x,          zaxis.x,        0.f,
         xaxis.y,          yaxis.y,          zaxis.z,        0.f,
-      -(xaxis & m_eye), -(yaxis & m_eye), -(zaxis & m_eye), 1.f
+      -(xaxis & m_pos), -(yaxis & m_pos), -(zaxis & m_pos), 1.f
     );
 }
 
-Vector2 Camera::getFPRotation() const
+//* -------- CAMERA SETTERS METHODS --------- *//
+
+void Camera::setPosition(const Vector3& pos)
 {
-    return { m_pitch, m_yaw };
+    m_pos = pos;
+}
+
+void Camera::setRotation(const float pitch, const float yaw)
+{
+    m_pitch = pitch; m_yaw = yaw;
 }
 
 //* ------------------ MISC. ---------------- *//

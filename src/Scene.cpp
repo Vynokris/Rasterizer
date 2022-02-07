@@ -27,7 +27,7 @@ void Scene::update(float deltaTime, Renderer& renderer, const Camera& camera)
     //(float)cos(time) * 0.5f, (float)sin(time) * 0.1f, 0.f, 1.f);
     Mat4 matrix = getTransformMatrix({ 0, 0, -2 }, { 0, 0, 0 }, { scale, scale, scale });
     renderer.setModel(matrix);
-    renderer.setView(camera.getFPViewMatrix());
+    renderer.setView(camera.getViewMatrix());
     renderer.setProjection(camera.getProjection());
 
     // Draw

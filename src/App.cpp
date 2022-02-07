@@ -100,7 +100,7 @@ void App::update()
     Scene scene;
 
     CameraInputs inputs;
-    Camera camera(renderer.framebuffer.getWidth(), renderer.framebuffer.getHeight(), 90.f, 0.025f, 1000.f);
+    Camera camera(renderer.framebuffer.getWidth(), renderer.framebuffer.getHeight(), 90.f, 0.025f, 1000.f, 2.5f);
 
     bool mouseCaptured = false;
     double mouseX = 0.0;
@@ -133,8 +133,10 @@ void App::update()
         {
             inputs.deltaX = mouseDeltaX;
             inputs.deltaY = mouseDeltaY;
-            inputs.moveForward  = ImGui::IsKeyDown(GLFW_KEY_UP);
-            inputs.moveBackward = ImGui::IsKeyDown(GLFW_KEY_DOWN);
+            inputs.moveForward  = ImGui::IsKeyDown(GLFW_KEY_W);
+            inputs.moveBackward = ImGui::IsKeyDown(GLFW_KEY_S);
+            inputs.moveLeft     = ImGui::IsKeyDown(GLFW_KEY_A);
+            inputs.moveRight    = ImGui::IsKeyDown(GLFW_KEY_D);
             camera.update(ImGui::GetIO().DeltaTime, inputs);
         }
 
@@ -143,7 +145,7 @@ void App::update()
 
         // Setup matrices
         Mat4 projection = camera.getProjection();
-        Mat4 view       = camera.getFPViewMatrix();
+        Mat4 view       = camera.getViewMatrix();
         renderer.setProjection(projection);
         renderer.setView(view);
 

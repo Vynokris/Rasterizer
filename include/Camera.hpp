@@ -4,35 +4,37 @@
 
 struct CameraInputs
 {
-    float deltaX;
-    float deltaY;
-    bool moveForward;
-    bool moveBackward;
+    float deltaX, deltaY;
+    bool moveForward, moveBackward, moveLeft, moveRight;
     // ... and more if needed
 };
 
 class Camera
 {
 private:
-    Vector3 m_eye;
+    Vector3 m_pos, m_direction;
     unsigned int m_width, m_height;
-    float m_fov, m_aspect, m_near, m_far, m_pitch, m_yaw;
+    float m_fov, m_aspect, m_near, m_far,
+          m_pitch, m_yaw, m_speed, m_acceleration;
 
 public:
     Camera(const unsigned int width, const unsigned int height,
-           const float fov, const float near, const float far);
+           const float fov, const float near, const float far,
+           const float acceleration);
 
     // Main methods.
     void update(const float deltaTime, const CameraInputs& inputs);
-    matrix::Mat4 getProjection()     const;
+
+    // Getters.
     Mat4         getWorldTransform() const;
+    float        getPitch()          const;
+    float        getYaw()            const;
+    matrix::Mat4 getProjection()     const;
+    matrix::Mat4 getViewMatrix()     const;
 
-    // FP camera methods.
-    Vector2      getFPRotation()   const;
-    matrix::Mat4 getFPViewMatrix() const;
-
-    // Look at camera methods.
-    matrix::Mat4 getLookAtMatrix(Vector3 m_at, Vector3 m_up) const;
+    // Setters.
+    void setPosition(const Vector3& pos);
+    void setRotation(const float pitch, const float yaw);
 
     // Misc.
     void showImGuiControls();

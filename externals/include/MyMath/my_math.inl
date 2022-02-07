@@ -354,12 +354,6 @@ inline void Vector4::operator/=<Vector4>(const Vector4& val)
 template <>
 inline Vector4 Vector4::operator*<Matrix<4,4>>(const Matrix<4,4>& val) const
 {
-    printf("Vector multiplied: %.2f, %.2f, %.2f, %.2f\n", x, y, z, w);
-    printf("Matrix multiplication: %.2f, %.2f, %.2f, %.2f\n", x * val[0][0] + y * val[1][0] + z * val[2][0] + w * val[3][0],
-                                                              x * val[0][1] + y * val[1][1] + z * val[2][1] + w * val[3][1],
-                                                              x * val[0][2] + y * val[1][2] + z * val[2][2] + w * val[3][2],
-                                                              x * val[0][3] + y * val[1][3] + z * val[2][3] + w * val[3][3]);
-    val.print();
     return Vector4
     (
         x * val[0][0] + y * val[1][0] + z * val[2][0] + w * val[3][0],
