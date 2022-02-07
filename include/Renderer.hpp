@@ -7,7 +7,7 @@ struct rdrVertex
 {
     float x, y, z;    // Pos
     float nx, ny, nz; // Normal
-    float r, g, b, a; // Color
+    Color color;      // Color
     float u, v;       // Texture coordinates
 };
 
@@ -28,9 +28,9 @@ private:
     Viewport viewport;
     Color lineColor = { 1.f, 1.f, 1.f, 1.f };
 
-    Mat4 projectionMat;
-    Mat4 viewMat;
     Mat4 modelMat;
+    Mat4 viewMat;
+    Mat4 projectionMat;
 
 public:
     Framebuffer framebuffer;
