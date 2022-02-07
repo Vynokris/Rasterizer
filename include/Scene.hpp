@@ -13,8 +13,5 @@ public:
     Scene();
     ~Scene();
     void update(float p_deltaTime, Renderer& p_renderer);
-
-private:
     void showImGuiControls();
-
 };
