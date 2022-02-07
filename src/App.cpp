@@ -1,3 +1,4 @@
+#include <string>
 #include "App.hpp"
 #include "Renderer.hpp"
 #include "Framebuffer.hpp"
@@ -94,12 +95,12 @@ void App::update()
     // Create renderer framebuffer (color+depth+opengl texture)
     // We need an OpenGL texture to display the result of the renderer to the screen
     // Init renderer
-    Renderer renderer(800, 600);
+    Renderer renderer(800, 800);
 
     Scene scene;
 
     CameraInputs inputs;
-    Camera camera(renderer.framebuffer.getWidth(), renderer.framebuffer.getHeight());
+    Camera camera(renderer.framebuffer.getWidth(), renderer.framebuffer.getHeight(), 90.f, 0.025f, 1000.f);
 
     bool mouseCaptured = false;
     double mouseX = 0.0;
@@ -108,8 +109,9 @@ void App::update()
     float mouseDeltaY = 0.0;
     while (glfwWindowShouldClose(window) == false)
     {
-        newFrame(mouseCaptured); //ImGui
+        newFrame(mouseCaptured);
 
+        // Update the mouse pos and delta.
         {
             double newMouseX, newMouseY;
             glfwGetCursorPos(window, &newMouseX, &newMouseY);
@@ -119,13 +121,14 @@ void App::update()
             mouseY = newMouseY;
         }
 
-        // Update camera
+        // Update the input mode.
         if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE))
         {
             mouseCaptured = false;
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
 
+        // Update the camera position and rotation.
         if (mouseCaptured)
         {
             inputs.deltaX = mouseDeltaX;
@@ -140,22 +143,33 @@ void App::update()
 
         // Setup matrices
         Mat4 projection = camera.getProjection();
-        Mat4 view       = camera.getViewMatrix();
+        Mat4 view       = camera.getFPViewMatrix();
         renderer.setProjection(projection);
         renderer.setView(view);
 
         // Render scene
-        scene.update(ImGui::GetIO().DeltaTime, renderer);
+        scene.update(ImGui::GetIO().DeltaTime, renderer, camera);
 
         // Update texture
         renderer.framebuffer.updateTexture();
 
-        // Display debug controls
+        // Display info.
+        if (ImGui::Begin("Info"))
+        {
+            ImGui::Text(("Frame duration: " + std::to_string(ImGui::GetIO().DeltaTime) + " seconds.").c_str());
+        }
+        ImGui::End();
+
+        // Display debug controls.
         if (ImGui::Begin("Config"))
         {
             if (ImGui::CollapsingHeader("Framebuffer", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                ImGui::ColorEdit4("clearColor", renderer.framebuffer.clearColor.val);
+                ImGui::ColorEdit4("clearColor", &renderer.framebuffer.clearColor.r);
+            }
+            if (ImGui::CollapsingHeader("Objects", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                scene.showImGuiControls();
             }
             if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
             {
@@ -163,17 +177,22 @@ void App::update()
             }
         }
         ImGui::End();
-
+        
+        // Display the rasterizer's output.
         ImGui::Begin("Framebuffer");
-        ImGui::Text("(Right click to capture mouse, Esc to un-capture)");
-        // Display framebuffer (renderer output)
-        ImGui::Image((ImTextureID)(size_t)renderer.framebuffer.getColorTexture(), { (float)renderer.framebuffer.getWidth(), (float)renderer.framebuffer.getHeight() });
-        if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
         {
-            mouseCaptured = true;
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            ImGui::Text("(Right click to capture mouse, Esc to un-capture)");
+
+            ImGui::Image((ImTextureID)(size_t)renderer.framebuffer.getColorTexture(), { (float)renderer.framebuffer.getWidth(), (float)renderer.framebuffer.getHeight() });
+
+            if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
+            {
+                mouseCaptured = true;
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            }
         }
         ImGui::End();
+
         endFrame();
     }
 }

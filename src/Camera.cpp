@@ -22,7 +22,7 @@ void Camera::update(const float p_deltaTime, const CameraInputs& inputs)
     //TODO
 }
 
-Mat4 Camera::getProjection()
+Mat4 Camera::getProjection() const
 {
     float yScale = 1.f / tanf(degToRad(m_fov / 2.f));
     float xScale = yScale / m_aspect;
@@ -35,14 +35,14 @@ Mat4 Camera::getProjection()
     );
 }
 
-Mat4 Camera::getWorldTransform()
+Mat4 Camera::getWorldTransform() const
 {
     return getFPViewMatrix().inv4();
 }
 
 //* ------------ FP CAMERA METHODS ---------- *//
 
-Mat4 Camera::getFPViewMatrix()
+Mat4 Camera::getFPViewMatrix() const
 {
     Vector2 pitchAngle = { cosf(m_pitch), sinf(m_pitch)};
     Vector2 yawAngle   = { cosf(m_yaw),   sinf(m_yaw)};
@@ -61,7 +61,7 @@ Mat4 Camera::getFPViewMatrix()
     );
 }
 
-Vector2 Camera::getFPRotation()
+Vector2 Camera::getFPRotation() const
 {
     return { m_pitch, m_yaw };
 }

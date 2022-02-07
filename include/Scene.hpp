@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <Camera.hpp>
 #include <Renderer.hpp>
 
 class Scene
@@ -12,9 +13,6 @@ private:
 public:
     Scene();
     ~Scene();
-    void update(float p_deltaTime, Renderer& p_renderer);
-
-private:
+    void update(float p_deltaTime, Renderer& p_renderer, const Camera& camera);
     void showImGuiControls();
-
 };
