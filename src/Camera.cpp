@@ -1,6 +1,5 @@
 
 #include <imgui.h>
-
 #include <my_math.hpp>
 
 #include <Camera.hpp>
@@ -16,18 +15,17 @@ Camera::Camera(const unsigned int width, const unsigned int height,
         m_acceleration(acceleration)
 {
     m_aspect = m_width / m_height;
-    m_pitch = 0;
-    m_yaw = 0;
-    m_speed = 0.f;
+    m_pitch = m_yaw = m_speed = 0.f;
 }
 
 //* ---------- MAIN CAMERA METHODS ---------- *//
 
 void Camera::update(const float deltaTime, const CameraInputs& inputs)
 {
-    // Rotate camera first.
-    setRotation(m_pitch + inputs.deltaX / 200.f, 
-                m_yaw   - inputs.deltaY / 200.f);
+    // Rotate camera first (Yaw locked between -90° and 90°).
+    setRotation(m_pitch + inputs.deltaX / 180.f, 
+                (m_yaw < -PI/2 || m_yaw > PI/2) ?
+                signof(m_yaw) * PI/2 : m_yaw - inputs.deltaY / 180.f);
 
     // Then move the camera.
     m_speed = deltaTime * m_acceleration;
@@ -79,6 +77,6 @@ void Camera::setRotation(const float pitch, const float yaw)
 void Camera::showImGuiControls()
 {
     ImGui::Text("Position: %.2f, %.2f, %.2f", m_pos.x, m_pos.y, m_pos.z);
-    ImGui::Text("Pitch: %.2f, Yaw = %.2f", m_pitch, m_yaw);
+    ImGui::Text("Pitch: %.2f° | Yaw = %.2f°", radToDeg(m_pitch), radToDeg(m_yaw));
     ImGui::Text("Speed: %.2f", m_speed);
 }
