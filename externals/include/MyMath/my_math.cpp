@@ -35,7 +35,7 @@ int arithmetic::ceilInt(const float& val) { return (int)ceil(val); }
 float arithmetic::sqpow(const float& val) { return val * val; }
 
 // Returns 1 if the given value is positive or null, and -1 if it is negative.
-int arithmetic::signOf(const float& val) { if (val == 0) return 1; return val / abs((int)val); }
+int arithmetic::signof(const float& val) { if (val == 0) return 1; return val / abs((int)val); }
 
 // Converts the given angle from degrees to radians.
 float arithmetic::degToRad(const float& deg) { return deg * (PI / 180.0f); }
