@@ -24,12 +24,14 @@ Camera::Camera(const unsigned int width, const unsigned int height,
 void Camera::update(const float deltaTime, const CameraInputs& inputs)
 {
     // Rotate camera first.
-    setRotation(inputs.deltaY / 3.f, inputs.deltaX / 3.f);
+    setRotation(m_pitch + inputs.deltaY / 5.f, m_yaw + inputs.deltaX / 5.f);
 
     // Then move the camera.
     m_speed = deltaTime * m_acceleration;
-    if (inputs.moveForward)  setPosition({m_pos.x, m_pos.y, m_pos.z + m_speed});
-    if (inputs.moveBackward) setPosition({m_pos.x, m_pos.y, m_pos.z - m_speed});
+    if (inputs.moveForward)  setPosition({ m_pos.x, m_pos.y, m_pos.z + m_speed });
+    if (inputs.moveBackward) setPosition({ m_pos.x, m_pos.y, m_pos.z - m_speed });
+    if (inputs.moveLeft)     setPosition({ m_pos.x + m_speed, m_pos.y, m_pos.z });
+    if (inputs.moveRight)    setPosition({ m_pos.x - m_speed, m_pos.y, m_pos.z });
 }
 
 //* -------- CAMERA GETTERS METHODS --------- *//
@@ -86,5 +88,7 @@ void Camera::setRotation(const float pitch, const float yaw)
 
 void Camera::showImGuiControls()
 {
-    //TODO
+    ImGui::Text("Position: %.2f, %.2f, %.2f", m_pos.x, m_pos.y, m_pos.z);
+    ImGui::Text("Pitch: %.2f, Yaw = %.2f", m_pitch, m_yaw);
+    ImGui::Text("Speed: %.2f", m_speed);
 }
