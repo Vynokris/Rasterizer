@@ -6,6 +6,9 @@ Framebuffer::Framebuffer(int width, int height)
     : _width(width)
     , _height(height)
 {
+    // Create the framebuffer (color+depth+opengl texture).
+    // We need an OpenGL texture to display the result of the renderer to the screen.
+
     // Load the color and depth buffers.
     colorBuffer.reserve(width * height);
     depthBuffer.reserve(width * height);

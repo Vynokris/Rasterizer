@@ -80,6 +80,7 @@ App::App(const AppInit& p_init)
 
     ImGui::StyleColorsDark();
     ImGuiStyle& style = ImGui::GetStyle();
+    ImGui::LoadIniSettingsFromDisk("externals/include/imgui.ini");
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
