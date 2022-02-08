@@ -169,6 +169,23 @@ void Renderer::drawTriangle(rdrVertex* vertices)
         { ndcToScreenCoords(ndcCoords[2], viewport) },
     };
 
+    #include <sstream>
+    ImGui::Begin("Debug info");
+    std::ostringstream temp;
+    temp.precision(2);
+    for (int i = 0; i < 3; i++) temp << "Local coords "  << i << ": (" << localCoords[i].x  << ", " << localCoords[i].y  << ", " << localCoords[i].z  << (i == 2 ? ")\n\n" : ")\n");
+    for (int i = 0; i < 3; i++) temp << "World coords "  << i << ": (" << worldCoords[i].x  << ", " << worldCoords[i].y  << ", " << worldCoords[i].z  << ", " << worldCoords[i].w << (i == 2 ? ")\n\n" : ")\n");
+    for (int i = 0; i < 3; i++) temp << "View coords "   << i << ": (" << viewCoords [i].x  << ", " << viewCoords [i].y  << ", " << viewCoords [i].z  << ", " << viewCoords [i].w << (i == 2 ? ")\n\n" : ")\n");
+    for (int i = 0; i < 3; i++) temp << "Clip coords "   << i << ": (" << clipCoords [i].x  << ", " << clipCoords [i].y  << ", " << clipCoords [i].z  << ", " << clipCoords [i].w << (i == 2 ? ")\n\n" : ")\n");
+    for (int i = 0; i < 3; i++) temp << "NDC coords "    << i << ": (" << ndcCoords  [i].x  << ", " << ndcCoords  [i].y  << ", " << ndcCoords  [i].z  << (i == 2 ? ")\n\n" : ")\n");
+    temp.precision(4);
+    for (int i = 0; i < 3; i++) temp << "Screen coords " << i << ": (" << screenCoords[i].x << ", " << screenCoords[i].y << ", " << screenCoords[i].z << (i == 2 ? ")\n\n" : ")\n");
+    ImGui::Text(temp.str().c_str());
+    ImGui::End();
+
+    if (viewCoords[0].z >= 0 && viewCoords[1].z >= 0 && viewCoords[2].z >= 0)
+        return;
+
     // Draw triangle wireframe
     // drawLine(screenCoords[0], screenCoords[1], lineColor);
     // drawLine(screenCoords[1], screenCoords[2], lineColor);
@@ -217,12 +234,14 @@ void Renderer::drawTriangle(rdrVertex* vertices)
     maxX = clamp(maxX, 0, (int)viewport.width  - 1);
     maxY = clamp(maxY, 0, (int)viewport.height - 1);
 
+    /*
     printf("\nCoords 0: %.1f, %.1f, %.1f\nCoords 1: %.1f, %.1f, %.1f\nCoords 2: %.1f, %.1f, %.1f\nMin xy: %d, %d\nMax xy: %d, %d\n", 
            screenCoords[0].x, screenCoords[0].y, screenCoords[0].z, 
            screenCoords[1].x, screenCoords[1].y, screenCoords[1].z, 
            screenCoords[2].x, screenCoords[2].y, screenCoords[2].z, 
            minX, minY, 
            maxX, maxY);
+    */
     
     // Triangle setup.
     int A01 = screenCoords[0].y - screenCoords[1].y, B01 = screenCoords[1].x - screenCoords[0].x;
