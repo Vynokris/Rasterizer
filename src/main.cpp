@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
     {
         1200, 
         1200, 
-        "Software renderer tester",
+        "ALEMI ENGINE",
         [](int errorCode, const char* description)
         { 
             printf("GLFW error (code=%d): '%s'\n", errorCode, description);
@@ -44,10 +44,8 @@ int main(int argc, char* argv[])
     case EAppState::GLFWFAILED:
     case EAppState::WINDOWFAILED:
     case EAppState::GLADFAILED:
-        printf("Y a eu un soucis.\n");
-        break;
+        throw;
     case EAppState::SUCCESS:
-        printf("Ca fonctionne !\n");
         break;
     default:
         break;

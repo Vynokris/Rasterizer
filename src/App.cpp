@@ -91,23 +91,18 @@ App::App(const AppInit& p_init)
 //Update device and call the renderer
 void App::update()
 {
-    bool mouse = false;
-
     // Create renderer framebuffer (color+depth+opengl texture)
     // We need an OpenGL texture to display the result of the renderer to the screen
     // Init renderer
     Renderer renderer(800, 800);
-
     Scene scene;
-
     CameraInputs inputs;
     Camera camera(renderer.framebuffer.getWidth(), renderer.framebuffer.getHeight(), 90.f, 0.025f, 1000.f, 2.5f);
 
     bool mouseCaptured = false;
-    double mouseX = 0.0;
-    double mouseY = 0.0;
-    float mouseDeltaX = 0.0;
-    float mouseDeltaY = 0.0;
+    double mouseX = 0.0, mouseY = 0.0;
+    float mouseDeltaX = 0.0, mouseDeltaY = 0.0;
+
     while (glfwWindowShouldClose(window) == false)
     {
         newFrame(mouseCaptured);
@@ -122,12 +117,8 @@ void App::update()
             mouseY = newMouseY;
         }
 
-        // Update the input mode.
-        if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE))
-        {
-            mouseCaptured = false;
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        }
+        // Update the exit key.
+        if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE)) break;
 
         // Update the camera position and rotation.
         if (mouseCaptured)
@@ -184,14 +175,19 @@ void App::update()
         // Display the rasterizer's output.
         ImGui::Begin("Framebuffer");
         {
-            ImGui::Text("(Right click to capture mouse, Esc to un-capture)");
+            if (mouseCaptured == false) ImGui::Text("(Hold RMB to capture mouse)");
+            else                        ImGui::Text("(Release RMB to leave mouse capture mode)");
 
             ImGui::Image((ImTextureID)(size_t)renderer.framebuffer.getColorTexture(), { (float)renderer.framebuffer.getWidth(), (float)renderer.framebuffer.getHeight() });
-
-            if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
+            if (ImGui::IsItemHovered() && ImGui::IsMouseDown(ImGuiMouseButton_Right))
             {
                 mouseCaptured = true;
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            }
+            else if (ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+            {
+                mouseCaptured = false;
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             }
         }
         ImGui::End();
