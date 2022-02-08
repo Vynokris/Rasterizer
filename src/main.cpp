@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
     // Prepare the initialization structure.
     AppInit init =
     {
-        1280, 1080, 
+        1920, 1080, 
         "Alemi Engine",
         [](int errorCode, const char* description)
         { 
