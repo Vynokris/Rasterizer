@@ -157,7 +157,7 @@ void App::update()
         // Display debug controls.
         if (ImGui::Begin("Config"))
         {
-            if (ImGui::CollapsingHeader("Framebuffer", ImGuiTreeNodeFlags_DefaultOpen))
+            if (ImGui::CollapsingHeader("Renderer", ImGuiTreeNodeFlags_DefaultOpen))
             {
                 renderer.showImGuiControls();
             }
@@ -173,7 +173,7 @@ void App::update()
         ImGui::End();
         
         // Display the rasterizer's output.
-        ImGui::Begin("Framebuffer");
+        ImGui::Begin("Render");
         {
             if (mouseCaptured == false) ImGui::Text("(Hold RMB to capture mouse)");
             else                        ImGui::Text("(Release RMB to leave mouse capture mode)");

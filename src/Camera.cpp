@@ -16,7 +16,9 @@ Camera::Camera(const unsigned int width, const unsigned int height,
         m_acceleration(acceleration)
 {
     m_aspect = m_width / m_height;
-    m_pitch = m_yaw = m_speed = 0.f;
+    m_pitch = 0;
+    m_yaw = 0;
+    m_speed = 0.f;
 }
 
 //* ---------- MAIN CAMERA METHODS ---------- *//
@@ -24,14 +26,15 @@ Camera::Camera(const unsigned int width, const unsigned int height,
 void Camera::update(const float deltaTime, const CameraInputs& inputs)
 {
     // Rotate camera first.
-    setRotation(m_pitch + inputs.deltaY / 5.f, m_yaw + inputs.deltaX / 5.f);
+    setRotation(m_pitch + inputs.deltaX / 200.f, 
+                m_yaw   - inputs.deltaY / 200.f);
 
     // Then move the camera.
     m_speed = deltaTime * m_acceleration;
     if (inputs.moveForward)  setPosition({ m_pos.x, m_pos.y, m_pos.z + m_speed });
     if (inputs.moveBackward) setPosition({ m_pos.x, m_pos.y, m_pos.z - m_speed });
-    if (inputs.moveLeft)     setPosition({ m_pos.x + m_speed, m_pos.y, m_pos.z });
-    if (inputs.moveRight)    setPosition({ m_pos.x - m_speed, m_pos.y, m_pos.z });
+    if (inputs.moveLeft)     setPosition({ m_pos.x - m_speed, m_pos.y, m_pos.z });
+    if (inputs.moveRight)    setPosition({ m_pos.x + m_speed, m_pos.y, m_pos.z });
 }
 
 //* -------- CAMERA GETTERS METHODS --------- *//
@@ -42,19 +45,20 @@ float Camera::getYaw()           const { return m_pitch; }
 
 Mat4 Camera::getProjection() const
 {
-    float yScale = 1.f / tanf(degToRad(m_fov / 2.f));
+    float yScale = 1.f / tan(m_fov / 2.f);
     float xScale = yScale / m_aspect;
 
     return Mat4(
-        xScale, 0,      0,                                  0,
-        0,      yScale, 0,                                  0,
-        0,      0,    - m_far          / (m_far - m_near), -1,
-        0,      0,    - m_far * m_near / (m_far - m_near),  0
+        xScale, 0,      0,                                 0,
+        0,      yScale, 0,                                 0,
+        0,      0,      m_far          / (m_far - m_near), 1,
+        0,      0,    - m_far * m_near / (m_far - m_near), 0
     );
 }
 
 Mat4 Camera::getViewMatrix() const
 {
+    /*
     Vector2 pitchAngle = { cosf(m_pitch), sinf(m_pitch)};
     Vector2 yawAngle   = { cosf(m_yaw),   sinf(m_yaw)};
 
@@ -70,6 +74,10 @@ Mat4 Camera::getViewMatrix() const
         xaxis.y,          yaxis.y,          zaxis.z,        0.f,
       -(xaxis & m_pos), -(yaxis & m_pos), -(zaxis & m_pos), 1.f
     );
+    */
+
+    Mat4 output(true);
+    return output * render3D::getTransformMatrix(m_pos, { m_yaw, m_pitch, 0 }, { 1, 1, 1 });
 }
 
 //* -------- CAMERA SETTERS METHODS --------- *//
