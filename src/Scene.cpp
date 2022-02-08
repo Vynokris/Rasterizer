@@ -10,10 +10,10 @@ Scene::Scene()
     // HERE: Load the scene
     // Setup some vertices to test
     vertices.clear();
-    //                          |       pos        |      normal     |                  color                   |    uv    |
-    vertices.push_back(rdrVertex{-0.5f,-0.5f, 0.0f, 0.0f, 0.0f, 0.0f, { 131.f/255, 144.f/255, 250.f/255, 1.0f }, 0.0f, 0.0f });
-    vertices.push_back(rdrVertex{ 0.5f,-0.5f, 0.0f, 0.0f, 0.0f, 0.0f, { 250.f/255, 199.f/255, 72.0f/255, 1.0f }, 0.0f, 0.0f });
-    vertices.push_back(rdrVertex{ 0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, { 248.f/255, 141.f/255, 173.f/255, 1.0f }, 0.0f, 0.0f });
+    //                          |       pos        |      normal     |           color           |    uv    |
+    vertices.push_back(rdrVertex{-0.5f,-0.5f, 0.0f, 0.0f, 0.0f, 0.0f, { 0.0f, 1.0f, 1.0f, 1.0f }, 0.0f, 0.0f });
+    vertices.push_back(rdrVertex{ 0.5f,-0.5f, 0.0f, 0.0f, 0.0f, 0.0f, { 1.0f, 1.0f, 0.0f, 1.0f }, 0.0f, 0.0f });
+    vertices.push_back(rdrVertex{ 0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, { 1.0f, 0.0f, 1.0f, 1.0f }, 0.0f, 0.0f });
 }
 
 Scene::~Scene()
@@ -41,7 +41,14 @@ void Scene::update(float deltaTime, Renderer& renderer, const Camera& camera)
 void Scene::showImGuiControls()
 {
     ImGui::SliderFloat("scale", &scale, 0.f, 10.f);
-    ImGui::SliderFloat3("point 0", &vertices[0].x, -2, 2);
-    ImGui::SliderFloat3("point 1", &vertices[1].x, -2, 2);
-    ImGui::SliderFloat3("point 2", &vertices[2].x, -2, 2);
+
+    ImGui::Text("\nPoint 0:");
+    ImGui::SliderFloat3("position 0", &vertices[0].x, -2, 2);
+    ImGui::ColorEdit4  ("color 0",    &vertices[0].color.r);
+    ImGui::Text("\nPoint 1:");
+    ImGui::SliderFloat3("position 1", &vertices[1].x, -2, 2);
+    ImGui::ColorEdit4  ("color 1", &vertices[1].color.r);
+    ImGui::Text("\nPoint 2:");
+    ImGui::SliderFloat3("position 2", &vertices[2].x, -2, 2);
+    ImGui::ColorEdit4  ("color 2", &vertices[2].color.r);
 }
