@@ -20,9 +20,9 @@ Renderer::~Renderer()
 {
 }
 
-void Renderer::setProjection(const Mat4& projectionMatrix)
+void Renderer::setModel(const Mat4& modelMatrix)
 {
-    projectionMat = projectionMatrix;
+    modelMat = modelMatrix;
 }
 
 void Renderer::setView(const Mat4& viewMatrix)
@@ -30,17 +30,9 @@ void Renderer::setView(const Mat4& viewMatrix)
     viewMat = viewMatrix;
 }
 
-void Renderer::setModel(const Mat4& modelMatrix)
+void Renderer::setProjection(const Mat4& projectionMatrix)
 {
-    modelMat = modelMatrix;
-}
-
-void Renderer::setViewport(const int x, const int y, const unsigned int width, const unsigned int height)
-{
-    viewport.x = x;
-    viewport.y = x;
-    viewport.width = width;
-    viewport.height = height;
+    projectionMat = projectionMatrix;
 }
 
 void Renderer::setTexture(float* colors32Bits, const unsigned int width, const unsigned int height)
@@ -290,5 +282,6 @@ void Renderer::drawTriangles(rdrVertex* vertices, const unsigned int count)
 
 void Renderer::showImGuiControls()
 {
+    ImGui::ColorEdit4("clearColor", &framebuffer.clearColor.r);
     ImGui::ColorEdit4("lineColor", &lineColor.r);
 }

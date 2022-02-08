@@ -39,18 +39,19 @@ public:
     ~Renderer();
 
     //TODO
-    void setProjection(const Mat4& projectionMatrix);
-    void setView(const Mat4& viewMatrix);
     void setModel(const Mat4& modelMatrix);
-    void setViewport(const int x, const int y, const unsigned int width, const unsigned int height);
+    void setView(const Mat4& viewMatrix);
+    void setProjection(const Mat4& projectionMatrix);
+
     void setTexture(float* colors32Bits, const unsigned int width, const unsigned int height);
     void drawPixel(unsigned int x, unsigned int y, Color color);
     void drawLine(Vector3 p0, Vector3 p1, const Color& color);
     void drawTriangles(rdrVertex* vertices, const unsigned int count);
 
+    void showImGuiControls();
+    
 private:
     void drawTriangle(rdrVertex* vertices);
-    void showImGuiControls();
 };
 
 

@@ -159,7 +159,7 @@ void App::update()
         {
             if (ImGui::CollapsingHeader("Framebuffer", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                ImGui::ColorEdit4("clearColor", &renderer.framebuffer.clearColor.r);
+                renderer.showImGuiControls();
             }
             if (ImGui::CollapsingHeader("Objects", ImGuiTreeNodeFlags_DefaultOpen))
             {
