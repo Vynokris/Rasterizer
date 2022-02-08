@@ -21,9 +21,8 @@ int main(int argc, char* argv[])
     // Prepare the initialization structure.
     AppInit init =
     {
-        1200, 
-        1200, 
-        "ALEMI ENGINE",
+        1280, 1080, 
+        "Alemi Engine",
         [](int errorCode, const char* description)
         { 
             printf("GLFW error (code=%d): '%s'\n", errorCode, description);

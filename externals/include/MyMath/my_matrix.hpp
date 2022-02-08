@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdio>
+#include <string>
+#include <sstream>
 #include "my_math.hpp"
 
 namespace matrix
@@ -347,10 +349,11 @@ class Matrix
         }
 
 
-        void print() const
+        void print(bool showSize = true) const
         {
             // Print data
-            printf("Matrix<%d,%d>\n", R, C);
+            if (showSize)
+                printf("Matrix<%d,%d>\n", R, C);
             
             // Print content
             for (int i = 0; i < R; i++)
@@ -359,6 +362,29 @@ class Matrix
                 printf("\n");
             }
             printf("\n");
+        }
+
+        std::string printStr(bool showSize = true) const
+        {
+            std::string output = "";
+
+            // Add data to output.
+            if (showSize)
+                output += "Matrix<" + std::to_string(R) + "," + std::to_string(C) + ">\n";
+            
+            // Add content to output.
+            for (int i = 0; i < R; i++)
+            {
+                for (int j = 0; j < C; j++)
+                {
+                    std::ostringstream temp;
+                    temp.precision(2);
+                    temp << std::fixed << m[i][j];
+                    output += temp.str() + ", ";
+                }
+                output += "\n";
+            }
+            return output + "\n";
         }
 };
 

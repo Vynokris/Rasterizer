@@ -5,6 +5,7 @@
 #include <imgui.h>
 #include <my_math.hpp>
 using namespace arithmetic;
+using namespace render3D;
 
 #include "Renderer.hpp"
 
@@ -34,6 +35,32 @@ void Renderer::setProjection(const Mat4& projectionMatrix)
 {
     projectionMat = projectionMatrix;
 }
+
+void Renderer::modelTranslate(float x, float y, float z)
+{
+    modelMat = modelMat * getTranslationMatrix({ x, y, z });
+}
+
+void Renderer::modelRotateX  (float angle)
+{
+    modelMat = modelMat * getXRotationMatrix(angle);
+}
+
+void Renderer::modelRotateY  (float angle)
+{
+    modelMat = modelMat * getYRotationMatrix(angle);
+}
+
+void Renderer::modelRotateZ  (float angle)
+{
+    modelMat = modelMat * getZRotationMatrix(angle);
+}
+
+void Renderer::modelScale    (float scaleX, float scaleY, float scaleZ)
+{
+    modelMat = modelMat * getScaleMatrix({ scaleX, scaleY, scaleZ });
+}
+
 
 void Renderer::setTexture(float* colors32Bits, const unsigned int width, const unsigned int height)
 {
@@ -106,72 +133,41 @@ void Renderer::drawTriangle(rdrVertex* vertices)
         { vertices[1].x, vertices[1].y, vertices[1].z },
         { vertices[2].x, vertices[2].y, vertices[2].z },
     };
-    /*
-    printf("Local coords: (%.2f, %.2f, %.2f)\n", localCoords[0].x, localCoords[0].y, localCoords[0].z);
-    printf("              (%.2f, %.2f, %.2f)\n", localCoords[1].x, localCoords[1].y, localCoords[1].z);
-    printf("              (%.2f, %.2f, %.2f)\n", localCoords[2].x, localCoords[2].y, localCoords[2].z);
-    */
+    
     // Local space (3D) -> World space (3D).
     Vector4 worldCoords[3] = {
         { (Vector4{ localCoords[0], 1 } * modelMat) },
         { (Vector4{ localCoords[1], 1 } * modelMat) },
         { (Vector4{ localCoords[2], 1 } * modelMat) },
     };
-    /*
-    printf("World coords: (%.2f, %.2f, %.2f, %.2f)\n", worldCoords[0].x, worldCoords[0].y, worldCoords[0].z, worldCoords[0].w);
-    printf("              (%.2f, %.2f, %.2f, %.2f)\n", worldCoords[1].x, worldCoords[1].y, worldCoords[1].z, worldCoords[1].w);
-    printf("              (%.2f, %.2f, %.2f, %.2f)\n", worldCoords[2].x, worldCoords[2].y, worldCoords[2].z, worldCoords[2].w);
-    */
+    
     // World space (3D) -> View space (3D).
     Vector4 viewCoords[3] = {
         { (worldCoords[0] * viewMat) },
         { (worldCoords[1] * viewMat) },
         { (worldCoords[2] * viewMat) },
     };
-    /*
-    printf("View coords: (%.2f, %.2f, %.2f, %.2f)\n", viewCoords[0].x, viewCoords[0].y, viewCoords[0].z, viewCoords[0].w);
-    printf("             (%.2f, %.2f, %.2f, %.2f)\n", viewCoords[1].x, viewCoords[1].y, viewCoords[1].z, viewCoords[1].w);
-    printf("             (%.2f, %.2f, %.2f, %.2f)\n", viewCoords[2].x, viewCoords[2].y, viewCoords[2].z, viewCoords[2].w);
-    */
+    
     // View space (3D) -> Clip space (4D).
     Vector4 clipCoords[3] = {
-        { worldCoords[0] * projectionMat },
-        { worldCoords[1] * projectionMat },
-        { worldCoords[2] * projectionMat },
+        { viewCoords[0] * projectionMat },
+        { viewCoords[1] * projectionMat },
+        { viewCoords[2] * projectionMat },
     };
-    /*
-    printf("Clip coords: (%.2f, %.2f, %.2f, %.2f)\n", clipCoords[0].x, clipCoords[0].y, clipCoords[0].z, clipCoords[0].w);
-    printf("             (%.2f, %.2f, %.2f, %.2f)\n", clipCoords[1].x, clipCoords[1].y, clipCoords[1].z, clipCoords[1].w);
-    printf("             (%.2f, %.2f, %.2f, %.2f)\n", clipCoords[2].x, clipCoords[2].y, clipCoords[2].z, clipCoords[2].w);
-    */
+    
     // Clip space (4D) -> NDC (3D).
     Vector3 ndcCoords[3] = {
         { clipCoords[0].getHomogenized().toVector3().getNormalized() },
         { clipCoords[1].getHomogenized().toVector3().getNormalized() },
         { clipCoords[2].getHomogenized().toVector3().getNormalized() },
     };
-    /*
-    printf("NDC coords: (%.2f, %.2f, %.2f)\n", ndcCoords[0].x, ndcCoords[0].y, ndcCoords[0].z);
-    printf("            (%.2f, %.2f, %.2f)\n", ndcCoords[1].x, ndcCoords[1].y, ndcCoords[1].z);
-    printf("            (%.2f, %.2f, %.2f)\n", ndcCoords[2].x, ndcCoords[2].y, ndcCoords[2].z);
-    */
+    
     // NDC (3D) -> screen coords (2D).
     Vector3 screenCoords[3] = {
         { ndcToScreenCoords(ndcCoords[0], viewport) },
         { ndcToScreenCoords(ndcCoords[1], viewport) },
         { ndcToScreenCoords(ndcCoords[2], viewport) },
     };
-    /*
-    printf("Screen coords: (%.2f, %.2f, %.2f)\n", screenCoords[0].x, screenCoords[0].y, screenCoords[0].z);
-    printf("               (%.2f, %.2f, %.2f)\n", screenCoords[1].x, screenCoords[1].y, screenCoords[1].z);
-    printf("               (%.2f, %.2f, %.2f)\n", screenCoords[2].x, screenCoords[2].y, screenCoords[2].z);
-    printf("\n\n");
-    */
-    //Vector3 sCoords[3] = {
-    //    { vertices[0].x, vertices[0].y, vertices[0].z },
-    //    { vertices[1].x, vertices[1].y, vertices[1].z },
-    //    { vertices[2].x, vertices[2].y, vertices[2].z },
-    //};
 
     // Draw triangle wireframe
     // drawLine(screenCoords[0], screenCoords[1], lineColor);
@@ -216,10 +212,17 @@ void Renderer::drawTriangle(rdrVertex* vertices)
     int maxY = max(max(screenCoords[0].y, screenCoords[1].y), screenCoords[2].y);
 
     // Clip against screen bounds.
-    minX = max(minX, 0);
-    minY = max(minY, 0);
-    maxX = min(maxX, (int)viewport.width - 1);
-    maxY = min(maxY, (int)viewport.height - 1);
+    minX = clamp(minX, 0, (int)viewport.width  - 1);
+    minY = clamp(minY, 0, (int)viewport.height - 1);
+    maxX = clamp(maxX, 0, (int)viewport.width  - 1);
+    maxY = clamp(maxY, 0, (int)viewport.height - 1);
+
+    printf("\nCoords 0: %.1f, %.1f, %.1f\nCoords 1: %.1f, %.1f, %.1f\nCoords 2: %.1f, %.1f, %.1f\nMin xy: %d, %d\nMax xy: %d, %d\n", 
+           screenCoords[0].x, screenCoords[0].y, screenCoords[0].z, 
+           screenCoords[1].x, screenCoords[1].y, screenCoords[1].z, 
+           screenCoords[2].x, screenCoords[2].y, screenCoords[2].z, 
+           minX, minY, 
+           maxX, maxY);
     
     // Triangle setup.
     int A01 = screenCoords[0].y - screenCoords[1].y, B01 = screenCoords[1].x - screenCoords[0].x;
@@ -282,6 +285,9 @@ void Renderer::drawTriangles(rdrVertex* vertices, const unsigned int count)
 
 void Renderer::showImGuiControls()
 {
-    ImGui::ColorEdit4("clearColor", &framebuffer.clearColor.r);
-    ImGui::ColorEdit4("lineColor", &lineColor.r);
+    ImGui::ColorEdit4("BG Color", &framebuffer.clearColor.r);
+    ImGui::Text("\nMatrices:");
+    ImGui::Text(("Model:\n"      + modelMat.printStr     (false)).c_str());
+    ImGui::Text(("View:\n"       + viewMat.printStr      (false)).c_str());
+    ImGui::Text(("Projection:\n" + projectionMat.printStr(false)).c_str());
 }

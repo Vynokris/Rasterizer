@@ -38,10 +38,21 @@ public:
     Renderer(const unsigned int& width, const unsigned int& height);
     ~Renderer();
 
-    //TODO
+    // -- Setters for the three matrices -- //
+
     void setModel(const Mat4& modelMatrix);
     void setView(const Mat4& viewMatrix);
     void setProjection(const Mat4& projectionMatrix);
+
+    // -- Model transformations -- //
+
+    void modelTranslate(float x, float y, float z);
+    void modelRotateX  (float angle);
+    void modelRotateY  (float angle);
+    void modelRotateZ  (float angle);
+    void modelScale    (float scaleX, float scaleY, float scaleZ);
+
+    // -- Drawing functions -- //
 
     void setTexture(float* colors32Bits, const unsigned int width, const unsigned int height);
     void drawPixel(unsigned int x, unsigned int y, Color color);
@@ -49,7 +60,7 @@ public:
     void drawTriangles(rdrVertex* vertices, const unsigned int count);
 
     void showImGuiControls();
-    
+
 private:
     void drawTriangle(rdrVertex* vertices);
 };

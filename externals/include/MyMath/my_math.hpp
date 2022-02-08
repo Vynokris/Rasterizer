@@ -39,7 +39,7 @@ namespace arithmetic
     float sqpow(const float& val);
 
     // Returns 1 if the given value is positive or null, and -1 if it is negative.
-    int signOf(const float& val);
+    int signof(const float& val);
 
     // Converts the given angle from degrees to radians.
     float degToRad(const float& deg);
