@@ -603,7 +603,7 @@ namespace render3D
     matrix::Matrix<4, 4> getXRotationMatrix  (float angle);
     matrix::Matrix<4, 4> getYRotationMatrix  (float angle);
     matrix::Matrix<4, 4> getZRotationMatrix  (float angle);
-    matrix::Matrix<4, 4> getTransformMatrix  (const geometry3D::Vector3& position, const geometry3D::Vector3& rotation, const geometry3D::Vector3& scale);
+    matrix::Matrix<4, 4> getTransformMatrix  (const geometry3D::Vector3& position, const geometry3D::Vector3& rotation, const geometry3D::Vector3& scale, const bool& reverse = false);
 }
 
 #include "my_math.inl"

@@ -813,11 +813,22 @@ matrix::Matrix<4, 4> render3D::getZRotationMatrix(float angle)
                                0, 0, 0, 1 );
 }
 
-matrix::Matrix<4, 4> render3D::getTransformMatrix(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+matrix::Matrix<4, 4> render3D::getTransformMatrix(const Vector3& position, const Vector3& rotation, const Vector3& scale, const bool& reverse)
 {
-    return getTranslationMatrix(position)   *
-           getYRotationMatrix  (rotation.y) *
-           getXRotationMatrix  (rotation.x) * 
-           getZRotationMatrix  (rotation.z) *
-           getScaleMatrix      (scale);
+    if (reverse)
+    {
+        return getTranslationMatrix(position)   *
+               getYRotationMatrix  (rotation.y) *
+               getXRotationMatrix  (rotation.x) * 
+               getZRotationMatrix  (rotation.z) *
+               getScaleMatrix      (scale);
+    }
+    else
+    {
+        return getScaleMatrix      (scale)      *
+               getZRotationMatrix  (rotation.z) *
+               getXRotationMatrix  (rotation.x) * 
+               getYRotationMatrix  (rotation.y) *
+               getTranslationMatrix(position);
+    }
 }

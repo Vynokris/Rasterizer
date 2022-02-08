@@ -58,26 +58,8 @@ Mat4 Camera::getProjection() const
 
 Mat4 Camera::getViewMatrix() const
 {
-    /*
-    Vector2 pitchAngle = { cosf(m_pitch), sinf(m_pitch)};
-    Vector2 yawAngle   = { cosf(m_yaw),   sinf(m_yaw)};
-
-    // Compute axis according to the camera pitch and yaw.
-    Vector3 xaxis = { yawAngle.x, 0, -yawAngle.y};
-    Vector3 yaxis = { yawAngle.y * pitchAngle.y,  pitchAngle.x, yawAngle.x * pitchAngle.y};
-    Vector3 zaxis = { yawAngle.y * pitchAngle.x, -pitchAngle.y, yawAngle.x * pitchAngle.x};
-
-    // Compute view matrix.
-    return Mat4(
-        xaxis.z,          yaxis.z,          zaxis.z,        0.f,
-        xaxis.x,          yaxis.x,          zaxis.x,        0.f,
-        xaxis.y,          yaxis.y,          zaxis.z,        0.f,
-      -(xaxis & m_pos), -(yaxis & m_pos), -(zaxis & m_pos), 1.f
-    );
-    */
-
     Mat4 output(true);
-    return output * render3D::getTransformMatrix(m_pos, { m_yaw, m_pitch, 0 }, { 1, 1, 1 });
+    return output * render3D::getTransformMatrix(m_pos, { m_yaw, m_pitch, 0 }, { 1, 1, 1 }, true);
 }
 
 //* -------- CAMERA SETTERS METHODS --------- *//
