@@ -12,6 +12,8 @@ Renderer::Renderer(const unsigned int& width, const unsigned int& height)
     : viewport(0, 0, width, height)
     , framebuffer(width, height)
 {
+    // Create renderer framebuffer (color+depth+opengl texture).
+    // We need an OpenGL texture to display the result of the renderer to the screen.
 }
 
 Renderer::~Renderer()
