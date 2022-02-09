@@ -28,19 +28,9 @@ Framebuffer::~Framebuffer()
 
 void Framebuffer::clear()
 {
-    // Clear color buffer
-    Color* colors = colorBuffer.data();
-
-    // Fill the first line with the clear color
-    for (std::size_t i = 0; i < (std::size_t)_width; ++i)
-        std::memcpy(&colors[i], &clearColor, sizeof(Color));
-
-    // Copy the first line onto every line
-    for (std::size_t i = 1; i < (std::size_t)_height; ++i)
-        std::memcpy(&colors[i * _width], &colors[0], _width * sizeof(Color));
-
-    // Clear depth buffer
-    std::memset(depthBuffer.data(), -1, depthBuffer.size() * sizeof(depthBuffer[0]));
+    // Clear color and depth buffer
+    colorBuffer.assign(_width * _height, clearColor);
+    depthBuffer.assign(_width * _height, 1);
 }
 
 void Framebuffer::updateTexture()
