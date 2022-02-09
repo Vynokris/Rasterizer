@@ -519,6 +519,7 @@ std::vector<geometry3D::Triangle3> geometry3D::clipTriangleWithFrustum(const geo
         {
             if (frustumSide->doesTriangleClip(triangle))
             {
+                printf("Side %d (normal: %.2f, %.2f, %.2f) clips with triangle %d.\n", i, frustumSide->normal.x, frustumSide->normal.y, frustumSide->normal.z, j);
                 std::vector<Vertex> clippedVertices  = frustumSide->clipTriangle(triangle);
 
                 switch (clippedVertices.size())
@@ -767,8 +768,8 @@ Plane3::Plane3(const Vector3& _normal, const float& _distance) : normal(_normal.
 int Plane3::doesSegmentClip(const Segment3& seg) const
 {
     // Get the distance from each point to the plane.
-    float distA = (seg.a.pos & normal)/* * distance*/;
-    float distB = (seg.b.pos & normal)/* * distance*/;
+    float distA = (seg.a.pos & normal)/* - distance*/;
+    float distB = (seg.b.pos & normal)/* - distance*/;
 
     // If both distances are positive, the segment doesn't clip.
     if (distA > 0 && distB > 0)
@@ -791,8 +792,8 @@ int Plane3::doesSegmentClip(const Segment3& seg) const
 Segment3 Plane3::clipSegment(Segment3 seg) const
 {
     // Get the distance from each point to the plane.
-    float distA = (seg.a.pos & normal)/* * distance*/;
-    float distB = (seg.b.pos & normal)/* * distance*/;
+    float distA = (seg.a.pos & normal)/* - distance*/;
+    float distB = (seg.b.pos & normal)/* - distance*/;
 
     // If both distances are positive, the segment is on the good side of the plane.
     if (distA > 0 && distB > 0)
