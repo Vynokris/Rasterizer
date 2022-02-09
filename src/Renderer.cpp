@@ -74,13 +74,12 @@ void Renderer::drawLine(Vector3 p0, Vector3 p1, const Color& color)
         //? This probably will be avoidable one we get the clip space right.
         if (0 <= p0.x && p0.x < viewport.width && 0 <= p0.y && p0.y < viewport.height)
             drawPixel(p0.x, p0.y, 0, color);
-        else break;
 
         e2 = 2 * err;
         if (e2 >= dy)
         {
             // Stop if the first point reached the second one.
-            if (p0.x == p1.x) break;
+            if (roundInt(p0.x) == roundInt(p1.x)) break;
 
             // Increment the error and the first point's x coordinate.
             err += dy; p0.x += sx;
@@ -88,12 +87,17 @@ void Renderer::drawLine(Vector3 p0, Vector3 p1, const Color& color)
         if (e2 <= dx)
         {
             // Stop if the first point reached the second one.
-            if (p0.y == p1.y) break;
+            if (roundInt(p0.y) == roundInt(p1.y)) break;
 
             // Increment the error and the first point's y coordinate.
             err += dx; p0.y += sy;
         }
     }
+}
+
+static Vector3 clipCoordsToNDC(const Vector4& clipCoords)
+{
+    return clipCoords.getHomogenized().toVector3();
 }
 
 static Vector3 ndcToScreenCoords(const Vector3& ndc, const Viewport& viewport)
@@ -132,8 +136,16 @@ void Renderer::drawTriangle(Vertex* vertices, const Frustum& frustum, bool wasCl
         { (worldCoords[1] * viewMat) },
         { (worldCoords[2] * viewMat) },
     };
+    
+    // View space (3D) -> Clip space (4D).
+    Vector4 clipCoords[3] = {
+        { viewCoords[0] * projectionMat },
+        { viewCoords[1] * projectionMat },
+        { viewCoords[2] * projectionMat },
+    };
 
     // Clip the triangle against the frustum.
+    // TODO: try clipping against clipCoords.z against 0.
     /*
     if (!wasClipped)
     {
@@ -150,18 +162,11 @@ void Renderer::drawTriangle(Vertex* vertices, const Frustum& frustum, bool wasCl
     }
     */
     
-    // View space (3D) -> Clip space (4D).
-    Vector4 clipCoords[3] = {
-        { viewCoords[0] * projectionMat },
-        { viewCoords[1] * projectionMat },
-        { viewCoords[2] * projectionMat },
-    };
-    
     // Clip space (4D) -> NDC (3D).
     Vector3 ndcCoords[3] = {
-        { clipCoords[0].getHomogenized().toVector3().getNormalized() },
-        { clipCoords[1].getHomogenized().toVector3().getNormalized() },
-        { clipCoords[2].getHomogenized().toVector3().getNormalized() }
+        { clipCoordsToNDC(clipCoords[0]) },
+        { clipCoordsToNDC(clipCoords[1]) },
+        { clipCoordsToNDC(clipCoords[2]) }
     };
     
     // NDC (3D) -> screen coords (2D).
