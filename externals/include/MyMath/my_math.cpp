@@ -927,6 +927,7 @@ matrix::Matrix<4, 4> render3D::getZRotationMatrix(float angle)
 
 matrix::Matrix<4, 4> render3D::getTransformMatrix(const Vector3& position, const Vector3& rotation, const Vector3& scale, const bool& reverse)
 {
+    // FOR CAMERA.
     if (reverse)
     {
         return getTranslationMatrix(position)   *
@@ -935,7 +936,8 @@ matrix::Matrix<4, 4> render3D::getTransformMatrix(const Vector3& position, const
                getZRotationMatrix  (rotation.z) *
                getScaleMatrix      (scale);
     }
-    else
+    // FOR WORLD COORDS.
+    else         
     {
         return getScaleMatrix      (scale)      *
                getZRotationMatrix  (rotation.z) *

@@ -67,9 +67,13 @@ void Renderer::setTexture(float* colors32Bits, const unsigned int width, const u
     // TODO
 }
 
-void Renderer::drawPixel(unsigned int x, unsigned int y, Color color)
+void Renderer::drawPixel(const unsigned int& x, const unsigned int& y, const float& depth, const Color& color)
 {
-    framebuffer.colorBuffer[y * framebuffer.getWidth() + x] = color;
+    if (framebuffer.depthBuffer[y * framebuffer.getWidth() + x] <= depth)
+    {
+        framebuffer.depthBuffer[y * framebuffer.getWidth() + x] = depth;
+        framebuffer.colorBuffer[y * framebuffer.getWidth() + x] = color;
+    }
 }
 
 void Renderer::drawLine(Vector3 p0, Vector3 p1, const Color& color)
@@ -90,7 +94,7 @@ void Renderer::drawLine(Vector3 p0, Vector3 p1, const Color& color)
     {
         //? This probably will be avoidable one we get the clip space right.
         if (0 <= p0.x && p0.x < viewport.width && 0 <= p0.y && p0.y < viewport.height)
-            drawPixel(p0.x, p0.y, { 1, 0, 0, 1 });
+            drawPixel(p0.x, p0.y, 0, { 1, 0, 0, 1 });
         else break;
 
         e2 = 2 * err;
@@ -269,9 +273,11 @@ void Renderer::drawTriangle(rdrVertex* vertices)
                            vertices[0].color.b * w0n + vertices[1].color.b * w1n + vertices[2].color.b * w2n, 
                            vertices[0].color.a * w0n + vertices[1].color.a * w1n + vertices[2].color.a * w2n };
 
+            // Compute depth
+            float depth = screenCoords[0].z * w0n + screenCoords[1].z * w1n + screenCoords[2].z * w2n;
+
             // If p is on or inside all edges, render pixel.
-            if ((w0 | w1 | w2) >= 0)
-                drawPixel(p.x, p.y, pCol);
+            if ((w0 | w1 | w2) >= 0) drawPixel(p.x, p.y, depth, pCol);
 
             // One step to the right.
             w0 += A12;
@@ -290,10 +296,7 @@ void Renderer::drawTriangles(rdrVertex* vertices, const unsigned int count)
 {
     // calculate mvp from matrices
     // Transform vertex list to triangles into colorBuffer
-    for (int i = 0; i < (int)count; i += 3)
-    {
-        drawTriangle(&vertices[i]);
-    }
+    for (int i = 0; i < (int)count; i += 3)  drawTriangle(&vertices[i]);
 }
 
 void Renderer::showImGuiControls()
