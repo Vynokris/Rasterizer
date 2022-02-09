@@ -69,6 +69,7 @@
         "csignal": "cpp",
         "condition_variable": "cpp",
         "mutex": "cpp",
-        "xiosbase": "cpp"
+        "xiosbase": "cpp",
+        "*.ipp": "cpp"
     }
 }

@@ -64,6 +64,17 @@ float arithmetic::lerp(const float& val, const float& start, const float& end)
     return start + val * (end - start);
 }
 
+// Linear interpolation between two given colors.
+Color arithmetic::colorLerp(const float& val, const Color& start, const Color& end)
+{
+    return (Color){
+        start.r + val * (end.r - start.r),
+        start.g + val * (end.g - start.g),
+        start.b + val * (end.b - start.b),
+        start.a + val * (end.a - start.a)
+    };
+}
+
 // Remaps the given value from one range to another.
 float arithmetic::remap(const float& val, const float& inputStart, const float& inputEnd, const float& outputStart, const float& outputEnd)
 {
@@ -433,15 +444,111 @@ Vector3 geometry3D::getSphericalCoords(const float& r, const float& theta, const
     };
 }
 
+matrix::Matrix<4, 4> geometry3D::getTranslationMatrix(const Vector3& translation)
+{
+    return matrix::Matrix<4,4>(1, 0, 0, 0,
+                               0, 1, 0, 0,
+                               0, 0, 1, 0,
+                               translation.x, translation.y, translation.z, 1);
+}
+
+matrix::Matrix<4, 4> geometry3D::getScaleMatrix(const Vector3& scale)
+{
+    return matrix::Matrix<4,4>(scale.x, 0, 0, 0,
+                               0, scale.y, 0, 0,
+                               0, 0, scale.z, 0,
+                               0, 0, 0, 1);
+}
+
+matrix::Matrix<4, 4> geometry3D::getXRotationMatrix(float angle)
+{
+    return matrix::Matrix<4,4>(1, 0, 0, 0,
+                               0, cosf(angle), -sinf(angle), 0,
+                               0, sinf(angle),  cosf(angle), 0,
+                               0, 0, 0, 1);
+}
+
+matrix::Matrix<4, 4> geometry3D::getYRotationMatrix(float angle)
+{
+    return matrix::Matrix<4,4>(cosf(angle), 0, sinf(angle), 0,
+                               0, 1, 0, 0,
+                               -sinf(angle), 0, cosf(angle), 0,
+                               0, 0, 0, 1);
+}
+
+matrix::Matrix<4, 4> geometry3D::getZRotationMatrix(float angle)
+{
+    return matrix::Matrix<4,4>(cosf(angle), -sinf(angle), 0, 0,
+                               sinf(angle), cosf(angle), 0, 0,
+                               0, 0, 1, 0 ,
+                               0, 0, 0, 1 );
+}
+
+matrix::Matrix<4, 4> geometry3D::getTransformMatrix(const Vector3& position, const Vector3& rotation, const Vector3& scale, const bool& reverse)
+{
+    // For cameras.
+    if (reverse)
+    {
+        return getTranslationMatrix(position)   *
+               getYRotationMatrix  (rotation.y) *
+               getXRotationMatrix  (rotation.x) * 
+               getZRotationMatrix  (rotation.z) *
+               getScaleMatrix      (scale);
+    }
+    // For world coordinates.
+    else         
+    {
+        return getScaleMatrix      (scale)      *
+               getZRotationMatrix  (rotation.z) *
+               getXRotationMatrix  (rotation.x) * 
+               getYRotationMatrix  (rotation.y) *
+               getTranslationMatrix(position);
+    }
+}
+
+// Returns an array of vertices that result of the clipping of the given triangle against the given frustum.
+std::vector<geometry3D::Triangle3> geometry3D::clipTriangleWithFrustum(const geometry3D::Triangle3& triangle, const Frustum& frustum)
+{
+    std::vector<geometry3D::Triangle3> output;
+    output.push_back(triangle);
+    
+    const Plane3* frustumSide = &frustum.up;
+    for (int i = 0; i < 6; i++, frustumSide++) 
+    {
+        for (int j = 0; j < (int)output.size(); j++)
+        {
+            if (frustumSide->doesTriangleClip(triangle))
+            {
+                std::vector<Vertex> clippedVertices  = frustumSide->clipTriangle(triangle);
+
+                switch (clippedVertices.size())
+                {
+                case 3:
+                    output[j] = { clippedVertices[0], clippedVertices[1], clippedVertices[2] };
+                    break;
+                case 4:
+                    output[j] = { clippedVertices[0], clippedVertices[1], clippedVertices[3] };
+                    output.insert(output.begin() + j + 1, { clippedVertices[1], clippedVertices[2], clippedVertices[3] });
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    }
+
+    return output;
+}
+
 
 
 // -------------------- VECTOR3 -------------------- //
 
 // Constructors.
-Vector3::Vector3()                                                  : x(0),                 y(0),                 z(0)                 {}; // Null vector.
-Vector3::Vector3(const float& _x, const float& _y, const float& _z) : x(_x),                y(_y),                z(_z)                {}; // Vector with 3 coordinates.
-Vector3::Vector3(const Vector3& p1, const Vector3& p2)              : x(p2.x - p1.x),       y(p2.y - p1.y),       z(p2.z - p1.z)       {}; // Vector from 2 points.
-Vector3::Vector3(const Segment3& seg)                               : x(seg.b.x - seg.a.x), y(seg.b.y - seg.a.y), z(seg.b.z - seg.a.z) {}; // Vector from Segment3.
+Vector3::Vector3()                                                  : x(0),                         y(0),                         z(0)                         {}; // Null vector.
+Vector3::Vector3(const float& _x, const float& _y, const float& _z) : x(_x),                        y(_y),                        z(_z)                        {}; // Vector with 3 coordinates.
+Vector3::Vector3(const Vector3& p1, const Vector3& p2)              : x(p2.x - p1.x),               y(p2.y - p1.y),               z(p2.z - p1.z)               {}; // Vector from 2 points.
+Vector3::Vector3(const Segment3& seg)                               : x(seg.b.pos.x - seg.a.pos.x), y(seg.b.pos.y - seg.a.pos.y), z(seg.b.pos.z - seg.a.pos.z) {}; // Vector from Segment3.
 Vector3::Vector3(const float& theta, const float& phi, const float& length, const bool& isAngle) // Vector from angle (useless bool).
 {
     x = length * sinf(theta) * cosf(phi);
@@ -538,11 +645,11 @@ Vector4 Vector3::toVector4() { return Vector4(x, y, z, 1); }
 // -------------------- VECTOR4 -------------------- //
 
 // Constructors.
-Vector4::Vector4()                                                                   : x(0),                 y(0),                 z(0),                 w(1)  {}; // Null vector.
-Vector4::Vector4(const float& _x, const float& _y, const float& _z, const float& _w) : x(_x),                y(_y),                z(_z),                w(_w) {}; // Vector with 3 coordinates.
-Vector4::Vector4(const Vector4& p1, const Vector4& p2, const float& _w)              : x(p2.x - p1.x),       y(p2.y - p1.y),       z(p2.z - p1.z),       w(_w) {}; // Vector from 2 points.
-Vector4::Vector4(const Vector3&  vec, const float& _w)                               : x(vec.x),             y(vec.y),             z(vec.z),             w(_w) {}; // Vector from Segment3.
-Vector4::Vector4(const Segment3& seg, const float& _w)                               : x(seg.b.x - seg.a.x), y(seg.b.y - seg.a.y), z(seg.b.z - seg.a.z), w(_w) {}; // Vector from Segment3.
+Vector4::Vector4()                                                                   : x(0),                         y(0),                         z(0),                         w(1)  {}; // Null vector.
+Vector4::Vector4(const float& _x, const float& _y, const float& _z, const float& _w) : x(_x),                        y(_y),                        z(_z),                        w(_w) {}; // Vector with 3 coordinates.
+Vector4::Vector4(const Vector4& p1, const Vector4& p2, const float& _w)              : x(p2.x - p1.x),               y(p2.y - p1.y),               z(p2.z - p1.z),               w(_w) {}; // Vector from 2 points.
+Vector4::Vector4(const Vector3&  vec, const float& _w)                               : x(vec.x),                     y(vec.y),                     z(vec.z),                     w(_w) {}; // Vector from Segment3.
+Vector4::Vector4(const Segment3& seg, const float& _w)                               : x(seg.b.pos.x - seg.a.pos.x), y(seg.b.pos.y - seg.a.pos.y), z(seg.b.pos.z - seg.a.pos.z), w(_w) {}; // Vector from Segment3.
 Vector4::Vector4(const float& theta, const float& phi, const float& length, const float& _w, const bool& isAngle) // Vector from angle (useless bool).
 {
     x = length * sinf(theta) * cosf(phi);
@@ -646,87 +753,6 @@ Vector3 Vector4::toVector3(bool homogenizeVec)
 }
 
 
-// -------------------- SEGMENT3 -------------------- //
-
-// Constructors.
-Segment3::Segment3()                                                              : a(Vector3()), b(Vector3())    {}; // Null Segment3.
-Segment3::Segment3(const Vector3& _a,  const Vector3& _b)                         : a(_a),        b(_b)           {}; // Segment3 from points.
-Segment3::Segment3(const Vector3& origin, const Vector3& vec, const bool& vector) : a(origin),    b(origin + vec) {}; // Segment3 from point and vector.
-
-// ---------------- SEGMENT3 METHODS --------------- //
-
-// Returns the center of mass of the Segment3.
-Vector3 Segment3::getCenterOfMass() const
-{
-    return Vector3((a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2);
-}
-
-// Returns the vertex of the Segment3 that corresponds to the given index.
-Vector3 Segment3::getVertex(const int& index) const
-{
-    assert (0 <= index && index < 2);
-
-    switch (index)
-    {
-        case 0:  return a;
-        case 1:  return b;
-        default: return Vector3();
-    }
-}
-
-// Moves the Segment3 by the given vector.
-void Segment3::move(const Vector3& vec)
-{
-    a += vec;
-    b += vec;
-}
-
-// -------------------- TRIANGLE3 -------------------- //
-
-// Constructor.
-Triangle3::Triangle3()                                                        : a(Vector3()), b(Vector3()), c(Vector3()) {}; // Null triangle.
-Triangle3::Triangle3(const Vector3& _a, const Vector3& _b, const Vector3& _c) : a(_a),        b(_b),        c(_c)        {}; // Triangle3 from points.
-
-// ---------- TRIANGLE3 METHODS ---------- //
-
-// Returns the center of mass of the triangle.
-Vector3 Triangle3::getCenterOfMass() const { return Vector3((a.x + b.x + c.x) / 3, (a.y + b.y + c.y) / 3, (a.z + b.z + c.z) / 3); }
-
-// Returns the side of the triangle that corresponds to the given index.
-Segment3 Triangle3::getSide(const int& index) const
-{
-    assert (0 <= index && index < 3);
-
-    switch (index)
-    {
-        case 0:   return Segment3(a, b);
-        case 1:   return Segment3(b, c);
-        case 2:   return Segment3(c, a);
-        default:  return Segment3(Vector3(), Vector3());
-    }
-}
-
-// Returns the vertex of the triangle that corresponds to the given index.
-Vector3 Triangle3::getVertex(const int& index) const
-{
-    assert (0 <= index && index < 3);
-
-    switch (index)
-    {
-    case 0:  return a;
-    case 1:  return b;
-    case 2:  return c;
-    default: return Vector3();
-    }
-}
-
-// Moves the triangle by the given vector.
-void Triangle3::move(const Vector3& vec)
-{
-    a += vec;
-    b += vec;
-    c += vec;
-}
 
 // -------------------- PLANE3 -------------------- //
 
@@ -738,63 +764,75 @@ Plane3::Plane3(const Vector3& _normal, const float& _distance) : normal(_normal.
 
 // Returns 0 if the given segment doesn't clip against this plane.
 // Else, returns 1 if point A clips, 2 if point B clips and 3 if both clip.
-int Plane3::doesSegmentClip(const Segment3& seg)
+int Plane3::doesSegmentClip(const Segment3& seg) const
 {
     // Get the distance from each point to the plane.
-    float distA = (seg.a & normal) - distance;
-    float distB = (seg.b & normal) - distance;
+    float distA = (seg.a.pos & normal) * distance;
+    float distB = (seg.b.pos & normal) * distance;
 
     // If both distances are positive, the segment doesn't clip.
     if (distA > 0 && distB > 0)
         return 0;
+
+    // If both distances are negative, the whole segment clips.
+    else if (distA <= 0 && distB <= 0)
+        return 3;
 
     // If the 1st distance is negative, point A clips.
     else if (distA <= 0)
         return 1;
 
     // If the 1st distance is negative, point A clips.
-    else if (distB <= 0)
-        return 2;
-
-    // If both distances are negative, the whole segment clips.
     else
-        return 3;
+        return 2;
 }
 
 // Clips the given 3D segment against this plane.
-Segment3 Plane3::clipSegment(Segment3 seg)
+Segment3 Plane3::clipSegment(Segment3 seg) const
 {
     // Get the distance from each point to the plane.
-    float distA = (seg.a & normal) - distance;
-    float distB = (seg.b & normal) - distance;
-
-    // If both distances are negative, the segment is on the wrong side of the plane.
-    if (distA <= 0 && distB <= 0)
-        return Segment3();
+    float distA = (seg.a.pos & normal) * distance;
+    float distB = (seg.b.pos & normal) * distance;
 
     // If both distances are positive, the segment is on the good side of the plane.
     if (distA > 0 && distB > 0)
         return seg;
 
+    // If both distances are negative, the segment is on the wrong side of the plane.
+    if (distA <= 0 && distB <= 0)
+        return Segment3();
+
     // Compute the intersection factor (between 0 and 1).
     float factor = distA / (distA - distB);
 
     // Compute the intersection point.
-    Vector3 intersectPoint(seg.a.x + factor * (seg.b.x - seg.a.x),
-                           seg.a.y + factor * (seg.b.y - seg.a.y),
-                           seg.a.z + factor * (seg.b.z - seg.a.z));
+    Vertex intersectVertex = {
+                    point3Lerp(factor, seg.a.pos,    seg.b.pos),
+                    point3Lerp(factor, seg.a.normal, seg.b.normal),
+        arithmetic::colorLerp (factor, seg.a.color,  seg.b.color),
+                    point2Lerp(factor, seg.a.uv,     seg.b.uv),
+    };
     
     // Override the point that is clipping with the intersection point.
-    if      (distA <= 0) seg.a = intersectPoint;
-    else if (distB <= 0) seg.b = intersectPoint;
+    if      (distA <= 0) seg.a = intersectVertex;
+    else if (distB <= 0) seg.b = intersectVertex;
     return seg;
 }
 
+// Returns true if the given triangle clips against theis plane, false if not.
+bool Plane3::doesTriangleClip(const Triangle3& triangle) const
+{
+    for (int i = 0; i < 3; i++)
+        if (doesSegmentClip(triangle.getSide(0)))
+            return true;
+    return false;
+}
+
 // Clips the given triangle against this plane.
-std::vector<Vector3> Plane3::clipTriangle(const Triangle3& triangle)
+std::vector<Vertex> Plane3::clipTriangle(const Triangle3& triangle) const
 {
     // Output array of vertices.
-    std::vector<Vector3> vertices;
+    std::vector<Vertex> vertices;
 
     // Clip the triangle's segments against the plane.
     for (int i = 0; i < 3; i++)
@@ -806,12 +844,6 @@ std::vector<Vector3> Plane3::clipTriangle(const Triangle3& triangle)
         switch (clipPoint)
         {
         case 0:
-            vertices.push_back(clipSeg.a);
-            vertices.push_back(clipSeg.b); // This should probably be removed since the next side will take care of it.
-            break;
-        case 1:
-            vertices.push_back(clipSeg.b); // This should probably be removed since the next side will take care of it.
-            break;
         case 2:
             vertices.push_back(clipSeg.a);
             break;
@@ -821,6 +853,102 @@ std::vector<Vector3> Plane3::clipTriangle(const Triangle3& triangle)
     }
 
     return vertices;
+}
+
+
+// -------------------- SEGMENT3 -------------------- //
+
+// Constructors.
+Segment3::Segment3()                                                              : a(Vertex{}), b(Vertex{}) {}; // Null Segment3.
+Segment3::Segment3(const Vertex& _a,  const Vertex& _b)                           : a(_a),        b(_b)      {}; // Segment3 from points.
+Segment3::Segment3(const Vertex& origin, const Vector3& vec, const bool& vector)  : a(origin),    b({ origin.pos + vec, origin.normal, origin.color, origin.uv }) {}; // Segment3 from point and vector.
+
+// ---------------- SEGMENT3 METHODS --------------- //
+
+// Returns the center of mass of the Segment3.
+Vertex Segment3::getCenterOfMass() const
+{
+    return Vertex{ 
+        { (a.pos.x + b.pos.x) / 2, (a.pos.y + b.pos.y) / 2, (a.pos.z + b.pos.z) / 2 }, 
+        geometry3D::point3Lerp(0.5, a.normal, b.normal),
+        arithmetic::colorLerp(0.5, a.color, b.color),
+        geometry2D::point2Lerp(0.5, a.uv, b.uv)
+    };
+}
+
+// Returns the vertex of the Segment3 that corresponds to the given index.
+Vertex Segment3::getVertex(const int& index) const
+{
+    assert (0 <= index && index < 2);
+
+    switch (index)
+    {
+        case 0:  return a;
+        case 1:  return b;
+        default: return Vertex{};
+    }
+}
+
+// Moves the Segment3 by the given vector.
+void Segment3::move(const Vector3& vec)
+{
+    a.pos += vec;
+    b.pos += vec;
+}
+
+// -------------------- TRIANGLE3 -------------------- //
+
+// Constructor.
+Triangle3::Triangle3()                                                     : a(Vertex{}), b(Vertex{}), c(Vertex{}) {}; // Null triangle.
+Triangle3::Triangle3(const Vertex& _a, const Vertex& _b, const Vertex& _c) : a(_a),       b(_b),       c(_c)       {}; // Triangle3 from points.
+
+// ---------- TRIANGLE3 METHODS ---------- //
+
+// Returns the center of mass of the triangle.
+Vertex Triangle3::getCenterOfMass() const 
+{ 
+    return Vertex{
+        { (a.pos.x + b.pos.x + c.pos.x) / 3, (a.pos.y + b.pos.y + c.pos.y) / 3, (a.pos.z + b.pos.z + c.pos.z) / 3 },
+        { (a.normal.x + b.normal.x + c.normal.x) / 3, (a.normal.y + b.normal.y + c.normal.y) / 3, (a.normal.z + b.normal.z + c.normal.z) / 3 },
+        { (a.color.r + b.color.r + c.color.r) / 3, (a.color.g + b.color.g + c.color.g) / 3, (a.color.b + b.color.b + c.color.b) / 3, (a.color.a + b.color.a + c.color.a) / 3 },
+        { (a.uv.x + b.uv.x + c.uv.x) / 3, (a.uv.y + b.uv.y + c.uv.y) / 3 }
+    }; 
+}
+
+// Returns the side of the triangle that corresponds to the given index.
+Segment3 Triangle3::getSide(const int& index) const
+{
+    assert (0 <= index && index < 3);
+
+    switch (index)
+    {
+        case 0:   return Segment3(a, b);
+        case 1:   return Segment3(b, c);
+        case 2:   return Segment3(c, a);
+        default:  return Segment3(Vertex{}, Vertex{});
+    }
+}
+
+// Returns the vertex of the triangle that corresponds to the given index.
+Vertex Triangle3::getVertex(const int& index) const
+{
+    assert (0 <= index && index < 3);
+
+    switch (index)
+    {
+    case 0:  return a;
+    case 1:  return b;
+    case 2:  return c;
+    default: return Vertex{};
+    }
+}
+
+// Moves the triangle by the given vector.
+void Triangle3::move(const Vector3& vec)
+{
+    a.pos += vec;
+    b.pos += vec;
+    c.pos += vec;
 }
 
 
@@ -875,74 +1003,4 @@ bool collisions2D::collisionProjections(geometry2D::Segment2 projection1, geomet
             collisionSegment2Point(projection1, projection2.b) ||
             collisionSegment2Point(projection2, projection1.a) ||
             collisionSegment2Point(projection2, projection1.b));
-}
-
-
-
-
-
-
-
-//* ------------------------------ RENDER 3D ------------------------------ *//
-
-matrix::Matrix<4, 4> render3D::getTranslationMatrix(const Vector3& translation)
-{
-    return matrix::Matrix<4,4>(1, 0, 0, 0,
-                               0, 1, 0, 0,
-                               0, 0, 1, 0,
-                               translation.x, translation.y, translation.z, 1);
-}
-
-matrix::Matrix<4, 4> render3D::getScaleMatrix(const Vector3& scale)
-{
-    return matrix::Matrix<4,4>(scale.x, 0, 0, 0,
-                               0, scale.y, 0, 0,
-                               0, 0, scale.z, 0,
-                               0, 0, 0, 1);
-}
-
-matrix::Matrix<4, 4> render3D::getXRotationMatrix(float angle)
-{
-    return matrix::Matrix<4,4>(1, 0, 0, 0,
-                               0, cosf(angle), -sinf(angle), 0,
-                               0, sinf(angle),  cosf(angle), 0,
-                               0, 0, 0, 1);
-}
-
-matrix::Matrix<4, 4> render3D::getYRotationMatrix(float angle)
-{
-    return matrix::Matrix<4,4>(cosf(angle), 0, sinf(angle), 0,
-                               0, 1, 0, 0,
-                               -sinf(angle), 0, cosf(angle), 0,
-                               0, 0, 0, 1);
-}
-
-matrix::Matrix<4, 4> render3D::getZRotationMatrix(float angle)
-{
-    return matrix::Matrix<4,4>(cosf(angle), -sinf(angle), 0, 0,
-                               sinf(angle), cosf(angle), 0, 0,
-                               0, 0, 1, 0 ,
-                               0, 0, 0, 1 );
-}
-
-matrix::Matrix<4, 4> render3D::getTransformMatrix(const Vector3& position, const Vector3& rotation, const Vector3& scale, const bool& reverse)
-{
-    // FOR CAMERA.
-    if (reverse)
-    {
-        return getTranslationMatrix(position)   *
-               getYRotationMatrix  (rotation.y) *
-               getXRotationMatrix  (rotation.x) * 
-               getZRotationMatrix  (rotation.z) *
-               getScaleMatrix      (scale);
-    }
-    // FOR WORLD COORDS.
-    else         
-    {
-        return getScaleMatrix      (scale)      *
-               getZRotationMatrix  (rotation.z) *
-               getXRotationMatrix  (rotation.x) * 
-               getYRotationMatrix  (rotation.y) *
-               getTranslationMatrix(position);
-    }
 }

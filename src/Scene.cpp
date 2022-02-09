@@ -3,7 +3,7 @@
 
 #include "Scene.hpp"
 
-using namespace render3D;
+using namespace geometry3D;
 
 Scene::Scene()
 {
@@ -11,15 +11,15 @@ Scene::Scene()
     // Setup some vertices to test
     vertices.clear();
 
-    // FIRST TRIANGLE           |       pos        |      normal     |           color           |    uv    |
-    vertices.push_back(rdrVertex{-0.5f,-0.5f, 0.0f, 0.0f, 0.0f, 0.0f, { 0.0f, 1.0f, 1.0f, 1.0f }, 0.0f, 0.0f });
-    vertices.push_back(rdrVertex{ 0.5f,-0.5f, 0.0f, 0.0f, 0.0f, 0.0f, { 1.0f, 1.0f, 0.0f, 1.0f }, 0.0f, 0.0f });
-    vertices.push_back(rdrVertex{ 0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, { 1.0f, 0.0f, 1.0f, 1.0f }, 0.0f, 0.0f });
+    // FIRST TRIANGLE          |        pos        |  |      normal      |  |         color          |  |     uv     |
+    vertices.push_back(Vertex{ { -0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } });
+    vertices.push_back(Vertex{ {  0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } });
+    vertices.push_back(Vertex{ {  0.0f, 0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } });
     
-    // SECOND TRIANGLE          |       pos        |      normal     |           color           |    uv    |
-    vertices.push_back(rdrVertex{ -1.0f,-0.5f, 1.0f, 0.0f, 0.0f, 0.0f, { 1.0f, 0.0f, 1.0f, 1.0f }, 0.0f, 0.0f });
-    vertices.push_back(rdrVertex{ 1.0f,-0.5f, 1.0f, 0.0f, 0.0f, 0.0f, { 1.0f, 1.0f, 0.0f, 1.0f }, 0.0f, 0.0f });
-    vertices.push_back(rdrVertex{ 1.0f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, { 0.0f, 0.0f, 1.0f, 1.0f }, 0.0f, 0.0f });
+    // SECOND TRIANGLE         |        pos        |  |      normal      |  |         color          |  |     uv     |
+    vertices.push_back(Vertex{ { -1.0f,-0.5f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } });
+    vertices.push_back(Vertex{ { 1.0f, -0.5f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } });
+    vertices.push_back(Vertex{ { 1.0f,  0.5f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } });
 }
 
 Scene::~Scene()
@@ -35,7 +35,7 @@ void Scene::update(float deltaTime, Renderer& renderer, const Camera& camera)
     renderer.setProjection(camera.getProjection());
 
     // Draw
-    renderer.drawTriangles(vertices.data(), (int)vertices.size());
+    renderer.drawTriangles(vertices.data(), (int)vertices.size(), camera.getFrustum());
 
     time += deltaTime;
 }

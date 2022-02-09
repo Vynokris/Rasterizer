@@ -1,8 +1,8 @@
 #pragma once
 
 #include <vector>
-#include "common.hpp"
 #include <glad/gl.h>
+#include <my_math.hpp>
 
 class Framebuffer
 {
