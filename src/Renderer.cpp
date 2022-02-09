@@ -5,7 +5,7 @@
 #include <imgui.h>
 #include <my_math.hpp>
 using namespace arithmetic;
-using namespace render3D;
+using namespace geometry3D;
 
 #include "Renderer.hpp"
 
@@ -129,13 +129,13 @@ static int barycentricCoords(const Vector3& a, const Vector3& b, const Vector3& 
     return (b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x);
 }
 
-void Renderer::drawTriangle(rdrVertex* vertices)
+void Renderer::drawTriangle(Vertex* vertices, const Frustum& frustum, bool wasClipped)
 {
     // Store triangle vertices positions.
     Vector3 localCoords[3] = {
-        { vertices[0].x, vertices[0].y, vertices[0].z },
-        { vertices[1].x, vertices[1].y, vertices[1].z },
-        { vertices[2].x, vertices[2].y, vertices[2].z },
+        { vertices[0].pos.x, vertices[0].pos.y, vertices[0].pos.z },
+        { vertices[1].pos.x, vertices[1].pos.y, vertices[1].pos.z },
+        { vertices[2].pos.x, vertices[2].pos.y, vertices[2].pos.z },
     };
     
     // Local space (3D) -> World space (3D).
@@ -151,6 +151,21 @@ void Renderer::drawTriangle(rdrVertex* vertices)
         { (worldCoords[1] * viewMat) },
         { (worldCoords[2] * viewMat) },
     };
+
+    // Clip the triangle against the frustum.
+    if (!wasClipped)
+    {
+        Triangle3 viewTriangle(
+            { viewCoords[0].toVector3(), vertices[0].normal, vertices[0].color, vertices[0].uv }, 
+            { viewCoords[1].toVector3(), vertices[1].normal, vertices[1].color, vertices[1].uv }, 
+            { viewCoords[2].toVector3(), vertices[2].normal, vertices[2].color, vertices[2].uv }
+        );
+        std::vector<Triangle3> clippedTriangles = clipTriangleWithFrustum(viewTriangle, frustum);
+        
+        for (int i = 0; i < (int)clippedTriangles.size(); i++)
+            drawTriangle(&clippedTriangles[0].a, frustum, true);
+        return;
+    }
     
     // View space (3D) -> Clip space (4D).
     Vector4 clipCoords[3] = {
@@ -231,15 +246,6 @@ void Renderer::drawTriangle(rdrVertex* vertices)
     minY = clamp(minY, 0, (int)viewport.height - 1);
     maxX = clamp(maxX, 0, (int)viewport.width  - 1);
     maxY = clamp(maxY, 0, (int)viewport.height - 1);
-
-    /*
-    printf("\nCoords 0: %.1f, %.1f, %.1f\nCoords 1: %.1f, %.1f, %.1f\nCoords 2: %.1f, %.1f, %.1f\nMin xy: %d, %d\nMax xy: %d, %d\n", 
-           screenCoords[0].x, screenCoords[0].y, screenCoords[0].z, 
-           screenCoords[1].x, screenCoords[1].y, screenCoords[1].z, 
-           screenCoords[2].x, screenCoords[2].y, screenCoords[2].z, 
-           minX, minY, 
-           maxX, maxY);
-    */
     
     // Triangle setup.
     int A01 = screenCoords[0].y - screenCoords[1].y, B01 = screenCoords[1].x - screenCoords[0].x;
@@ -292,11 +298,11 @@ void Renderer::drawTriangle(rdrVertex* vertices)
     }
 }
 
-void Renderer::drawTriangles(rdrVertex* vertices, const unsigned int count)
+void Renderer::drawTriangles(Vertex* vertices, const unsigned int count, const Frustum& frustum)
 {
     // calculate mvp from matrices
     // Transform vertex list to triangles into colorBuffer
-    for (int i = 0; i < (int)count; i += 3)  drawTriangle(&vertices[i]);
+    for (int i = 0; i < (int)count; i += 3) drawTriangle(&vertices[i], frustum);
 }
 
 void Renderer::showImGuiControls()

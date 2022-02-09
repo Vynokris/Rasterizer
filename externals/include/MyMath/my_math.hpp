@@ -13,14 +13,19 @@
 #include <vector>
 #include <ctime>
 #include "my_matrix.hpp"
+using namespace std;
 
 #define PI 3.14159265358979323846f
 
-using namespace std;
+typedef struct
+{
+    float r, g, b, a;
+} Color;
 
 // --------------------- ARITHMECTIC ---------------------- //
 namespace arithmetic
 {
+
     // --------- ARITHMETIC FUNCTIONS ---------- //
     
     // Fast inverse square root from Quake III.
@@ -58,6 +63,9 @@ namespace arithmetic
 
     // Compute linear interpolation between start and end for the parameter val (if 0 <= val <= 1: start <= return <= end).
     float lerp(const float& val, const float& start, const float& end);
+
+    // Linear interpolation between two given colors.
+    Color colorLerp(const float& val, const Color& start, const Color& end);
 
     // Remaps the given value from one range to another.
     float remap(const float& val, const float& inputStart, const float& inputEnd, const float& outputStart, const float& outputEnd);
@@ -339,22 +347,21 @@ namespace geometry3D
     class Segment3;
     class Triangle3;
     class Plane3;
-
-    /*
-    struct Transform
-    {
-        Vector3 translation;
-        Vector3 rotation;
-        Vector3 scale;
-    };
-    */
-
+    struct Vertex;
+    struct Plane;
 
     // Calculates linear interpolation for a value from a start point to an end point.
     Vector3 point3Lerp(const float& val, const Vector3& start, const Vector3& end);
 
     // Returns the coordinates of a point on a sphere of radius r, using the given angles.
     Vector3 getSphericalCoords(const float& r, const float& theta, const float& phi);
+
+    matrix::Matrix<4, 4> getTranslationMatrix(const geometry3D::Vector3& translation);
+    matrix::Matrix<4, 4> getScaleMatrix      (const geometry3D::Vector3& scale);
+    matrix::Matrix<4, 4> getXRotationMatrix  (float angle);
+    matrix::Matrix<4, 4> getYRotationMatrix  (float angle);
+    matrix::Matrix<4, 4> getZRotationMatrix  (float angle);
+    matrix::Matrix<4, 4> getTransformMatrix  (const geometry3D::Vector3& position, const geometry3D::Vector3& rotation, const geometry3D::Vector3& scale, const bool& reverse = false);
 
     // Vector class that holds values for x, y and z (3 dimensions).
     class Vector3
@@ -508,58 +515,6 @@ namespace geometry3D
             Vector3 toVector3(bool homogenizeVec = true);
     };
 
-    // Segment3 structure that holds values for the starting point and the end point.
-    class Segment3
-    {
-        public :
-            // Attributes.
-            Vector3 a, b;
-
-            // Constructors.
-            Segment3();                                                              // Null Segment3.
-            Segment3(const Vector3& _a,  const Vector3& _b);                   // Segment3 from points.
-            Segment3(const Vector3& origin, const Vector3& vec, const bool& vector); // Segment3 from point and vector.
-
-            // Destructor.
-            ~Segment3() {}
-
-            // Returns the center of mass of the Segment3.
-            Vector3 getCenterOfMass() const;
-
-            // Returns the vertex of the Segment3 that corresponds to the given index.
-            Vector3 getVertex(const int& index) const;
-
-            // Moves the Segment3 by the given vector.
-            void move(const Vector3& vec);
-    };
-
-    // Triangle3 structure that holds values for 3 points.
-    class Triangle3
-    {
-        public:
-            // Attributes.
-            Vector3 a, b, c;
-
-            // Constructor.
-            Triangle3();                                                                 // Null triangle.
-            Triangle3(const Vector3& _a, const Vector3& _b, const Vector3& _c); // Triangle3 from points.
-
-            // Destructor.
-            ~Triangle3() {}
-            
-            // Returns the center of mass of the triangle.
-            Vector3 getCenterOfMass() const;
-
-            // Returns the side of the triangle that corresponds to the given index.
-            Segment3 getSide(const int& index) const;
-
-            // Returns the vertex of the triangle that corresponds to the given index.
-            Vector3 getVertex(const int& index) const;
-
-            // Moves the triangle by the given vector.
-            void move(const Vector3& vec);
-    };
-
     class Plane3
     {
         public:
@@ -576,13 +531,89 @@ namespace geometry3D
 
             // Returns 0 if the given segment doesn't clip against this plane.
             // Else, returns 1 if point A clips, 2 if point B clips and 3 if both clip.
-            int doesSegmentClip(const Segment3& seg);
+            int doesSegmentClip(const Segment3& seg) const;
 
             // Clips the given segment against this plane.
-            Segment3 clipSegment(Segment3 seg);
+            Segment3 clipSegment(Segment3 seg) const;
 
-            // Clips the given triangle against this plane.
-            std::vector<Vector3> clipTriangle(const Triangle3& triangle);
+            // Returns true if the given triangle clips against theis plane, false if not.
+            bool doesTriangleClip(const Triangle3& triangle) const;
+
+            // Clips the given triangle against this plane (returns 0-4 points).
+            std::vector<Vertex> clipTriangle(const Triangle3& triangle) const;
+    };
+
+    struct Vertex
+    {
+        Vector3 pos;            // Pos
+        Vector3 normal;         // Normal
+        Color   color;          // Color
+        geometry2D::Vector2 uv; // Texture coordinates
+    };
+
+    struct Frustum
+    {
+        geometry3D::Plane3 up;
+        geometry3D::Plane3 down;
+        geometry3D::Plane3 left;
+        geometry3D::Plane3 right;
+        geometry3D::Plane3 near;
+        geometry3D::Plane3 far;
+    };
+
+    // Returns an array of vertices that result of the clipping of the given triangle against the given frustum.
+    std::vector<geometry3D::Triangle3> clipTriangleWithFrustum(const geometry3D::Triangle3& triangle, const Frustum& frustum);
+
+    // Segment3 structure that holds values for the starting point and the end point.
+    class Segment3
+    {
+        public :
+            // Attributes.
+            Vertex a, b;
+
+            // Constructors.
+            Segment3();                                                              // Null Segment3.
+            Segment3(const Vertex& _a,  const Vertex& _b);                   // Segment3 from points.
+            Segment3(const Vertex& origin, const Vector3& vec, const bool& vector); // Segment3 from point and vector.
+
+            // Destructor.
+            ~Segment3() {}
+
+            // Returns the center of mass of the Segment3.
+            Vertex getCenterOfMass() const;
+
+            // Returns the vertex of the Segment3 that corresponds to the given index.
+            Vertex getVertex(const int& index) const;
+
+            // Moves the Segment3 by the given vector.
+            void move(const Vector3& vec);
+    };
+
+    // Triangle3 structure that holds values for 3 points.
+    class Triangle3
+    {
+        public:
+            // Attributes.
+            Vertex a, b, c;
+
+            // Constructor.
+            Triangle3();                                                                 // Null triangle.
+            Triangle3(const Vertex& _a, const Vertex& _b, const Vertex& _c); // Triangle3 from points.
+
+            // Destructor.
+            ~Triangle3() {}
+            
+            // Returns the center of mass of the triangle.
+            Vertex getCenterOfMass() const;
+
+            // Returns the side of the triangle that corresponds to the given index.
+            Segment3 getSide(const int& index) const;
+
+            // Returns the vertex of the triangle that corresponds to the given index.
+            Vertex getVertex(const int& index) const;
+
+            // Moves the triangle by the given vector.
+            void move(const Vector3& vec);
     };
 }
 
@@ -621,18 +652,6 @@ namespace collisions2D
 
     // Checks for collision between two given shapes.
     template <typename T1, typename T2> bool collisionSAT(T1 shape1, T2 shape2);
-}
-
-// -------------------- RENDER 3D -------------------- //
-
-namespace render3D
-{
-    matrix::Matrix<4, 4> getTranslationMatrix(const geometry3D::Vector3& translation);
-    matrix::Matrix<4, 4> getScaleMatrix      (const geometry3D::Vector3& scale);
-    matrix::Matrix<4, 4> getXRotationMatrix  (float angle);
-    matrix::Matrix<4, 4> getYRotationMatrix  (float angle);
-    matrix::Matrix<4, 4> getZRotationMatrix  (float angle);
-    matrix::Matrix<4, 4> getTransformMatrix  (const geometry3D::Vector3& position, const geometry3D::Vector3& rotation, const geometry3D::Vector3& scale, const bool& reverse = false);
 }
 
 #include "my_math.inl"
