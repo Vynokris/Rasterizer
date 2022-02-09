@@ -446,9 +446,9 @@ Vector3 geometry3D::getSphericalCoords(const float& r, const float& theta, const
 
 matrix::Matrix<4, 4> geometry3D::getTranslationMatrix(const Vector3& translation)
 {
-    return matrix::Matrix<4,4>(1, 0, 0, 0,
-                               0, 1, 0, 0,
-                               0, 0, 1, 0,
+    return matrix::Matrix<4,4>(1,             0,             0,             0,
+                               0,             1,             0,             0,
+                               0,             0,             1,             0,
                                translation.x, translation.y, translation.z, 1);
 }
 

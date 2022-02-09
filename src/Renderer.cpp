@@ -293,6 +293,49 @@ void Renderer::drawTriangles(Vertex* vertices, const unsigned int& count, const 
     for (int i = 0; i < (int)count; i += 3) drawTriangle(&vertices[i], frustum);
 }
 
+
+void Renderer::drawDividedQuad(const float& size, const Frustum& frustum, const bool& negateNormals)
+{
+
+    Vertex v[] = {
+        { { -size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, V2_ZERO  },
+        { { -size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 0, 1 } },
+        { {  size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 1, 0 } },
+
+        { {  size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, V2_ONE   },
+        { {  size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 1, 0 } },
+        { { -size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 0, 1}  },
+    };
+    
+    drawTriangles(v, 0, frustum);
+    drawTriangles(v, 3, frustum);
+}
+
+void Renderer::drawCube(const Cube& cube, const Frustum& frustum)
+{
+    modelPushMat();
+
+    modelTranslate(0, 0, cube.getSize() / 2);
+
+    // Render the 4 side faces.
+    for (int i = 0; i < 4; i++)
+    {
+        glRotatef(-90, 0, 1, 0);
+        modelRotateY(-PI/2);
+        glTranslatef(-cube.getSize()/2, 0, cube.getSize()/2);
+        drawDividedQuad(cube.getSize(), frustum, true);
+    }
+
+    // Render the upper and lower faces.
+    glRotatef(90, 1, 0, 0);
+    glTranslatef(0, -cube.getSize()/2, -cube.getSize()/2);
+    drawDividedQuad(cube.getSize(), frustum, true);
+    glTranslatef(0, 0, cube.getSize());
+    drawDividedQuad(cube.getSize(), frustum);
+
+    modelPopMat();
+}
+
 // --- View mode getters / setters --- //
 
 ViewMode Renderer::getViewMode() const
