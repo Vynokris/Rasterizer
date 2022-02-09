@@ -17,9 +17,9 @@ Scene::Scene()
     vertices.push_back(Vertex{ {  0.0f, 0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } });
     
     // SECOND TRIANGLE         |        pos        |  |      normal      |  |         color          |  |     uv     |
-    vertices.push_back(Vertex{ { -1.0f,-0.5f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } });
-    vertices.push_back(Vertex{ { 1.0f, -0.5f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } });
-    vertices.push_back(Vertex{ { 1.0f,  0.5f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } });
+    vertices.push_back(Vertex{ { -1.0f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } });
+    vertices.push_back(Vertex{ { 1.0f, -0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } });
+    vertices.push_back(Vertex{ { 1.0f,  0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } });
 }
 
 Scene::~Scene()
@@ -30,12 +30,20 @@ Scene::~Scene()
 
 void Scene::update(float deltaTime, Renderer& renderer, const Camera& camera)
 {
-    renderer.setModel(getTransformMatrix({ 0, 0, -4 }, { 0, 0, 0 }, { scale, scale, scale }));
+    // Set the matrices.
+    renderer.setModel(getTransformMatrix({ 0, 0, 0 }, { 0, 0, 0 }, { scale, scale, scale }));
     renderer.setView(camera.getViewMatrix());
     renderer.setProjection(camera.getProjection());
 
-    // Draw
-    renderer.drawTriangles(vertices.data(), (int)vertices.size(), camera.getFrustum());
+    // Draw the first triangle.
+    renderer.modelPushMat();
+    renderer.modelTranslate(0, 0, -4);
+    renderer.drawTriangles(vertices.data(),     3, camera.getFrustum());
+    renderer.modelPopMat();
+
+    // Draw the second triangle.
+    renderer.modelTranslate(0, 0, -2);
+    renderer.drawTriangles(vertices.data() + 3, 3, camera.getFrustum());
 
     time += deltaTime;
 }

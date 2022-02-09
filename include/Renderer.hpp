@@ -35,7 +35,7 @@ private:
     Viewport viewport;
     Color lineColor = { 1.f, 1.f, 1.f, 1.f };
 
-    Mat4 modelMat;
+    std::vector<Mat4> modelMat;
     Mat4 viewMat;
     Mat4 projectionMat;
 
@@ -55,6 +55,8 @@ public:
 
     // ------- Model transformations ------ //
 
+    void modelPushMat  ();
+    void modelPopMat   ();
     void modelTranslate(const float& x, const float& y, const float& z);
     void modelRotateX  (const float& angle);
     void modelRotateY  (const float& angle);
