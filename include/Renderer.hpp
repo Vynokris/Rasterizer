@@ -1,17 +1,8 @@
 #pragma once
 
 #include <Framebuffer.hpp>
+#include <Object.hpp>
 #include <Camera.hpp>
-
-// Vertex format (only one supported for now)
-struct rdrVertex
-{
-    float x, y, z;    // Pos
-    float nx, ny, nz; // Normal
-    Color color;      // Color
-    float u, v;       // Texture coordinates
-};
-
 
 struct Viewport
 {
@@ -69,6 +60,8 @@ public:
     void drawPixel(const unsigned int& x, const unsigned int& y, const float& depth, const Color& color);
     void drawLine(Vector3 p0, Vector3 p1, const Color& color);
     void drawTriangles(Vertex* vertices, const unsigned int& count, const geometry3D::Frustum& frustum);
+    void drawDividedQuad(const float& size, const geometry3D::Frustum& frustum, const bool& negateNormals = false);
+    void drawCube(const Cube& cube, const geometry3D::Frustum& frustum);
 
     // --- View mode getters / setters --- //
 
