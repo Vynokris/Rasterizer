@@ -150,7 +150,7 @@ void App::update()
         // Display info.
         if (ImGui::Begin("Info"))
         {
-            ImGui::Text("Frame duration: %.f seconds.", ImGui::GetIO().DeltaTime);
+            ImGui::Text("Frame duration: %f seconds.", ImGui::GetIO().DeltaTime);
         }
         ImGui::End();
 
