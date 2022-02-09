@@ -7,7 +7,7 @@ class Scene
 {
 private:
     double time = 0.0;
-    std::vector<rdrVertex> vertices;
+    std::vector<Vertex> vertices;
     float scale = 1.f;
     
 public:

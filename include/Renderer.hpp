@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Framebuffer.hpp>
+#include <Camera.hpp>
 
 // Vertex format (only one supported for now)
 struct rdrVertex
@@ -57,12 +58,12 @@ public:
     void setTexture(float* colors32Bits, const unsigned int width, const unsigned int height);
     void drawPixel(const unsigned int& x, const unsigned int& y, const float& depth, const Color& color);
     void drawLine(Vector3 p0, Vector3 p1, const Color& color);
-    void drawTriangles(rdrVertex* vertices, const unsigned int count);
+    void drawTriangles(Vertex* vertices, const unsigned int count, const geometry3D::Frustum& frustum);
 
     void showImGuiControls();
 
 private:
-    void drawTriangle(rdrVertex* vertices);
+    void drawTriangle(Vertex* vertices, const geometry3D::Frustum& frustum, bool wasClipped = false);
 };
 
 
