@@ -24,6 +24,17 @@ Camera::Camera(const unsigned int width, const unsigned int height,
     m_frustum.down.distance  = (float)height / 2;
     m_frustum.left.distance  = (float)width  / 2;
     m_frustum.right.distance = (float)width  / 2;
+    
+    // Compute and update the camera frustum normals.
+    Vector3 fwdVec   = geometry3D::getSphericalCoords(1, 2*PI - m_yaw + PI/2, 2*PI - m_pitch - PI/2);
+    Vector3 downVec  = geometry3D::getSphericalCoords(1, 2*PI - m_yaw + PI,   2*PI - m_pitch - PI/2);
+    Vector3 rightVec = geometry3D::getSphericalCoords(1, 2*PI - m_yaw + PI/2, 2*PI - m_pitch);
+    m_frustum.near.normal   = fwdVec               ;
+    m_frustum.far.normal    = fwdVec.getNegated()  ;
+    m_frustum.up.normal     = downVec              ;
+    m_frustum.down.normal   = downVec.getNegated() ;
+    m_frustum.left.normal   = rightVec             ;
+    m_frustum.right.normal  = rightVec.getNegated();
 }
 
 //* ---------- MAIN CAMERA METHODS ---------- *//
@@ -38,23 +49,12 @@ void Camera::update(const float deltaTime, const CameraInputs& inputs)
     Vector3 fwdVec   = geometry3D::getSphericalCoords(1, 2*PI - m_yaw + PI/2, 2*PI - m_pitch - PI/2);
     Vector3 downVec  = geometry3D::getSphericalCoords(1, 2*PI - m_yaw + PI,   2*PI - m_pitch - PI/2);
     Vector3 rightVec = geometry3D::getSphericalCoords(1, 2*PI - m_yaw + PI/2, 2*PI - m_pitch);
-    m_frustum.near.normal   = fwdVec;
-    m_frustum.far.normal    = fwdVec.getNegated();
-    m_frustum.up.normal     = downVec;
-    m_frustum.down.normal   = downVec.getNegated();
-    m_frustum.left.normal   = rightVec;
+    m_frustum.near.normal   = fwdVec               ;
+    m_frustum.far.normal    = fwdVec.getNegated()  ;
+    m_frustum.up.normal     = downVec              ;
+    m_frustum.down.normal   = downVec.getNegated() ;
+    m_frustum.left.normal   = rightVec             ;
     m_frustum.right.normal  = rightVec.getNegated();
-
-    ImGui::Begin("Debug info");
-    {
-        ImGui::Text("Near  normal: (%.2f, %.2f, %.2f)",   m_frustum.near.normal.x,  m_frustum.near.normal.y,  m_frustum.near.normal.z );
-        ImGui::Text("Far   normal: (%.2f, %.2f, %.2f)",   m_frustum.far.normal.x,   m_frustum.far.normal.y,   m_frustum.far.normal.z  );
-        ImGui::Text("Up    normal: (%.2f, %.2f, %.2f)",   m_frustum.up.normal.x,    m_frustum.up.normal.y,    m_frustum.up.normal.z   );
-        ImGui::Text("Down  normal: (%.2f, %.2f, %.2f)",   m_frustum.down.normal.x,  m_frustum.down.normal.y,  m_frustum.down.normal.z );
-        ImGui::Text("Left  normal: (%.2f, %.2f, %.2f)",   m_frustum.left.normal.x,  m_frustum.left.normal.y,  m_frustum.left.normal.z );
-        ImGui::Text("Right normal: (%.2f, %.2f, %.2f)\n", m_frustum.right.normal.x, m_frustum.right.normal.y, m_frustum.right.normal.z);
-    }
-    ImGui::End();
 
     // Then move the camera.
     m_speed = deltaTime * m_acceleration;

@@ -97,7 +97,7 @@ void App::update()
     Renderer renderer(800, 800);
     Scene scene;
     CameraInputs inputs;
-    Camera camera(renderer.framebuffer.getWidth(), renderer.framebuffer.getHeight(), 90.f, 0.025f, 1000.f, 2.5f);
+    Camera camera(renderer.framebuffer.getWidth(), renderer.framebuffer.getHeight(), 90.f, 0.01f, 1000.f, 2.5f);
 
     bool mouseCaptured = false;
     double mouseX = 0.0, mouseY = 0.0;
