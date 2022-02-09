@@ -12,67 +12,44 @@ using namespace geometry3D;
 Renderer::Renderer(const unsigned int& width, const unsigned int& height)
     : viewport(0, 0, width, height)
     , framebuffer(width, height)
-{
-    // Create renderer framebuffer (color+depth+opengl texture).
-    // We need an OpenGL texture to display the result of the renderer to the screen.
-}
+{}
 
 Renderer::~Renderer()
-{
-}
+{}
 
-void Renderer::setModel(const Mat4& modelMatrix)
-{
-    modelMat = modelMatrix;
-}
+// -- Setters for the three matrices -- //
 
-void Renderer::setView(const Mat4& viewMatrix)
-{
-    viewMat = viewMatrix;
-}
+void Renderer::setModel(const Mat4& modelMatrix)           { modelMat = modelMatrix;           }
+void Renderer::setView(const Mat4& viewMatrix)             { viewMat = viewMatrix;             }
+void Renderer::setProjection(const Mat4& projectionMatrix) { projectionMat = projectionMatrix; }
 
-void Renderer::setProjection(const Mat4& projectionMatrix)
-{
-    projectionMat = projectionMatrix;
-}
+// ------- Model transformations ------ //
 
-void Renderer::modelTranslate(float x, float y, float z)
-{
-    modelMat = modelMat * getTranslationMatrix({ x, y, z });
-}
+void Renderer::modelTranslate(const float& x, const float& y, const float& z)                { modelMat = modelMat * getTranslationMatrix({ x, y, z });          }
+void Renderer::modelRotateX  (const float& angle)                                            { modelMat = modelMat * getXRotationMatrix(angle);                  }
+void Renderer::modelRotateY  (const float& angle)                                            { modelMat = modelMat * getYRotationMatrix(angle);                  }
+void Renderer::modelRotateZ  (const float& angle)                                            { modelMat = modelMat * getZRotationMatrix(angle);                  }
+void Renderer::modelScale    (const float& scaleX, const float& scaleY, const float& scaleZ) { modelMat = modelMat * getScaleMatrix({ scaleX, scaleY, scaleZ }); }
 
-void Renderer::modelRotateX  (float angle)
-{
-    modelMat = modelMat * getXRotationMatrix(angle);
-}
+// --------- Drawing functions -------- //
 
-void Renderer::modelRotateY  (float angle)
-{
-    modelMat = modelMat * getYRotationMatrix(angle);
-}
-
-void Renderer::modelRotateZ  (float angle)
-{
-    modelMat = modelMat * getZRotationMatrix(angle);
-}
-
-void Renderer::modelScale    (float scaleX, float scaleY, float scaleZ)
-{
-    modelMat = modelMat * getScaleMatrix({ scaleX, scaleY, scaleZ });
-}
-
-
-void Renderer::setTexture(float* colors32Bits, const unsigned int width, const unsigned int height)
+void Renderer::setTexture(float* colors32Bits, const unsigned int& width, const unsigned int& height)
 {
     // TODO
 }
 
 void Renderer::drawPixel(const unsigned int& x, const unsigned int& y, const float& depth, const Color& color)
 {
-    if (framebuffer.depthBuffer[y * framebuffer.getWidth() + x] <= depth)
+    if (framebuffer.depthBuffer[y * framebuffer.getWidth() + x] >= depth)
     {
         framebuffer.depthBuffer[y * framebuffer.getWidth() + x] = depth;
-        framebuffer.colorBuffer[y * framebuffer.getWidth() + x] = color;
+        switch (getViewMode())
+        {
+        case ViewMode::DEFAULT:
+        case ViewMode::WIREFRAME: framebuffer.colorBuffer[y * framebuffer.getWidth() + x] = color;                      break;
+        case ViewMode::ZBUFFER:   framebuffer.colorBuffer[y * framebuffer.getWidth() + x] = { depth, depth, depth, 1 }; break;
+        default: break;
+        }
     }
 }
 
@@ -94,7 +71,7 @@ void Renderer::drawLine(Vector3 p0, Vector3 p1, const Color& color)
     {
         //? This probably will be avoidable one we get the clip space right.
         if (0 <= p0.x && p0.x < viewport.width && 0 <= p0.y && p0.y < viewport.height)
-            drawPixel(p0.x, p0.y, 0, { 1, 0, 0, 1 });
+            drawPixel(p0.x, p0.y, 0, color);
         else break;
 
         e2 = 2 * err;
@@ -117,11 +94,13 @@ void Renderer::drawLine(Vector3 p0, Vector3 p1, const Color& color)
     }
 }
 
-static Vector3 ndcToScreenCoords(Vector3 ndc, const Viewport& viewport)
+static Vector3 ndcToScreenCoords(const Vector3& ndc, const Viewport& viewport)
 {
-    return { ndc.x * viewport.width + viewport.width / 2, 
-             ndc.y * viewport.height + viewport.height / 2, 
-             ndc.z };
+    return {
+        ndc.x * viewport.width  + viewport.width  / 2, 
+        ndc.y * viewport.height + viewport.height / 2, 
+        ndc.z
+    };
 }
 
 static int barycentricCoords(const Vector3& a, const Vector3& b, const Vector3& c)
@@ -178,7 +157,7 @@ void Renderer::drawTriangle(Vertex* vertices, const Frustum& frustum, bool wasCl
     Vector3 ndcCoords[3] = {
         { clipCoords[0].getHomogenized().toVector3().getNormalized() },
         { clipCoords[1].getHomogenized().toVector3().getNormalized() },
-        { clipCoords[2].getHomogenized().toVector3().getNormalized() },
+        { clipCoords[2].getHomogenized().toVector3().getNormalized() }
     };
     
     // NDC (3D) -> screen coords (2D).
@@ -195,14 +174,19 @@ void Renderer::drawTriangle(Vertex* vertices, const Frustum& frustum, bool wasCl
         for (int i = 0; i < 3; i++) ImGui::Text("View   coords %d: (%.2f, %.2f, %.2f, %.2f)%s", i, viewCoords[i].x,   viewCoords[i].y,   viewCoords[i].z,   viewCoords[i].w,  (i == 2 ? "\n " : ""));
         for (int i = 0; i < 3; i++) ImGui::Text("Clip   coords %d: (%.2f, %.2f, %.2f, %.2f)%s", i, clipCoords[i].x,   clipCoords[i].y,   clipCoords[i].z,   clipCoords[i].w,  (i == 2 ? "\n " : ""));
         for (int i = 0; i < 3; i++) ImGui::Text("NDC    coords %d: (%.2f, %.2f, %.2f)%s",       i, ndcCoords[i].x,    ndcCoords[i].y,    ndcCoords[i].z,                      (i == 2 ? "\n " : ""));
-        for (int i = 0; i < 3; i++) ImGui::Text("Screen coords %d: (%.0f, %.0f, %.0f)%s",       i, screenCoords[i].x, screenCoords[i].y, screenCoords[i].z,                   (i == 2 ? "\n " : ""));
+        for (int i = 0; i < 3; i++) ImGui::Text("Screen coords %d: (%.0f, %.0f, %.3f)%s",       i, screenCoords[i].x, screenCoords[i].y, screenCoords[i].z,                   (i == 2 ? "\n " : ""));
+        ImGui::Text("\n");
     }
     ImGui::End();
 
     // Draw triangle wireframe
-    // drawLine(screenCoords[0], screenCoords[1], lineColor);
-    // drawLine(screenCoords[1], screenCoords[2], lineColor);
-    // drawLine(screenCoords[2], screenCoords[0], lineColor);
+    if (getViewMode() == ViewMode::WIREFRAME)
+    {
+        drawLine(screenCoords[0], screenCoords[1], lineColor);
+        drawLine(screenCoords[1], screenCoords[2], lineColor);
+        drawLine(screenCoords[2], screenCoords[0], lineColor);
+        return;
+    }
 
     // Get the triangle's sides and normals.
     Vector2 p0p1(Vector2{ screenCoords[0].x, screenCoords[0].y }, Vector2{ screenCoords[1].x, screenCoords[1].y });
@@ -283,7 +267,7 @@ void Renderer::drawTriangle(Vertex* vertices, const Frustum& frustum, bool wasCl
             float depth = screenCoords[0].z * w0n + screenCoords[1].z * w1n + screenCoords[2].z * w2n;
 
             // If p is on or inside all edges, render pixel.
-            if ((w0 | w1 | w2) >= 0) drawPixel(p.x, p.y, depth, pCol);
+            if ((w0 | w1 | w2) >= 0) drawPixel(p.x, p.y, 1 / clipCoords[2].z * lerp(depth, -1, 1), pCol);
 
             // One step to the right.
             w0 += A12;
@@ -298,16 +282,39 @@ void Renderer::drawTriangle(Vertex* vertices, const Frustum& frustum, bool wasCl
     }
 }
 
-void Renderer::drawTriangles(Vertex* vertices, const unsigned int count, const Frustum& frustum)
+void Renderer::drawTriangles(Vertex* vertices, const unsigned int& count, const Frustum& frustum)
 {
-    // calculate mvp from matrices
+    // Calculate mvp from matrices
     // Transform vertex list to triangles into colorBuffer
     for (int i = 0; i < (int)count; i += 3) drawTriangle(&vertices[i], frustum);
 }
 
+// --- View mode getters / setters --- //
+
+ViewMode Renderer::getViewMode() const
+{
+    return currentView;
+}
+
+void Renderer::setViewMode(const ViewMode& mode)
+{
+    currentView = mode;
+}
+
+// ---------- Miscellaneous ---------- //
+
 void Renderer::showImGuiControls()
 {
+    // Static variables.
+    static const char* items[]{"Default", "Wireframe", "Z-Buffer"};
+    static int curItem = 0;
+    
+    // Displaying components.
     ImGui::ColorEdit4("BG Color", &framebuffer.clearColor.r);
+
+    ImGui::ListBox("View Mode", &curItem, items, IM_ARRAYSIZE(items));
+    setViewMode((ViewMode)curItem);
+
     ImGui::Text("\nMatrices:");
     ImGui::Text(("Model:\n"      + modelMat.printStr     (false)).c_str());
     ImGui::Text(("View:\n"       + viewMat.printStr      (false)).c_str());

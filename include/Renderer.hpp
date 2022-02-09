@@ -22,6 +22,12 @@ struct Viewport
     unsigned int width, height;
 };
 
+enum class ViewMode : int
+{
+    DEFAULT,
+    WIREFRAME,
+    ZBUFFER,
+};
 
 class Renderer
 {
@@ -32,6 +38,8 @@ private:
     Mat4 modelMat;
     Mat4 viewMat;
     Mat4 projectionMat;
+
+    ViewMode currentView = ViewMode::DEFAULT;
 
 public:
     Framebuffer framebuffer;
@@ -45,21 +53,28 @@ public:
     void setView(const Mat4& viewMatrix);
     void setProjection(const Mat4& projectionMatrix);
 
-    // -- Model transformations -- //
+    // ------- Model transformations ------ //
 
-    void modelTranslate(float x, float y, float z);
-    void modelRotateX  (float angle);
-    void modelRotateY  (float angle);
-    void modelRotateZ  (float angle);
-    void modelScale    (float scaleX, float scaleY, float scaleZ);
+    void modelTranslate(const float& x, const float& y, const float& z);
+    void modelRotateX  (const float& angle);
+    void modelRotateY  (const float& angle);
+    void modelRotateZ  (const float& angle);
+    void modelScale    (const float& scaleX, const float& scaleY, const float& scaleZ);
 
-    // -- Drawing functions -- //
+    // --------- Drawing functions -------- //
 
-    void setTexture(float* colors32Bits, const unsigned int width, const unsigned int height);
+    void setTexture(float* colors32Bits, const unsigned int& width, const unsigned int& height);
     void drawPixel(const unsigned int& x, const unsigned int& y, const float& depth, const Color& color);
     void drawLine(Vector3 p0, Vector3 p1, const Color& color);
-    void drawTriangles(Vertex* vertices, const unsigned int count, const geometry3D::Frustum& frustum);
+    void drawTriangles(Vertex* vertices, const unsigned int& count, const geometry3D::Frustum& frustum);
 
+    // --- View mode getters / setters --- //
+
+    ViewMode getViewMode() const;
+    void     setViewMode(const ViewMode& mode);
+
+    // ---------- Miscellaneous ---------- //
+    
     void showImGuiControls();
 
 private:
