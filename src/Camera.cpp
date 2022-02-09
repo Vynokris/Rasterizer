@@ -32,8 +32,7 @@ void Camera::update(const float deltaTime, const CameraInputs& inputs)
 {
     // Rotate camera first (Yaw locked between -90° and 90°).
     setRotation(m_pitch + inputs.deltaX / 180.f, 
-                (m_yaw < -PI/2 || m_yaw > PI/2) ?
-                signof(m_yaw) * PI/2 : m_yaw - inputs.deltaY / 180.f);
+                clamp(m_yaw - inputs.deltaY / 180.f, -PI/2, PI/2));
     
     // Compute and update the camera frustum normals.
     Vector3 fwdVec   = geometry3D::getSphericalCoords(1, 2*PI - m_yaw + PI/2, 2*PI - m_pitch - PI/2);
