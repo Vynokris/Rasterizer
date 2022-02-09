@@ -2,8 +2,8 @@
 #include <imgui.h>
 
 #include <my_math.hpp>
-
 #include <Camera.hpp>
+
 
 using namespace arithmetic;
 using namespace matrix;
@@ -19,6 +19,14 @@ Camera::Camera(const unsigned int width, const unsigned int height,
     m_pitch = 0;
     m_yaw = 0;
     m_speed = 0.f;
+
+    // Setup frustum distances.
+    m_frustum.near.distance  = near;
+    m_frustum.far.distance   = far;
+    m_frustum.up.distance    = (float)height / 2;
+    m_frustum.down.distance  = (float)height / 2;
+    m_frustum.left.distance  = (float)width  / 2;
+    m_frustum.right.distance = (float)width  / 2;
 }
 
 //* ---------- MAIN CAMERA METHODS ---------- *//
@@ -28,6 +36,28 @@ void Camera::update(const float deltaTime, const CameraInputs& inputs)
     // Rotate camera first.
     setRotation(m_pitch + inputs.deltaX / 200.f, 
                 m_yaw   - inputs.deltaY / 200.f);
+    
+    // Update the camera frustum normals.
+    Vector3 dirVec = geometry3D::getSphericalCoords(1, 2*PI - m_yaw + PI/2, 2*PI - m_pitch - PI/2);
+    m_frustum.near.normal   = dirVec;
+    m_frustum.far.normal    = dirVec.getNegated();
+    dirVec.rotate(0, PI);
+    m_frustum.up.normal     = dirVec;
+    m_frustum.down.normal   = dirVec.getNegated();
+    dirVec.rotate(PI, 0);
+    m_frustum.left.normal   = dirVec;
+    m_frustum.right.normal  = dirVec.getNegated();
+
+    ImGui::Begin("Debug info");
+    {
+        ImGui::Text("Near  normal: (%.2f, %.2f, %.2f)",   m_frustum.near.normal.x, m_frustum.near.normal.y, m_frustum.near.normal.z);
+        ImGui::Text("Far   normal: (%.2f, %.2f, %.2f)",   m_frustum.far.normal.x, m_frustum.far.normal.y, m_frustum.far.normal.z);
+        ImGui::Text("Up    normal: (%.2f, %.2f, %.2f)",   m_frustum.up.normal.x, m_frustum.up.normal.y, m_frustum.up.normal.z);
+        ImGui::Text("Down  normal: (%.2f, %.2f, %.2f)",   m_frustum.down.normal.x, m_frustum.down.normal.y, m_frustum.down.normal.z);
+        ImGui::Text("Left  normal: (%.2f, %.2f, %.2f)",   m_frustum.left.normal.x, m_frustum.left.normal.y, m_frustum.left.normal.z);
+        ImGui::Text("Right normal: (%.2f, %.2f, %.2f)\n", m_frustum.right.normal.x, m_frustum.right.normal.y, m_frustum.right.normal.z);
+    }
+    ImGui::End();
 
     // Then move the camera.
     m_speed = deltaTime * m_acceleration;
