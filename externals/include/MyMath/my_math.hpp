@@ -15,14 +15,29 @@
 #include "my_matrix.hpp"
 using namespace std;
 
+// ----------------------- DEFINES ------------------------ //
+
 #define PI 3.14159265358979323846f
 
-typedef struct
-{
-    float r, g, b, a;
-} Color;
+#define V2_ZERO (Vector2) { 0, 0 }
+#define V2_ONE  (Vector2) { 1, 1 }
+#define V3_ZERO (Vector3) { 0, 0, 0 }
+#define V3_ONE  (Vector3) { 1, 1, 1 }
+#define V4_ZERO (Vector4) { 0, 0, 0, 0 }
+#define V4_ONE  (Vector4) { 1, 1, 1, 1 }
+
+#define RED   (Color) { 1, 0, 0, 1 }
+#define GREEN (Color) { 0, 1, 0, 1 }
+#define BLUE  (Color) { 0, 0, 1, 1 }
+#define WHITE (Color) { 1, 1, 1, 1 }
+#define BLACK (Color) { 0, 0, 0, 1 }
+
+// --------------------- STRUCTURES ----------------------- //
+
+typedef struct { float r, g, b, a; } Color;
 
 // --------------------- ARITHMECTIC ---------------------- //
+
 namespace arithmetic
 {
 
