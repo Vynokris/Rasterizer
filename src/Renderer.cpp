@@ -169,22 +169,16 @@ void Renderer::drawTriangle(rdrVertex* vertices)
         { ndcToScreenCoords(ndcCoords[2], viewport) },
     };
 
-    #include <sstream>
     ImGui::Begin("Debug info");
-    std::ostringstream temp;
-    temp.precision(2);
-    for (int i = 0; i < 3; i++) temp << "Local coords "  << i << ": (" << localCoords[i].x  << ", " << localCoords[i].y  << ", " << localCoords[i].z  << (i == 2 ? ")\n\n" : ")\n");
-    for (int i = 0; i < 3; i++) temp << "World coords "  << i << ": (" << worldCoords[i].x  << ", " << worldCoords[i].y  << ", " << worldCoords[i].z  << ", " << worldCoords[i].w << (i == 2 ? ")\n\n" : ")\n");
-    for (int i = 0; i < 3; i++) temp << "View coords "   << i << ": (" << viewCoords [i].x  << ", " << viewCoords [i].y  << ", " << viewCoords [i].z  << ", " << viewCoords [i].w << (i == 2 ? ")\n\n" : ")\n");
-    for (int i = 0; i < 3; i++) temp << "Clip coords "   << i << ": (" << clipCoords [i].x  << ", " << clipCoords [i].y  << ", " << clipCoords [i].z  << ", " << clipCoords [i].w << (i == 2 ? ")\n\n" : ")\n");
-    for (int i = 0; i < 3; i++) temp << "NDC coords "    << i << ": (" << ndcCoords  [i].x  << ", " << ndcCoords  [i].y  << ", " << ndcCoords  [i].z  << (i == 2 ? ")\n\n" : ")\n");
-    temp.precision(4);
-    for (int i = 0; i < 3; i++) temp << "Screen coords " << i << ": (" << screenCoords[i].x << ", " << screenCoords[i].y << ", " << screenCoords[i].z << (i == 2 ? ")\n\n" : ")\n");
-    ImGui::Text(temp.str().c_str());
+    {
+        for (int i = 0; i < 3; i++) ImGui::Text("Local  coords %d: (%.2f, %.2f, %.2f)%s",       i, localCoords[i].x,  localCoords[i].y,  localCoords[i].z,                    (i == 2 ? "\n " : ""));
+        for (int i = 0; i < 3; i++) ImGui::Text("World  coords %d: (%.2f, %.2f, %.2f, %.2f)%s", i, worldCoords[i].x,  worldCoords[i].y,  worldCoords[i].z,  worldCoords[i].w, (i == 2 ? "\n " : ""));
+        for (int i = 0; i < 3; i++) ImGui::Text("View   coords %d: (%.2f, %.2f, %.2f, %.2f)%s", i, viewCoords[i].x,   viewCoords[i].y,   viewCoords[i].z,   viewCoords[i].w,  (i == 2 ? "\n " : ""));
+        for (int i = 0; i < 3; i++) ImGui::Text("Clip   coords %d: (%.2f, %.2f, %.2f, %.2f)%s", i, clipCoords[i].x,   clipCoords[i].y,   clipCoords[i].z,   clipCoords[i].w,  (i == 2 ? "\n " : ""));
+        for (int i = 0; i < 3; i++) ImGui::Text("NDC    coords %d: (%.2f, %.2f, %.2f)%s",       i, ndcCoords[i].x,    ndcCoords[i].y,    ndcCoords[i].z,                      (i == 2 ? "\n " : ""));
+        for (int i = 0; i < 3; i++) ImGui::Text("Screen coords %d: (%.0f, %.0f, %.0f)%s",       i, screenCoords[i].x, screenCoords[i].y, screenCoords[i].z,                   (i == 2 ? "\n " : ""));
+    }
     ImGui::End();
-
-    if (viewCoords[0].z >= 0 && viewCoords[1].z >= 0 && viewCoords[2].z >= 0)
-        return;
 
     // Draw triangle wireframe
     // drawLine(screenCoords[0], screenCoords[1], lineColor);

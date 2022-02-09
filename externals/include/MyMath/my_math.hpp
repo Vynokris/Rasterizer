@@ -338,6 +338,7 @@ namespace geometry3D
     class Vector4;
     class Segment3;
     class Triangle3;
+    class Plane3;
 
     /*
     struct Transform
@@ -351,6 +352,9 @@ namespace geometry3D
 
     // Calculates linear interpolation for a value from a start point to an end point.
     Vector3 point3Lerp(const float& val, const Vector3& start, const Vector3& end);
+
+    // Returns the coordinates of a point on a sphere of radius r, using the given angles.
+    Vector3 getSphericalCoords(const float& r, const float& theta, const float& phi);
 
     // Vector class that holds values for x, y and z (3 dimensions).
     class Vector3
@@ -554,6 +558,31 @@ namespace geometry3D
 
             // Moves the triangle by the given vector.
             void move(const Vector3& vec);
+    };
+
+    class Plane3
+    {
+        public:
+            // Attributes.
+            Vector3 normal; // Normalized normal vector to the plane.
+            float distance; // The distance from the origin.
+
+            // Constructor.
+            Plane3();
+            Plane3(const Vector3& _normal, const float& _distance);
+
+            // Destructor.
+            ~Plane3() {}
+
+            // Returns 0 if the given segment doesn't clip against this plane.
+            // Else, returns 1 if point A clips, 2 if point B clips and 3 if both clip.
+            int doesSegmentClip(const Segment3& seg);
+
+            // Clips the given segment against this plane.
+            Segment3 clipSegment(Segment3 seg);
+
+            // Clips the given triangle against this plane.
+            std::vector<Vector3> clipTriangle(const Triangle3& triangle);
     };
 }
 

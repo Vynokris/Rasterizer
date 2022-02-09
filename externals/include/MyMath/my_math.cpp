@@ -422,6 +422,17 @@ Vector3 geometry3D::point3Lerp(const float& val, const Vector3& start, const Vec
                    arithmetic::lerp(val, start.z, end.z));
 }
 
+// Returns the coordinates of a point on a sphere of radius r, using the given angles.
+Vector3 geometry3D::getSphericalCoords(const float& r, const float& theta, const float& phi)
+{
+    float sinTheta = sinf(theta);
+
+    return { r * sinTheta * cosf(phi),
+             r * cosf(theta),
+             r * sinTheta * sinf(phi)
+    };
+}
+
 
 
 // -------------------- VECTOR3 -------------------- //
@@ -684,7 +695,7 @@ Vector3 Triangle3::getCenterOfMass() const { return Vector3((a.x + b.x + c.x) / 
 // Returns the side of the triangle that corresponds to the given index.
 Segment3 Triangle3::getSide(const int& index) const
 {
-    assert (0<= index && index < 3);
+    assert (0 <= index && index < 3);
 
     switch (index)
     {
@@ -717,7 +728,108 @@ void Triangle3::move(const Vector3& vec)
     c += vec;
 }
 
-// ------------------------------ COLLISIONS ------------------------------ //
+// -------------------- PLANE3 -------------------- //
+
+// Constructor.
+Plane3::Plane3()                                               : normal({ 0, 0, 1 }),             distance(0)         {}
+Plane3::Plane3(const Vector3& _normal, const float& _distance) : normal(_normal.getNormalized()), distance(_distance) {}
+
+// ---------- PLANE3 METHODS ---------- //
+
+// Returns 0 if the given segment doesn't clip against this plane.
+// Else, returns 1 if point A clips, 2 if point B clips and 3 if both clip.
+int Plane3::doesSegmentClip(const Segment3& seg)
+{
+    // Get the distance from each point to the plane.
+    float distA = (seg.a & normal) - distance;
+    float distB = (seg.b & normal) - distance;
+
+    // If both distances are positive, the segment doesn't clip.
+    if (distA > 0 && distB > 0)
+        return 0;
+
+    // If the 1st distance is negative, point A clips.
+    else if (distA <= 0)
+        return 1;
+
+    // If the 1st distance is negative, point A clips.
+    else if (distB <= 0)
+        return 2;
+
+    // If both distances are negative, the whole segment clips.
+    else
+        return 3;
+}
+
+// Clips the given 3D segment against this plane.
+Segment3 Plane3::clipSegment(Segment3 seg)
+{
+    // Get the distance from each point to the plane.
+    float distA = (seg.a & normal) - distance;
+    float distB = (seg.b & normal) - distance;
+
+    // If both distances are negative, the segment is on the wrong side of the plane.
+    if (distA <= 0 && distB <= 0)
+        return Segment3();
+
+    // If both distances are positive, the segment is on the good side of the plane.
+    if (distA > 0 && distB > 0)
+        return seg;
+
+    // Compute the intersection factor (between 0 and 1).
+    float factor = distA / (distA - distB);
+
+    // Compute the intersection point.
+    Vector3 intersectPoint(seg.a.x + factor * (seg.b.x - seg.a.x),
+                           seg.a.y + factor * (seg.b.y - seg.a.y),
+                           seg.a.z + factor * (seg.b.z - seg.a.z));
+    
+    // Override the point that is clipping with the intersection point.
+    if      (distA <= 0) seg.a = intersectPoint;
+    else if (distB <= 0) seg.b = intersectPoint;
+    return seg;
+}
+
+// Clips the given triangle against this plane.
+std::vector<Vector3> Plane3::clipTriangle(const Triangle3& triangle)
+{
+    // Output array of vertices.
+    std::vector<Vector3> vertices;
+
+    // Clip the triangle's segments against the plane.
+    for (int i = 0; i < 3; i++)
+    {
+        Segment3 clipSeg = clipSegment(triangle.getSide(i));
+        int clipPoint = doesSegmentClip(triangle.getSide(i));
+
+        // Add the clipped segment vertices to the output array.
+        switch (clipPoint)
+        {
+        case 0:
+            vertices.push_back(clipSeg.a);
+            vertices.push_back(clipSeg.b); // This should probably be removed since the next side will take care of it.
+            break;
+        case 1:
+            vertices.push_back(clipSeg.b); // This should probably be removed since the next side will take care of it.
+            break;
+        case 2:
+            vertices.push_back(clipSeg.a);
+            break;
+        default:
+            break;
+        }
+    }
+
+    return vertices;
+}
+
+
+
+
+
+
+
+//* ------------------------------ COLLISIONS 2D ------------------------------ *//
 
 // Returns true if the given point is colliding with the given circle.
 bool collisions2D::collisionCirclePoint(geometry2D::Circle c, geometry2D::Vector2 p)
@@ -771,7 +883,7 @@ bool collisions2D::collisionProjections(geometry2D::Segment2 projection1, geomet
 
 
 
-// ------------------------------ RENDER 3D ------------------------------ //
+//* ------------------------------ RENDER 3D ------------------------------ *//
 
 matrix::Matrix<4, 4> render3D::getTranslationMatrix(const Vector3& translation)
 {
