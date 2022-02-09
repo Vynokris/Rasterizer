@@ -303,11 +303,11 @@ void Renderer::drawDividedQuad(const float& size, const Frustum& frustum, const 
 {
 
     Vertex v[] = {
-        { { -size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, V2_ZERO  },
+        { { -size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, Vector2() },
         { { -size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 0, 1 } },
         { {  size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 1, 0 } },
 
-        { {  size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, V2_ONE   },
+        { {  size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 1, 1 } },
         { {  size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 1, 0 } },
         { { -size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 0, 1}  },
     };

@@ -41,9 +41,11 @@ Camera::Camera(const unsigned int width, const unsigned int height,
 
 void Camera::update(const float deltaTime, const CameraInputs& inputs)
 {
-    // Rotate camera first (Yaw locked between -90° and 90°).
+    // Rotate camera (Yaw locked between -90° and 90°, Pitch reset to 0 when it reach 2PI).
     setRotation(m_pitch + inputs.deltaX / 180.f, 
                 clamp(m_yaw - inputs.deltaY / 180.f, -PI/2, PI/2));
+
+    m_pitch = fmodf(m_pitch, 2 * PI);
     
     // Compute and update the camera frustum normals.
     Vector3 fwdVec   = geometry3D::getSphericalCoords(1, 2*PI - m_yaw + PI/2, 2*PI - m_pitch - PI/2);
@@ -57,11 +59,23 @@ void Camera::update(const float deltaTime, const CameraInputs& inputs)
     m_frustum.right.normal  = rightVec.getNegated();
 
     // Then move the camera.
+    Mat4 viewMat = getViewMatrix();
+    Vector3 dir;
+
+    // Set direction accoring to inputs.
+    if (inputs.moveForward)  dir.z =  1.f;
+    if (inputs.moveBackward) dir.z = -1.f;
+    if (inputs.moveLeft)     dir.x = -1.f;
+    if (inputs.moveRight)    dir.x =  1.f;
+    if (inputs.moveUpper)    dir.y = -1.f;
+    if (inputs.moveLower)    dir.y =  1.f;
+
+    // Set speed according to deltatime.
     m_speed = deltaTime * m_acceleration;
-    if (inputs.moveForward)  setPosition({ m_pos.x, m_pos.y, m_pos.z + m_speed });
-    if (inputs.moveBackward) setPosition({ m_pos.x, m_pos.y, m_pos.z - m_speed });
-    if (inputs.moveLeft)     setPosition({ m_pos.x - m_speed, m_pos.y, m_pos.z });
-    if (inputs.moveRight)    setPosition({ m_pos.x + m_speed, m_pos.y, m_pos.z });
+
+    setPosition({ m_pos.x + (dir.x * viewMat[0][0] + dir.z * viewMat[0][2]) * m_speed,
+                  m_pos.y + dir.y * m_speed,
+                  m_pos.z + (dir.x * viewMat[2][0] + dir.z * viewMat[2][2]) * m_speed });
 }
 
 //* -------- CAMERA GETTERS METHODS --------- *//
@@ -112,5 +126,5 @@ void Camera::showImGuiControls()
 {
     ImGui::Text("Position: %.2f, %.2f, %.2f", m_pos.x, m_pos.y, m_pos.z);
     ImGui::Text("Pitch: %.2f° | Yaw = %.2f°", radToDeg(m_pitch), radToDeg(m_yaw));
-    ImGui::Text("Speed: %.2f", m_speed);
+    ImGui::SliderFloat("Acceleration: ", &m_acceleration, 1.f, 8.f);
 }

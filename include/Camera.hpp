@@ -5,7 +5,8 @@
 struct CameraInputs
 {
     float deltaX, deltaY;
-    bool moveForward, moveBackward, moveLeft, moveRight;
+    bool moveForward, moveBackward, moveLeft,
+         moveRight, moveUpper, moveLower;
 };
 
 class Camera

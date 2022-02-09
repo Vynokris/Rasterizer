@@ -129,6 +129,8 @@ void App::update()
             inputs.moveBackward = ImGui::IsKeyDown(GLFW_KEY_S);
             inputs.moveLeft     = ImGui::IsKeyDown(GLFW_KEY_A);
             inputs.moveRight    = ImGui::IsKeyDown(GLFW_KEY_D);
+            inputs.moveUpper    = ImGui::IsKeyDown(GLFW_KEY_SPACE);
+            inputs.moveLower    = ImGui::IsKeyDown(GLFW_KEY_LEFT_SHIFT);
             camera.update(ImGui::GetIO().DeltaTime, inputs);
         }
 
