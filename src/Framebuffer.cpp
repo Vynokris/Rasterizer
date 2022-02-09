@@ -40,7 +40,7 @@ void Framebuffer::clear()
         std::memcpy(&colors[i * _width], &colors[0], _width * sizeof(Color));
 
     // Clear depth buffer
-    std::memset(depthBuffer.data(), 0, depthBuffer.size() * sizeof(depthBuffer[0]));
+    std::memset(depthBuffer.data(), -1, depthBuffer.size() * sizeof(depthBuffer[0]));
 }
 
 void Framebuffer::updateTexture()
