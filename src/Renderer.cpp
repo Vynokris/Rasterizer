@@ -19,17 +19,19 @@ Renderer::~Renderer()
 
 // -- Setters for the three matrices -- //
 
-void Renderer::setModel(const Mat4& modelMatrix)           { modelMat = modelMatrix;           }
-void Renderer::setView(const Mat4& viewMatrix)             { viewMat = viewMatrix;             }
-void Renderer::setProjection(const Mat4& projectionMatrix) { projectionMat = projectionMatrix; }
+void Renderer::setModel(const Mat4& modelMatrix)           { modelMat.clear(); modelMat.push_back(modelMatrix); }
+void Renderer::setView(const Mat4& viewMatrix)             { viewMat = viewMatrix;                              }
+void Renderer::setProjection(const Mat4& projectionMatrix) { projectionMat = projectionMatrix;                  }
 
 // ------- Model transformations ------ //
 
-void Renderer::modelTranslate(const float& x, const float& y, const float& z)                { modelMat = modelMat * getTranslationMatrix({ x, y, z });          }
-void Renderer::modelRotateX  (const float& angle)                                            { modelMat = modelMat * getXRotationMatrix(angle);                  }
-void Renderer::modelRotateY  (const float& angle)                                            { modelMat = modelMat * getYRotationMatrix(angle);                  }
-void Renderer::modelRotateZ  (const float& angle)                                            { modelMat = modelMat * getZRotationMatrix(angle);                  }
-void Renderer::modelScale    (const float& scaleX, const float& scaleY, const float& scaleZ) { modelMat = modelMat * getScaleMatrix({ scaleX, scaleY, scaleZ }); }
+void Renderer::modelPushMat  ()                                                              { modelMat.push_back(modelMat.back()); }
+void Renderer::modelPopMat   ()                                                              { if (modelMat.size() > 1) modelMat.pop_back(); }
+void Renderer::modelTranslate(const float& x, const float& y, const float& z)                { modelMat.back() = modelMat.back() * getTranslationMatrix({ x, y, z });          }
+void Renderer::modelRotateX  (const float& angle)                                            { modelMat.back() = modelMat.back() * getXRotationMatrix(angle);                  }
+void Renderer::modelRotateY  (const float& angle)                                            { modelMat.back() = modelMat.back() * getYRotationMatrix(angle);                  }
+void Renderer::modelRotateZ  (const float& angle)                                            { modelMat.back() = modelMat.back() * getZRotationMatrix(angle);                  }
+void Renderer::modelScale    (const float& scaleX, const float& scaleY, const float& scaleZ) { modelMat.back() = modelMat.back() * getScaleMatrix({ scaleX, scaleY, scaleZ }); }
 
 // --------- Drawing functions -------- //
 
@@ -119,9 +121,9 @@ void Renderer::drawTriangle(Vertex* vertices, const Frustum& frustum, bool wasCl
     
     // Local space (3D) -> World space (3D).
     Vector4 worldCoords[3] = {
-        { (Vector4{ localCoords[0], 1 } * modelMat) },
-        { (Vector4{ localCoords[1], 1 } * modelMat) },
-        { (Vector4{ localCoords[2], 1 } * modelMat) },
+        { (Vector4{ localCoords[0], 1 } * modelMat.back()) },
+        { (Vector4{ localCoords[1], 1 } * modelMat.back()) },
+        { (Vector4{ localCoords[2], 1 } * modelMat.back()) },
     };
     
     // World space (3D) -> View space (3D).
@@ -132,6 +134,7 @@ void Renderer::drawTriangle(Vertex* vertices, const Frustum& frustum, bool wasCl
     };
 
     // Clip the triangle against the frustum.
+    /*
     if (!wasClipped)
     {
         Triangle3 viewTriangle(
@@ -145,6 +148,7 @@ void Renderer::drawTriangle(Vertex* vertices, const Frustum& frustum, bool wasCl
             drawTriangle(&clippedTriangles[0].a, frustum, true);
         return;
     }
+    */
     
     // View space (3D) -> Clip space (4D).
     Vector4 clipCoords[3] = {
@@ -316,7 +320,7 @@ void Renderer::showImGuiControls()
     setViewMode((ViewMode)curItem);
 
     ImGui::Text("\nMatrices:");
-    ImGui::Text(("Model:\n"      + modelMat.printStr     (false)).c_str());
-    ImGui::Text(("View:\n"       + viewMat.printStr      (false)).c_str());
-    ImGui::Text(("Projection:\n" + projectionMat.printStr(false)).c_str());
+    ImGui::Text(("Model:\n"      + modelMat.back().printStr(false)).c_str());
+    ImGui::Text(("View:\n"       + viewMat.printStr        (false)).c_str());
+    ImGui::Text(("Projection:\n" + projectionMat.printStr  (false)).c_str());
 }
