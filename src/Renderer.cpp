@@ -25,8 +25,8 @@ void Renderer::setProjection(const Mat4& projectionMatrix) { projectionMat = pro
 
 // ------- Model transformations ------ //
 
-void Renderer::modelPushMat  ()                                                              { modelMat.push_back(modelMat.back()); }
-void Renderer::modelPopMat   ()                                                              { if (modelMat.size() > 1) modelMat.pop_back(); }
+void Renderer::modelPushMat  ()                                                              { modelMat.push_back(modelMat.back());                                            }
+void Renderer::modelPopMat   ()                                                              { if (modelMat.size() > 1) modelMat.pop_back();                                   }
 void Renderer::modelTranslate(const float& x, const float& y, const float& z)                { modelMat.back() = modelMat.back() * getTranslationMatrix({ x, y, z });          }
 void Renderer::modelRotateX  (const float& angle)                                            { modelMat.back() = modelMat.back() * getXRotationMatrix(angle);                  }
 void Renderer::modelRotateY  (const float& angle)                                            { modelMat.back() = modelMat.back() * getYRotationMatrix(angle);                  }
@@ -297,49 +297,43 @@ void Renderer::drawTriangles(Vertex* vertices, const unsigned int& count, const 
 }
 
 
-void Renderer::drawDividedQuad(const Frustum& frustum, const float& size, const bool& negateNormals)
+void Renderer::drawDividedQuad(const Frustum& frustum, const Color& color, const float& size, const bool& negateNormals)
 {
     Vertex v[] = {
-        { { -size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 0, 0 } },
-        { { -size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 0, 1 } },
-        { {  size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 1, 0 } },
+        { { -size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, color, { 0, 0 } },
+        { { -size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, color, { 0, 1 } },
+        { {  size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, color, { 1, 0 } },
 
-        { {  size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 1, 1 } },
-        { {  size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 1, 0 } },
-        { { -size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 0, 1}  },
+        { {  size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, color, { 1, 1 } },
+        { {  size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, color, { 1, 0 } },
+        { { -size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, color, { 0, 1}  },
     };
     
     drawTriangles(v, 0, frustum);
     drawTriangles(v, 3, frustum);
 }
 
-void Renderer::drawCube(const Frustum& frustum, const float& size)
+void Renderer::drawCube(const Frustum& frustum, const Color& color, const float& size)
 {
     modelPushMat();
 
     modelTranslate(0, 0, size / 2);
 
-    // Render the 4 side faces.
-    for (int i = 0; i < 4; i++)
+    // Render all the faces.
+    for (int i = 0; i < 6; i++)
     {
-        modelRotateY(PI / 2);
-        drawDividedQuad(frustum,  size, true);
-        drawDividedQuad(frustum, -size, true);
+        if      (i < 4)  modelRotateY(PI / 2);
+        else if (i == 4) modelRotateX(PI / 2);
+        else if (i == 5) modelRotateX(PI);
+
+        drawDividedQuad(frustum, color,  size, true);
+        drawDividedQuad(frustum, color, -size, true);
     }
-
-    // Render the upper and lower faces.
-    modelRotateX(PI / 2);
-    drawDividedQuad(frustum,  size, true);
-    drawDividedQuad(frustum, -size, true);
-
-    modelRotateX(PI);
-    drawDividedQuad(frustum,  size, true);
-    drawDividedQuad(frustum, -size, true);
 
     modelPopMat();
 }
 
-void Renderer::drawSphere(const geometry3D::Frustum& frustum, const float& r, const int& lon, const int& lat)
+void Renderer::drawSphere(const geometry3D::Frustum& frustum, const float& r, const int& lon, const int& lat, const Color& color)
 {
     for (int j = 0; j < lat; j++)
     {
@@ -357,17 +351,17 @@ void Renderer::drawSphere(const geometry3D::Frustum& frustum, const float& r, co
             Vector3 c3 = getSphericalCoords(r, theta1, phi0);
 
             Vertex v[] = {
-                { c0, { 0, 0, 1 }, WHITE, { 0, 0 } },
-                { c1, { 0, 0, 1 }, WHITE, { 0, 1 } },
-                { c2, { 0, 0, 1 }, WHITE, { 1, 0 } },
+                { c0, { 0, 0, 1 }, color, { 0, 0 } },
+                { c1, { 0, 0, 1 }, color, { 0, 1 } },
+                { c2, { 0, 0, 1 }, color, { 1, 0 } },
 
-                { { c0.x, c0.y, c0.z }, { 0, 0, 1 }, WHITE, { 1, 1 } },
-                { { c2.x, c2.y, c2.z }, { 0, 0, 1 }, WHITE, { 1, 0 } },
-                { { c3.x, c3.y, c3.z }, { 0, 0, 1 }, WHITE, { 0, 1 } },
+                { { c0.x, c0.y, c0.z }, { 0, 0, 1 }, color, { 1, 1 } },
+                { { c2.x, c2.y, c2.z }, { 0, 0, 1 }, color, { 1, 0 } },
+                { { c3.x, c3.y, c3.z }, { 0, 0, 1 }, color, { 0, 1 } },
 
-                { c0.getNegated(), { 0, 0, 1 }, WHITE, { 0, 0 } },
-                { c1.getNegated(), { 0, 0, 1 }, WHITE, { 0, 1 } },
-                { c2.getNegated(), { 0, 0, 1 }, WHITE, { 1, 0 } },
+                { c0.getNegated(), { 0, 0, 1 }, color, { 0, 0 } },
+                { c1.getNegated(), { 0, 0, 1 }, color, { 0, 1 } },
+                { c2.getNegated(), { 0, 0, 1 }, color, { 1, 0 } },
             };
     
             drawTriangles(v, 0, frustum);
