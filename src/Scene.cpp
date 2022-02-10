@@ -36,15 +36,21 @@ void Scene::update(float deltaTime, Renderer& renderer, const Camera& camera)
     renderer.setProjection(camera.getProjection());
 
     // Draw the first triangle.
-    renderer.modelPushMat();
-    renderer.modelTranslate(0, 0, -4);
-    renderer.drawTriangles(vertices.data(),     3, camera.getFrustum());
-    renderer.modelPopMat();
+    //renderer.modelPushMat();
+    //renderer.modelTranslate(0, 0, -4);
+    //renderer.drawTriangles(vertices.data(), 3, camera.getFrustum());
+    //renderer.modelPopMat();
 
     // Draw the second triangle.
-    renderer.modelTranslate(0, 0, -2);
-    renderer.drawTriangles(vertices.data() + 3, 3, camera.getFrustum());
+    //renderer.modelTranslate(0, 0, -2);
+    //renderer.drawTriangles(vertices.data() + 3, 3, camera.getFrustum());
 
+    // Draw Sphere.
+    renderer.modelPushMat();
+    renderer.modelTranslate(0, 0, -3);
+    renderer.drawSphere(camera.getFrustum(), 1, 16, 16);
+    renderer.modelPopMat();
+    
     time += deltaTime;
 }
 
