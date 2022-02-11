@@ -2,9 +2,10 @@
 
 #include "Framebuffer.hpp"
 
-Framebuffer::Framebuffer(int width, int height)
+Framebuffer::Framebuffer(const int& width, const int& height, const int& depth)
     : _width(width)
     , _height(height)
+    , _depth(depth)
 {
     // Create the framebuffer (color+depth+opengl texture).
     // We need an OpenGL texture to display the result of the renderer to the screen.
@@ -30,7 +31,7 @@ void Framebuffer::clear()
 {
     // Clear color and depth buffer
     colorBuffer.assign(_width * _height, clearColor);
-    depthBuffer.assign(_width * _height, 1);
+    depthBuffer.assign(_width * _height, _depth);
 }
 
 void Framebuffer::updateTexture()

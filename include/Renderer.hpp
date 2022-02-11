@@ -34,7 +34,7 @@ private:
 public:
     Framebuffer framebuffer;
     
-    Renderer(const unsigned int& width, const unsigned int& height);
+    Renderer(const unsigned int& width, const unsigned int& height, const int& depth);
     ~Renderer();
 
     // -- Setters for the three matrices -- //

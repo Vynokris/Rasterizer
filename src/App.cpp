@@ -94,7 +94,7 @@ void App::update()
     // Create renderer framebuffer (color+depth+opengl texture)
     // We need an OpenGL texture to display the result of the renderer to the screen
     // Init renderer
-    Renderer renderer(800, 800);
+    Renderer renderer(800, 800, 1000);
     Scene scene;
     CameraInputs inputs;
     Camera camera(renderer.framebuffer.getWidth(), renderer.framebuffer.getHeight(), 90.f, 0.01f, 1000.f, 2.5f);
