@@ -570,7 +570,7 @@ namespace geometry3D
     };
 
     // Returns an array of vertices that result of the clipping of the given triangle against the given frustum.
-    std::vector<geometry3D::Triangle3> clipTriangleWithFrustum(const geometry3D::Triangle3& triangle, const Frustum& frustum);
+    std::vector<geometry3D::Triangle3> clipHomogeneousTriangle(const geometry3D::Triangle3& triangle, float pointAbsW[3]);
 
     // Segment3 structure that holds values for the starting point and the end point.
     class Segment3
@@ -663,3 +663,10 @@ namespace collisions2D
 }
 
 #include "my_math.inl"
+
+// When all programming gods have truned their backs,
+// praise the blessed meowing duck.
+/*     _
+   .__(.)< (MEOW)
+    \___)
+*/

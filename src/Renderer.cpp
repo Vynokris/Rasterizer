@@ -136,17 +136,18 @@ void Renderer::drawTriangle(Triangle3 triangle, const Frustum& frustum, bool was
     clipCoords[1] = { viewCoords[1] * projectionMat };
     clipCoords[2] = { viewCoords[2] * projectionMat };
 
+    // TODO: fix clipping.
     /*
     if (!wasClipped)
     {
         // Clip the triangle against the frustum.
-        // TODO: try clipping against clipCoords.z 0.
         Triangle3 viewTriangle(
-            { viewCoords[0].toVector3(true), triangle.a.normal, triangle.a.color, triangle.a.uv }, 
-            { viewCoords[1].toVector3(true), triangle.b.normal, triangle.b.color, triangle.b.uv }, 
-            { viewCoords[2].toVector3(true), triangle.c.normal, triangle.c.color, triangle.c.uv }
+            { clipCoords[0].toVector3(), triangle.a.normal, triangle.a.color, triangle.a.uv }, 
+            { clipCoords[1].toVector3(), triangle.b.normal, triangle.b.color, triangle.b.uv }, 
+            { clipCoords[2].toVector3(), triangle.c.normal, triangle.c.color, triangle.c.uv }
         );
-        std::vector<Triangle3> clippedTriangles = clipTriangleWithFrustum(viewTriangle, frustum);
+        float vertexAbsW[3] = { abs(clipCoords[0].w), abs(clipCoords[1].w), abs(clipCoords[2].w) };
+        std::vector<Triangle3> clippedTriangles = clipHomogeneousTriangle(viewTriangle, vertexAbsW);
         
         // Draw the clipped triangles.
         for (int i = 0; i < (int)clippedTriangles.size(); i++)
@@ -154,6 +155,12 @@ void Renderer::drawTriangle(Triangle3 triangle, const Frustum& frustum, bool was
         return;
     }
     */
+
+    //! Temporarily clip triangles by nuking them when one vertex is offscreen.
+    if (clipCoords[0].w >= 0 ||
+        clipCoords[1].w >= 0 ||
+        clipCoords[2].w >= 0)
+        return;
     
     // Clip space (4D) -> NDC (3D).
     Vector3 ndcCoords[3] = {
@@ -162,6 +169,7 @@ void Renderer::drawTriangle(Triangle3 triangle, const Frustum& frustum, bool was
         { clipCoords[2].toVector3(true) }
     };
 
+    // TODO: fix clipping.
     /*
     if (wasClipped)
     {
@@ -304,14 +312,14 @@ void Renderer::drawDividedQuad(const Frustum& frustum, const Color& color, const
     Triangle3 triangles[2] = 
     {
         {
-            { { -size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, color, { 0, 0 } },
-            { { -size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, color, { 0, 1 } },
-            { {  size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, color, { 1, 0 } },
+            { { -size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1.f : -1.f) }, color, { 0, 0 } },
+            { { -size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1.f : -1.f) }, color, { 0, 1 } },
+            { {  size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1.f : -1.f) }, color, { 1, 0 } },
         },
         {
-            { {  size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, color, { 1, 1 } },
-            { {  size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, color, { 1, 0 } },
-            { { -size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, color, { 0, 1}  },
+            { {  size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1.f : -1.f) }, color, { 1, 1 } },
+            { {  size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1.f : -1.f) }, color, { 1, 0 } },
+            { { -size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1.f : -1.f) }, color, { 0, 1}  },
         },
     };
     
