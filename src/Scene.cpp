@@ -47,13 +47,13 @@ void Scene::update(const float& _deltaTime, Renderer& renderer, const Camera& ca
 
     // Draw scene components.
     renderer.modelPushMat();
-
-    renderer.modelTranslate(-0.5, 0, 2);
+    renderer.modelTranslate(0, 0, -2);
     renderer.drawCube(camera.getFrustum(), RED);
+    renderer.modelPopMat();
 
-    renderer.modelTranslate(0.5, 0, 2);
+    renderer.modelPushMat();
+    renderer.modelTranslate(0, 0, 2);
     renderer.drawSphere(camera.getFrustum(), 1, 8, 8, BLUE);
-
     renderer.modelPopMat();
     
     deltaTime = _deltaTime;
