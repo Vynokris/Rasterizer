@@ -58,7 +58,7 @@ public:
     void setTexture(float* colors32Bits, const unsigned int& width, const unsigned int& height);
     void drawPixel(const unsigned int& x, const unsigned int& y, const float& depth, const Color& color);
     void drawLine(Vector3 p0, Vector3 p1, const Color& color);
-    void drawTriangles(Vertex* vertices, const unsigned int& count, const geometry3D::Frustum& frustum);
+    void drawTriangles(geometry3D::Triangle3* triangles, const unsigned int& count, const geometry3D::Frustum& frustum);
     void drawDividedQuad(const geometry3D::Frustum& frustum, const float& size = 1.f, const bool& negateNormals = false);
     void drawCube(const geometry3D::Frustum& frustum, const float& size = 1.f);
     void drawSphere(const geometry3D::Frustum& frustum, const float& r, const int& lon, const int& lat);
@@ -73,7 +73,7 @@ public:
     void showImGuiControls();
 
 private:
-    void drawTriangle(Vertex* vertices, const geometry3D::Frustum& frustum, bool wasClipped = false);
+    void drawTriangle(geometry3D::Triangle3 triangle, const geometry3D::Frustum& frustum, bool wasClipped = false);
 };
 
 

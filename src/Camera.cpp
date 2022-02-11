@@ -20,10 +20,11 @@ Camera::Camera(const unsigned int width, const unsigned int height,
     // Setup frustum distances.
     m_frustum.near.distance  = near;
     m_frustum.far.distance   = far;
-    m_frustum.up.distance    = (float)height / 2;
-    m_frustum.down.distance  = (float)height / 2;
-    m_frustum.left.distance  = (float)width  / 2;
-    m_frustum.right.distance = (float)width  / 2;
+    m_frustum.up.distance    = (float)height;
+    m_frustum.down.distance  = (float)height;
+    m_frustum.left.distance  = (float)width;
+    m_frustum.right.distance = (float)width;
+    printf("Frustum distances: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f\n", m_frustum.near.distance, m_frustum.far.distance, m_frustum.up.distance, m_frustum.down.distance, m_frustum.left.distance, m_frustum.right.distance);
     
     // Compute and update the camera frustum normals.
     Vector3 fwdVec   = geometry3D::getSphericalCoords(1, 2*PI - m_yaw + PI/2, 2*PI - m_pitch - PI/2);
