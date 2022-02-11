@@ -520,7 +520,7 @@ namespace geometry3D
             void rotate(const float& theta, const float& phi);
 
             // Creates a Vector3 from this vector.
-            Vector3 toVector3(bool homogenizeVec = true);
+            Vector3 toVector3(bool homogenizeVec = false) const;
     };
 
     class Plane3
