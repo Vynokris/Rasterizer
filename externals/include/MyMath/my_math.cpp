@@ -510,7 +510,10 @@ matrix::Matrix<4, 4> geometry3D::getTransformMatrix(const Vector3& position, con
 std::vector<geometry3D::Triangle3> geometry3D::clipHomogeneousTriangle(const geometry3D::Triangle3& triangle, float vertexAbsW[3])
 {
     // TODO: fix this.
-    
+    //* https://www.youtube.com/watch?v=VMD7fsCYO9o&t=432s&ab_channel=thebennybox
+    //* https://www.youtube.com/watch?v=og7hOFypKpQ&ab_channel=UCDavisAcademics
+    //* https://www.cubic.org/docs/3dclip.htm#ma4
+
     std::vector<Vertex> vertices;
     for (int i = 0; i < 3; i++)
         vertices.push_back(*((&triangle.a) + i));
