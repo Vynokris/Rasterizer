@@ -9,9 +9,9 @@ using namespace geometry3D;
 
 #include "Renderer.hpp"
 
-Renderer::Renderer(const unsigned int& width, const unsigned int& height)
+Renderer::Renderer(const unsigned int& width, const unsigned int& height, const int& depth)
     : viewport(0, 0, width, height)
-    , framebuffer(width, height)
+    , framebuffer(width, height, depth)
 {}
 
 Renderer::~Renderer()
@@ -44,14 +44,14 @@ void Renderer::drawPixel(const unsigned int& x, const unsigned int& y, const flo
 {
     int index = y * framebuffer.getWidth() + x;
     
-    if (framebuffer.depthBuffer[index] >= depth)
+    if (depth <= framebuffer.depthBuffer[index])
     {
         framebuffer.depthBuffer[index] = depth;
         switch (getViewMode())
         {
         case ViewMode::DEFAULT:
         case ViewMode::WIREFRAME: framebuffer.colorBuffer[index] = color;                                     break;
-        case ViewMode::ZBUFFER:   framebuffer.colorBuffer[index] = { abs(depth), abs(depth), abs(depth), 1 }; break;
+        case ViewMode::ZBUFFER:   framebuffer.colorBuffer[index] = { depth, depth, depth, 1 }; break;
         default: break;
         }
     }
@@ -285,10 +285,17 @@ void Renderer::drawTriangle(Triangle3 triangle, const Frustum& frustum, bool was
                            triangle.a.color.a * w0n + triangle.b.color.a * w1n + triangle.c.color.a * w2n };
 
             // Compute depth
-            float depth = screenCoords[0].z * w0n + screenCoords[1].z * w1n + screenCoords[2].z * w2n;
+            float depth = abs(viewCoords[0].z * w0n + viewCoords[1].z * w1n + viewCoords[2].z * w2n);
+
+            if (p.x >= maxX-1 && p.y >= maxY-1)
+            {
+                ImGui::Begin("Debug info");
+                ImGui::Text("Pixel depth: %f", depth);
+                ImGui::End();
+            }
 
             // If p is on or inside all edges, render pixel.
-            if ((w0 | w1 | w2) >= 0) drawPixel(p.x, p.y, 1 / clipCoords[2].z * lerp(depth, -1, 1), pCol);
+            if ((w0 | w1 | w2) >= 0) drawPixel(p.x, p.y, depth, pCol);
 
             // One step to the right.
             w0 += A12;
