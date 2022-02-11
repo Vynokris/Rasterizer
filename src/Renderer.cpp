@@ -95,11 +95,6 @@ void Renderer::drawLine(Vector3 p0, Vector3 p1, const Color& color)
     }
 }
 
-static Vector3 clipCoordsToNDC(const Vector4& clipCoords)
-{
-    return clipCoords.getHomogenized().toVector3();
-}
-
 static Vector3 ndcToScreenCoords(const Vector3& ndc, const Viewport& viewport)
 {
     return {
@@ -114,60 +109,67 @@ static int barycentricCoords(const Vector3& a, const Vector3& b, const Vector3& 
     return (b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x);
 }
 
-void Renderer::drawTriangle(Vertex* vertices, const Frustum& frustum, bool wasClipped)
+void Renderer::drawTriangle(Triangle3 triangle, const Frustum& frustum, bool wasClipped)
 {
+    Vector3 localCoords[3];
+    Vector4 worldCoords[3];
+    Vector4 viewCoords[3];
+    Vector4 clipCoords[3];
+
     // Store triangle vertices positions.
-    Vector3 localCoords[3] = {
-        { vertices[0].pos.x, vertices[0].pos.y, vertices[0].pos.z },
-        { vertices[1].pos.x, vertices[1].pos.y, vertices[1].pos.z },
-        { vertices[2].pos.x, vertices[2].pos.y, vertices[2].pos.z },
-    };
+    localCoords[0] = triangle.a.pos;
+    localCoords[1] = triangle.b.pos;
+    localCoords[2] = triangle.c.pos;
     
     // Local space (3D) -> World space (3D).
-    Vector4 worldCoords[3] = {
-        { (Vector4{ localCoords[0], 1 } * modelMat.back()) },
-        { (Vector4{ localCoords[1], 1 } * modelMat.back()) },
-        { (Vector4{ localCoords[2], 1 } * modelMat.back()) },
-    };
+    worldCoords[0] = { (Vector4{ localCoords[0], 1 } * modelMat.back()) };
+    worldCoords[1] = { (Vector4{ localCoords[1], 1 } * modelMat.back()) };
+    worldCoords[2] = { (Vector4{ localCoords[2], 1 } * modelMat.back()) };
     
     // World space (3D) -> View space (3D).
-    Vector4 viewCoords[3] = {
-        { (worldCoords[0] * viewMat) },
-        { (worldCoords[1] * viewMat) },
-        { (worldCoords[2] * viewMat) },
-    };
+    viewCoords[0] = { (worldCoords[0] * viewMat) };
+    viewCoords[1] = { (worldCoords[1] * viewMat) };
+    viewCoords[2] = { (worldCoords[2] * viewMat) };
     
     // View space (3D) -> Clip space (4D).
-    Vector4 clipCoords[3] = {
-        { viewCoords[0] * projectionMat },
-        { viewCoords[1] * projectionMat },
-        { viewCoords[2] * projectionMat },
-    };
+    clipCoords[0] = { viewCoords[0] * projectionMat };
+    clipCoords[1] = { viewCoords[1] * projectionMat };
+    clipCoords[2] = { viewCoords[2] * projectionMat };
 
-    // Clip the triangle against the frustum.
-    // TODO: try clipping against clipCoords.z against 0.
     /*
     if (!wasClipped)
     {
+        // Clip the triangle against the frustum.
+        // TODO: try clipping against clipCoords.z 0.
         Triangle3 viewTriangle(
-            { viewCoords[0].toVector3(), vertices[0].normal, vertices[0].color, vertices[0].uv }, 
-            { viewCoords[1].toVector3(), vertices[1].normal, vertices[1].color, vertices[1].uv }, 
-            { viewCoords[2].toVector3(), vertices[2].normal, vertices[2].color, vertices[2].uv }
+            { viewCoords[0].toVector3(true), triangle.a.normal, triangle.a.color, triangle.a.uv }, 
+            { viewCoords[1].toVector3(true), triangle.b.normal, triangle.b.color, triangle.b.uv }, 
+            { viewCoords[2].toVector3(true), triangle.c.normal, triangle.c.color, triangle.c.uv }
         );
         std::vector<Triangle3> clippedTriangles = clipTriangleWithFrustum(viewTriangle, frustum);
         
+        // Draw the clipped triangles.
         for (int i = 0; i < (int)clippedTriangles.size(); i++)
-            drawTriangle(&clippedTriangles[0].a, frustum, true);
+            drawTriangle(clippedTriangles[i], frustum, true);
         return;
     }
     */
     
     // Clip space (4D) -> NDC (3D).
     Vector3 ndcCoords[3] = {
-        { clipCoordsToNDC(clipCoords[0]) },
-        { clipCoordsToNDC(clipCoords[1]) },
-        { clipCoordsToNDC(clipCoords[2]) }
+        { clipCoords[0].toVector3(true) },
+        { clipCoords[1].toVector3(true) },
+        { clipCoords[2].toVector3(true) }
     };
+
+    /*
+    if (wasClipped)
+    {
+        ndcCoords[0] = triangle.a.pos;
+        ndcCoords[1] = triangle.b.pos;
+        ndcCoords[2] = triangle.c.pos;
+    }
+    */
     
     // NDC (3D) -> screen coords (2D).
     Vector3 screenCoords[3] = {
@@ -267,10 +269,10 @@ void Renderer::drawTriangle(Vertex* vertices, const Frustum& frustum, bool wasCl
             float w2n = w2 / (float)(w0 + w1 + w2);
 
             // Calculate the pixel's color. (This is not very efficient but will probably be disabled once we implement textures)
-            Color pCol = { vertices[0].color.r * w0n + vertices[1].color.r * w1n + vertices[2].color.r * w2n, 
-                           vertices[0].color.g * w0n + vertices[1].color.g * w1n + vertices[2].color.g * w2n, 
-                           vertices[0].color.b * w0n + vertices[1].color.b * w1n + vertices[2].color.b * w2n, 
-                           vertices[0].color.a * w0n + vertices[1].color.a * w1n + vertices[2].color.a * w2n };
+            Color pCol = { triangle.a.color.r * w0n + triangle.b.color.r * w1n + triangle.c.color.r * w2n, 
+                           triangle.a.color.g * w0n + triangle.b.color.g * w1n + triangle.c.color.g * w2n, 
+                           triangle.a.color.b * w0n + triangle.b.color.b * w1n + triangle.c.color.b * w2n, 
+                           triangle.a.color.a * w0n + triangle.b.color.a * w1n + triangle.c.color.a * w2n };
 
             // Compute depth
             float depth = screenCoords[0].z * w0n + screenCoords[1].z * w1n + screenCoords[2].z * w2n;
@@ -291,26 +293,29 @@ void Renderer::drawTriangle(Vertex* vertices, const Frustum& frustum, bool wasCl
     }
 }
 
-void Renderer::drawTriangles(Vertex* vertices, const unsigned int& count, const Frustum& frustum)
+void Renderer::drawTriangles(Triangle3* triangles, const unsigned int& count, const Frustum& frustum)
 {
-    for (int i = 0; i < (int)count; i += 3) drawTriangle(&vertices[i], frustum);
+    for (int i = 0; i < (int)count; i++) drawTriangle(triangles[i], frustum);
 }
 
 
 void Renderer::drawDividedQuad(const Frustum& frustum, const float& size, const bool& negateNormals)
 {
-    Vertex v[] = {
-        { { -size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 0, 0 } },
-        { { -size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 0, 1 } },
-        { {  size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 1, 0 } },
-
-        { {  size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 1, 1 } },
-        { {  size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 1, 0 } },
-        { { -size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 0, 1}  },
+    Triangle3 triangles[2] = 
+    {
+        {
+            { { -size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 0, 0 } },
+            { { -size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 0, 1 } },
+            { {  size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 1, 0 } },
+        },
+        {
+            { {  size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 1, 1 } },
+            { {  size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 1, 0 } },
+            { { -size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1 : -1) }, WHITE, { 0, 1}  },
+        },
     };
     
-    drawTriangles(v, 0, frustum);
-    drawTriangles(v, 3, frustum);
+    drawTriangles(triangles, 2, frustum);
 }
 
 void Renderer::drawCube(const Frustum& frustum, const float& size)
@@ -356,23 +361,26 @@ void Renderer::drawSphere(const geometry3D::Frustum& frustum, const float& r, co
             Vector3 c2 = getSphericalCoords(r, theta1, phi1);
             Vector3 c3 = getSphericalCoords(r, theta1, phi0);
 
-            Vertex v[] = {
-                { c0, { 0, 0, 1 }, WHITE, { 0, 0 } },
-                { c1, { 0, 0, 1 }, WHITE, { 0, 1 } },
-                { c2, { 0, 0, 1 }, WHITE, { 1, 0 } },
-
-                { { c0.x, c0.y, c0.z }, { 0, 0, 1 }, WHITE, { 1, 1 } },
-                { { c2.x, c2.y, c2.z }, { 0, 0, 1 }, WHITE, { 1, 0 } },
-                { { c3.x, c3.y, c3.z }, { 0, 0, 1 }, WHITE, { 0, 1 } },
-
-                { c0.getNegated(), { 0, 0, 1 }, WHITE, { 0, 0 } },
-                { c1.getNegated(), { 0, 0, 1 }, WHITE, { 0, 1 } },
-                { c2.getNegated(), { 0, 0, 1 }, WHITE, { 1, 0 } },
+            Triangle3 triangles[3] = 
+            {
+                {
+                    { c0, { 0, 0, 1 }, WHITE, { 0, 0 } },
+                    { c1, { 0, 0, 1 }, WHITE, { 0, 1 } },
+                    { c2, { 0, 0, 1 }, WHITE, { 1, 0 } },
+                },
+                {
+                    { { c0.x, c0.y, c0.z }, { 0, 0, 1 }, WHITE, { 1, 1 } },
+                    { { c2.x, c2.y, c2.z }, { 0, 0, 1 }, WHITE, { 1, 0 } },
+                    { { c3.x, c3.y, c3.z }, { 0, 0, 1 }, WHITE, { 0, 1 } },
+                },
+                {
+                    { c0.getNegated(), { 0, 0, 1 }, WHITE, { 0, 0 } },
+                    { c1.getNegated(), { 0, 0, 1 }, WHITE, { 0, 1 } },
+                    { c2.getNegated(), { 0, 0, 1 }, WHITE, { 1, 0 } },
+                },
             };
     
-            drawTriangles(v, 0, frustum);
-            drawTriangles(v, 3, frustum);
-            drawTriangles(v, 6, frustum);
+            drawTriangles(triangles, 3, frustum);
         }
     }
 }

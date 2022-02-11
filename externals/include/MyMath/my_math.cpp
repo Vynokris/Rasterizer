@@ -746,11 +746,12 @@ float Vector4::getAnglePhiWithVector4(Vector4 v) const
 void Vector4::rotate(const float& theta, const float& phi)  { *(this) = Vector4(getAngleTheta() + theta, getAnglePhi() + phi, getLength(), w, true); }
 
 // Creates a Vector3 from this vector.
-Vector3 Vector4::toVector3(bool homogenizeVec)
+Vector3 Vector4::toVector3(bool homogenizeVec) const
 {
     if (homogenizeVec)
-        homogenize();
-    return Vector3(x, y, z);
+        return Vector3(x/w, y/w, z/w);
+    else
+        return Vector3(x, y, z);
 }
 
 
@@ -767,9 +768,16 @@ Plane3::Plane3(const Vector3& _normal, const float& _distance) : normal(_normal.
 // Else, returns 1 if point A clips, 2 if point B clips and 3 if both clip.
 int Plane3::doesSegmentClip(const Segment3& seg) const
 {
+    // Get the origin point of the plane.
+    Vector3 origin = normal.getNegated() * distance;
+
     // Get the distance from each point to the plane.
-    float distA = (seg.a.pos & normal)/* - distance*/;
-    float distB = (seg.b.pos & normal)/* - distance*/;
+    // float distA = (seg.a.pos & normal) - distance;
+    // float distB = (seg.b.pos & normal) - distance;
+    float distA = normal & (seg.a.pos - origin);
+    float distB = normal & (seg.b.pos - origin);
+
+    printf("Point distances: %.2f, %.2f\n", distA, distB);
 
     // If both distances are positive, the segment doesn't clip.
     if (distA > 0 && distB > 0)
@@ -791,9 +799,14 @@ int Plane3::doesSegmentClip(const Segment3& seg) const
 // Clips the given 3D segment against this plane.
 Segment3 Plane3::clipSegment(Segment3 seg) const
 {
+    // Get the origin point of the plane.
+    Vector3 origin = normal.getNegated() * distance;
+
     // Get the distance from each point to the plane.
-    float distA = (seg.a.pos & normal)/* - distance*/;
-    float distB = (seg.b.pos & normal)/* - distance*/;
+    // float distA = (seg.a.pos & normal) - distance;
+    // float distB = (seg.b.pos & normal) - distance;
+    float distA = normal & (seg.a.pos - origin);
+    float distB = normal & (seg.b.pos - origin);
 
     // If both distances are positive, the segment is on the good side of the plane.
     if (distA > 0 && distB > 0)

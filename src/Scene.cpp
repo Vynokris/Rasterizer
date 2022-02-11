@@ -9,23 +9,23 @@ Scene::Scene()
 {
     // HERE: Load the scene
     // Setup some vertices to test
-    vertices.clear();
+    triangles.clear();
 
-    // FIRST TRIANGLE          |        pos        |  |      normal      |  |         color          |  |     uv     |
-    vertices.push_back(Vertex{ { -0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } });
-    vertices.push_back(Vertex{ {  0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } });
-    vertices.push_back(Vertex{ {  0.0f, 0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } });
+    // FIRST TRIANGLE      |        pos        |  |      normal      |  |         color          |  |     uv     |
+    triangles.push_back({ { { -0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },
+                          { {  0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } },
+                          { {  0.0f, 0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } } });
     
-    // SECOND TRIANGLE         |        pos        |  |      normal      |  |         color          |  |     uv     |
-    vertices.push_back(Vertex{ { -1.0f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } });
-    vertices.push_back(Vertex{ { 1.0f, -0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } });
-    vertices.push_back(Vertex{ { 1.0f,  0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } });
+    // SECOND TRIANGLE     |        pos        |  |      normal      |  |         color          |  |     uv     |
+    triangles.push_back({ { { -1.0f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },
+                          { { 1.0f, -0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } },
+                          { { 1.0f,  0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } } });
 }
 
 Scene::~Scene()
 {
     // HERE: Unload the scene
-    vertices.clear();
+    triangles.clear();
 }
 
 void Scene::update(float deltaTime, Renderer& renderer, const Camera& camera)
@@ -36,20 +36,26 @@ void Scene::update(float deltaTime, Renderer& renderer, const Camera& camera)
     renderer.setProjection(camera.getProjection());
 
     // Draw the first triangle.
-    //renderer.modelPushMat();
-    //renderer.modelTranslate(0, 0, -4);
-    //renderer.drawTriangles(vertices.data(), 3, camera.getFrustum());
-    //renderer.modelPopMat();
+    renderer.modelPushMat();
+    renderer.modelTranslate(0, 0, -4);
+    renderer.drawTriangles(&triangles[0], 1, camera.getFrustum());
+    renderer.modelPopMat();
 
     // Draw the second triangle.
     //renderer.modelTranslate(0, 0, -2);
-    //renderer.drawTriangles(vertices.data() + 3, 3, camera.getFrustum());
+    //renderer.drawTriangles(&triangles[1], 1, camera.getFrustum());
+
+    // Draw Cube.
+    // renderer.modelPushMat();
+    // renderer.modelTranslate(0, 0, -5);
+    // renderer.drawCube(camera.getFrustum(), 1);
+    // renderer.modelPopMat();
 
     // Draw Sphere.
-    renderer.modelPushMat();
-    renderer.modelTranslate(0, 0, -3);
-    renderer.drawSphere(camera.getFrustum(), 1, 16, 16);
-    renderer.modelPopMat();
+    // renderer.modelPushMat();
+    // renderer.modelTranslate(0, 0, -3);
+    // renderer.drawSphere(camera.getFrustum(), 1, 16, 16);
+    // renderer.modelPopMat();
     
     time += deltaTime;
 }

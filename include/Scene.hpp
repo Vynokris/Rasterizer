@@ -7,7 +7,7 @@ class Scene
 {
 private:
     double time = 0.0;
-    std::vector<Vertex> vertices;
+    std::vector<Triangle3> triangles;
     float scale = 1.f;
     
 public:
