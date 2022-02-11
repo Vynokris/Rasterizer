@@ -28,7 +28,7 @@ Scene::~Scene()
     triangles.clear();
 }
 
-void Scene::update(float deltaTime, Renderer& renderer, const Camera& camera)
+void Scene::update(const float& _deltaTime, Renderer& renderer, const Camera& camera)
 {
     // Set the matrices.
     renderer.setModel(getTransformMatrix({ 0, 0, 0 }, { 0, 0, 0 }, { scale, scale, scale }));
@@ -45,22 +45,21 @@ void Scene::update(float deltaTime, Renderer& renderer, const Camera& camera)
     //renderer.modelTranslate(0, 0, -2);
     //renderer.drawTriangles(&triangles[1], 1, camera.getFrustum());
 
-    // Draw Cube.
-    // renderer.modelPushMat();
-    // renderer.modelTranslate(0, 0, -5);
-    // renderer.drawCube(camera.getFrustum(), 1);
-    // renderer.modelPopMat();
+    // Draw scene components.
+    renderer.modelPushMat();
 
-    // Draw Sphere.
-    // renderer.modelPushMat();
-    // renderer.modelTranslate(0, 0, -3);
-    // renderer.drawSphere(camera.getFrustum(), 1, 16, 16);
-    // renderer.modelPopMat();
+    renderer.modelTranslate(-0.5, 0, 2);
+    renderer.drawCube(camera.getFrustum(), RED);
+
+    renderer.modelTranslate(0.5, 0, 2);
+    renderer.drawSphere(camera.getFrustum(), 1, 8, 8, BLUE);
+
+    renderer.modelPopMat();
     
-    time += deltaTime;
+    deltaTime = _deltaTime;
+    time      += deltaTime;
 }
 
 void Scene::showImGuiControls()
 {
-    // TODO: Object manager.
 }

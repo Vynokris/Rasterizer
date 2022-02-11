@@ -454,34 +454,34 @@ matrix::Matrix<4, 4> geometry3D::getTranslationMatrix(const Vector3& translation
 
 matrix::Matrix<4, 4> geometry3D::getScaleMatrix(const Vector3& scale)
 {
-    return matrix::Matrix<4,4>(scale.x, 0, 0, 0,
-                               0, scale.y, 0, 0,
-                               0, 0, scale.z, 0,
-                               0, 0, 0, 1);
+    return matrix::Matrix<4,4>(scale.x, 0,       0,       0,
+                               0,       scale.y, 0,       0,
+                               0,       0,       scale.z, 0,
+                               0,       0,       0,       1);
 }
 
 matrix::Matrix<4, 4> geometry3D::getXRotationMatrix(float angle)
 {
-    return matrix::Matrix<4,4>(1, 0, 0, 0,
+    return matrix::Matrix<4,4>(1, 0,            0,           0,
                                0, cosf(angle), -sinf(angle), 0,
                                0, sinf(angle),  cosf(angle), 0,
-                               0, 0, 0, 1);
+                               0, 0,            0,           1);
 }
 
 matrix::Matrix<4, 4> geometry3D::getYRotationMatrix(float angle)
 {
-    return matrix::Matrix<4,4>(cosf(angle), 0, sinf(angle), 0,
-                               0, 1, 0, 0,
+    return matrix::Matrix<4,4>(cosf(angle),  0, sinf(angle), 0,
+                               0,            1, 0,           0,
                                -sinf(angle), 0, cosf(angle), 0,
-                               0, 0, 0, 1);
+                               0,            0, 0,           1);
 }
 
 matrix::Matrix<4, 4> geometry3D::getZRotationMatrix(float angle)
 {
     return matrix::Matrix<4,4>(cosf(angle), -sinf(angle), 0, 0,
-                               sinf(angle), cosf(angle), 0, 0,
-                               0, 0, 1, 0 ,
-                               0, 0, 0, 1 );
+                               sinf(angle), cosf(angle),  0, 0,
+                               0,           0,            1, 0,
+                               0,           0,            0, 1 );
 }
 
 matrix::Matrix<4, 4> geometry3D::getTransformMatrix(const Vector3& position, const Vector3& rotation, const Vector3& scale, const bool& reverse)

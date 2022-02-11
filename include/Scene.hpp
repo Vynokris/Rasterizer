@@ -6,13 +6,13 @@
 class Scene
 {
 private:
-    double time = 0.0;
+    double time = 0.f, deltaTime = 0.f;
     std::vector<Triangle3> triangles;
     float scale = 1.f;
     
 public:
     Scene();
     ~Scene();
-    void update(float p_deltaTime, Renderer& p_renderer, const Camera& camera);
+    void update(const float& _deltaTime, Renderer& renderer, const Camera& camera);
     void showImGuiControls();
 };

@@ -127,5 +127,5 @@ void Camera::showImGuiControls()
 {
     ImGui::Text("Position: %.2f, %.2f, %.2f", m_pos.x, m_pos.y, m_pos.z);
     ImGui::Text("Pitch: %.2f° | Yaw = %.2f°", radToDeg(m_pitch), radToDeg(m_yaw));
-    ImGui::SliderFloat("Acceleration: ", &m_acceleration, 1.f, 8.f);
+    ImGui::SliderFloat("Speed", &m_acceleration, 1.f, 20.f);
 }
