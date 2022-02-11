@@ -27,11 +27,11 @@ void Renderer::setProjection(const Mat4& projectionMatrix) { projectionMat = pro
 
 void Renderer::modelPushMat  ()                                                              { modelMat.push_back(modelMat.back());                                            }
 void Renderer::modelPopMat   ()                                                              { if (modelMat.size() > 1) modelMat.pop_back();                                   }
-void Renderer::modelTranslate(const float& x, const float& y, const float& z)                { modelMat.back() = modelMat.back() * getTranslationMatrix({ x, y, z });          }
-void Renderer::modelRotateX  (const float& angle)                                            { modelMat.back() = modelMat.back() * getXRotationMatrix(angle);                  }
-void Renderer::modelRotateY  (const float& angle)                                            { modelMat.back() = modelMat.back() * getYRotationMatrix(angle);                  }
-void Renderer::modelRotateZ  (const float& angle)                                            { modelMat.back() = modelMat.back() * getZRotationMatrix(angle);                  }
-void Renderer::modelScale    (const float& scaleX, const float& scaleY, const float& scaleZ) { modelMat.back() = modelMat.back() * getScaleMatrix({ scaleX, scaleY, scaleZ }); }
+void Renderer::modelTranslate(const float& x, const float& y, const float& z)                { modelMat.back() = getTranslationMatrix({ x, y, z })          * modelMat.back(); }
+void Renderer::modelRotateX  (const float& angle)                                            { modelMat.back() = getXRotationMatrix(angle)                  * modelMat.back(); }
+void Renderer::modelRotateY  (const float& angle)                                            { modelMat.back() = getYRotationMatrix(angle)                  * modelMat.back(); }
+void Renderer::modelRotateZ  (const float& angle)                                            { modelMat.back() = getZRotationMatrix(angle)                  * modelMat.back(); }
+void Renderer::modelScale    (const float& scaleX, const float& scaleY, const float& scaleZ) { modelMat.back() = getScaleMatrix({ scaleX, scaleY, scaleZ }) * modelMat.back(); }
 
 // --------- Drawing functions -------- //
 
@@ -42,14 +42,16 @@ void Renderer::setTexture(float* colors32Bits, const unsigned int& width, const 
 
 void Renderer::drawPixel(const unsigned int& x, const unsigned int& y, const float& depth, const Color& color)
 {
-    if (framebuffer.depthBuffer[y * framebuffer.getWidth() + x] >= depth)
+    int index = y * framebuffer.getWidth() + x;
+    
+    if (framebuffer.depthBuffer[index] >= depth)
     {
-        framebuffer.depthBuffer[y * framebuffer.getWidth() + x] = depth;
+        framebuffer.depthBuffer[index] = depth;
         switch (getViewMode())
         {
         case ViewMode::DEFAULT:
-        case ViewMode::WIREFRAME: framebuffer.colorBuffer[y * framebuffer.getWidth() + x] = color;                      break;
-        case ViewMode::ZBUFFER:   framebuffer.colorBuffer[y * framebuffer.getWidth() + x] = { depth, depth, depth, 1 }; break;
+        case ViewMode::WIREFRAME: framebuffer.colorBuffer[index] = color;                      break;
+        case ViewMode::ZBUFFER:   framebuffer.colorBuffer[index] = { abs(depth), abs(depth), abs(depth), 1 }; break;
         default: break;
         }
     }
@@ -328,10 +330,6 @@ void Renderer::drawDividedQuad(const Frustum& frustum, const Color& color, const
 
 void Renderer::drawCube(const Frustum& frustum, const Color& color, const float& size)
 {
-    modelPushMat();
-
-    modelTranslate(0, 0, size / 2);
-
     // Render all the faces.
     for (int i = 0; i < 6; i++)
     {
@@ -339,11 +337,12 @@ void Renderer::drawCube(const Frustum& frustum, const Color& color, const float&
         else if (i == 4) modelRotateX(PI / 2);
         else if (i == 5) modelRotateX(PI);
 
+        modelPushMat();
+        modelTranslate(0, 0, size / 2);
         drawDividedQuad(frustum, color,  size, true);
-        drawDividedQuad(frustum, color, -size, true);
+        modelPopMat();
     }
 
-    modelPopMat();
 }
 
 void Renderer::drawSphere(const geometry3D::Frustum& frustum, const float& r, const int& lon, const int& lat, const Color& color)
