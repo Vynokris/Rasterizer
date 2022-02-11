@@ -507,38 +507,97 @@ matrix::Matrix<4, 4> geometry3D::getTransformMatrix(const Vector3& position, con
 }
 
 // Returns an array of vertices that result of the clipping of the given triangle against the given frustum.
-std::vector<geometry3D::Triangle3> geometry3D::clipTriangleWithFrustum(const geometry3D::Triangle3& triangle, const Frustum& frustum)
+std::vector<geometry3D::Triangle3> geometry3D::clipHomogeneousTriangle(const geometry3D::Triangle3& triangle, float vertexAbsW[3])
 {
-    std::vector<geometry3D::Triangle3> output;
-    output.push_back(triangle);
+    // TODO: fix this.
     
-    const Plane3* frustumSide = &frustum.up;
-    for (int i = 0; i < 6; i++, frustumSide++) 
-    {
-        for (int j = 0; j < (int)output.size(); j++)
-        {
-            if (frustumSide->doesTriangleClip(triangle))
-            {
-                printf("Side %d (normal: %.2f, %.2f, %.2f) clips with triangle %d.\n", i, frustumSide->normal.x, frustumSide->normal.y, frustumSide->normal.z, j);
-                std::vector<Vertex> clippedVertices  = frustumSide->clipTriangle(triangle);
+    std::vector<Vertex> vertices;
+    for (int i = 0; i < 3; i++)
+        vertices.push_back(*((&triangle.a) + i));
+    
+    std::vector<Vertex> clippedVertices;
 
-                switch (clippedVertices.size())
-                {
-                case 3:
-                    output[j] = { clippedVertices[0], clippedVertices[1], clippedVertices[2] };
-                    break;
-                case 4:
-                    output[j] = { clippedVertices[0], clippedVertices[1], clippedVertices[3] };
-                    output.insert(output.begin() + j + 1, { clippedVertices[1], clippedVertices[2], clippedVertices[3] });
-                    break;
-                default:
-                    break;
-                }
+    // Loop over the vertices.
+    for (int i = 0; i < 3; i++)
+    {
+        // If the current vertex is between -w and w.
+        if (-vertexAbsW[i] <= vertices[i].pos.x && vertices[i].pos.x <= vertexAbsW[i] &&
+            -vertexAbsW[i] <= vertices[i].pos.y && vertices[i].pos.y <= vertexAbsW[i] &&
+            -vertexAbsW[i] <= vertices[i].pos.z && vertices[i].pos.z <= vertexAbsW[i])
+        {
+            // Add the vertex to the list.
+            clippedVertices.push_back(vertices[i]);
+        }
+
+        // If it is not between -w and w.
+        else
+        {
+            // Get the current, previous and next position and w.
+            float   curW    = vertexAbsW[i];
+            Vector3 curPos  = vertices[i].pos;
+            float   prevW   = vertexAbsW[(i == 0 ? 2 : i-1)];
+            Vector3 prevPos = vertices[(i == 0 ? 2 : i-1)].pos;
+            float   nextW   = vertexAbsW[(i+1)%3];
+            Vector3 nextPos = vertices[(i+1)%3].pos;
+
+            {
+                // Compute the lerping factors.
+                float xFactor = (prevW - prevPos.x) / ((prevW - prevPos.x) - (curW - curPos.x));
+                // float yFactor = (prevW - prevPos.y) / ((prevW - prevPos.y) - (curW - curPos.y));
+                // float zFactor = (prevW - prevPos.z) / ((prevW - prevPos.z) - (curW - curPos.z));
+
+                printf("Lerp factors: %.2f\n", xFactor);
+
+                // Lerp the vertice's coords.
+                float xLerp = arithmetic::lerp(xFactor, prevPos.x, curPos.x);
+                // float yLerp = arithmetic::lerp(yFactor, prevPos.y, curPos.y);
+                // float zLerp = arithmetic::lerp(zFactor, prevPos.z, curPos.z);
+
+                // Create a new vertex.
+                Vertex lerpVertex = {
+                    { xLerp, curPos.y, curPos.z },
+                    vertices[i].normal,
+                    vertices[i].color,
+                    vertices[i].uv
+                };
+
+                // Add the vertex to the list.
+                clippedVertices.push_back(lerpVertex);
+            }
+
+            {
+                // Compute the lerping factors.
+                float xFactor = (nextW - nextPos.x) / ((nextW - nextPos.x) - (curW - curPos.x));
+                // float yFactor = (nextW - nextPos.y) / ((nextW - nextPos.y) - (curW - curPos.y));
+                // float zFactor = (nextW - nextPos.z) / ((nextW - nextPos.z) - (curW - curPos.z));
+
+                // Lerp the vertice's coords.
+                float xLerp = arithmetic::lerp(xFactor, nextPos.x, curPos.x);
+                // float yLerp = arithmetic::lerp(yFactor, nextPos.y, curPos.y);
+                // float zLerp = arithmetic::lerp(zFactor, nextPos.z, curPos.z);
+
+                // Create a new vertex.
+                Vertex lerpVertex = {
+                    { xLerp, curPos.y, curPos.z },
+                    vertices[i].normal,
+                    vertices[i].color,
+                    vertices[i].uv
+                };
+
+                // Add the vertex to the list.
+                clippedVertices.push_back(lerpVertex);
             }
         }
     }
 
-    return output;
+    // Create the output triangles.
+    std::vector<Triangle3> clippedTriangles;
+    for (int i = 1; i < (int)clippedVertices.size() - 1; i++)
+    {
+        clippedTriangles.push_back({ clippedVertices[0], clippedVertices[i], clippedVertices[i+1] });
+    }
+
+    return clippedTriangles;
 }
 
 

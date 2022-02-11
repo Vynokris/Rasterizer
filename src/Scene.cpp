@@ -36,10 +36,10 @@ void Scene::update(const float& _deltaTime, Renderer& renderer, const Camera& ca
     renderer.setProjection(camera.getProjection());
 
     // Draw the first triangle.
-    renderer.modelPushMat();
-    renderer.modelTranslate(0, 0, -4);
-    renderer.drawTriangles(&triangles[0], 1, camera.getFrustum());
-    renderer.modelPopMat();
+    // renderer.modelPushMat();
+    // renderer.modelTranslate(0, 0, -4);
+    // renderer.drawTriangles(&triangles[0], 1, camera.getFrustum());
+    // renderer.modelPopMat();
 
     // Draw the second triangle.
     //renderer.modelTranslate(0, 0, -2);
