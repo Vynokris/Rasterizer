@@ -71,7 +71,8 @@
         "mutex": "cpp",
         "xiosbase": "cpp",
         "*.ipp": "cpp",
-        "xstring": "cpp"
+        "xstring": "cpp",
+        "xlocnum": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
