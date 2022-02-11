@@ -50,7 +50,7 @@ void Renderer::drawPixel(const unsigned int& x, const unsigned int& y, const flo
         switch (getViewMode())
         {
         case ViewMode::DEFAULT:
-        case ViewMode::WIREFRAME: framebuffer.colorBuffer[index] = color;                      break;
+        case ViewMode::WIREFRAME: framebuffer.colorBuffer[index] = color;                                     break;
         case ViewMode::ZBUFFER:   framebuffer.colorBuffer[index] = { abs(depth), abs(depth), abs(depth), 1 }; break;
         default: break;
         }
@@ -342,7 +342,6 @@ void Renderer::drawCube(const Frustum& frustum, const Color& color, const float&
         drawDividedQuad(frustum, color,  size, true);
         modelPopMat();
     }
-
 }
 
 void Renderer::drawSphere(const geometry3D::Frustum& frustum, const float& r, const int& lon, const int& lat, const Color& color)
@@ -362,7 +361,7 @@ void Renderer::drawSphere(const geometry3D::Frustum& frustum, const float& r, co
             Vector3 c2 = getSphericalCoords(r, theta1, phi1);
             Vector3 c3 = getSphericalCoords(r, theta1, phi0);
 
-            Triangle3 triangles[3] = 
+            Triangle3 triangles[2] = 
             {
                 {
                     { c0, { 0, 0, 1 }, color, { 0, 0 } },
@@ -370,18 +369,13 @@ void Renderer::drawSphere(const geometry3D::Frustum& frustum, const float& r, co
                     { c2, { 0, 0, 1 }, color, { 1, 0 } },
                 },
                 {
-                    { { c0.x, c0.y, c0.z }, { 0, 0, 1 }, color, { 1, 1 } },
-                    { { c2.x, c2.y, c2.z }, { 0, 0, 1 }, color, { 1, 0 } },
-                    { { c3.x, c3.y, c3.z }, { 0, 0, 1 }, color, { 0, 1 } },
-                },
-                {
-                    { c0.getNegated(), { 0, 0, 1 }, color, { 0, 0 } },
-                    { c1.getNegated(), { 0, 0, 1 }, color, { 0, 1 } },
-                    { c2.getNegated(), { 0, 0, 1 }, color, { 1, 0 } },
-                },
+                    { c0, { 0, 0, 1 }, color, { 1, 1 } },
+                    { c2, { 0, 0, 1 }, color, { 1, 0 } },
+                    { c3, { 0, 0, 1 }, color, { 0, 1 } },
+                }
             };
     
-            drawTriangles(triangles, 3, frustum);
+            drawTriangles(triangles, 2, frustum);
         }
     }
 }
@@ -409,7 +403,7 @@ void Renderer::showImGuiControls()
     // Displaying components.
     ImGui::ColorEdit4("BG Color", &framebuffer.clearColor.r);
 
-    ImGui::ListBox("View Mode", &curItem, items, IM_ARRAYSIZE(items));
+    ImGui::Combo("View Mode", &curItem, items, IM_ARRAYSIZE(items));
     setViewMode((ViewMode)curItem);
 
     ImGui::Text("\nMatrices:");
