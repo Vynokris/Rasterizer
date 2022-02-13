@@ -50,8 +50,8 @@ void Renderer::drawPixel(const unsigned int& x, const unsigned int& y, const flo
         switch (getViewMode())
         {
         case ViewMode::DEFAULT:
-        case ViewMode::WIREFRAME: framebuffer.colorBuffer[index] = color;                                     break;
-        case ViewMode::ZBUFFER:   framebuffer.colorBuffer[index] = { depth, depth, depth, 1 }; break;
+        case ViewMode::WIREFRAME: framebuffer.colorBuffer[index] = color;                      break;
+        case ViewMode::ZBUFFER:   framebuffer.colorBuffer[index] = { depth/5, depth/5, depth/5, 1 }; break;
         default: break;
         }
     }
