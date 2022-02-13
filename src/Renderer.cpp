@@ -108,7 +108,7 @@ static Vector3 ndcToScreenCoords(const Vector3& ndc, const Viewport& viewport)
 
 static int barycentricCoords(const Vector3& a, const Vector3& b, const Vector3& c)
 {
-    return (b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x);
+    return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
 }
 
 void Renderer::drawTriangle(Triangle3 triangle, const Frustum& frustum, bool wasClipped)
@@ -285,6 +285,8 @@ void Renderer::drawTriangle(Triangle3 triangle, const Frustum& frustum, bool was
                            triangle.a.color.a * w0n + triangle.b.color.a * w1n + triangle.c.color.a * w2n };
 
             // Compute depth
+            // TODO: Wrong way to compute depth
+            //? See: https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/visibility-problem-depth-buffer-depth-interpolation
             float depth = abs(viewCoords[0].z * w0n + viewCoords[1].z * w1n + viewCoords[2].z * w2n);
 
             if (p.x >= maxX-1 && p.y >= maxY-1)
