@@ -80,7 +80,7 @@ void Renderer::drawLine(const Vertex& _p0, const Vertex& _p1)
         if (0 <= point.x && point.x < viewport.width && 
             0 <= point.y && point.y < viewport.height)
         {
-            float lerpFactor = (getLerp(point.x, _p1.pos.x, _p1.pos.x) + getLerp(point.y, _p1.pos.y, _p1.pos.y)) / 2;
+            float lerpFactor = (getLerp(point.x, _p0.pos.x, _p1.pos.x) + getLerp(point.y, _p0.pos.y, _p1.pos.y)) / 2;
             drawPixel(point.x, point.y, 0, colorLerp(lerpFactor, _p0.color, _p1.color));
         }
 
