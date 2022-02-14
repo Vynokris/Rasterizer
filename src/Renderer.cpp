@@ -166,13 +166,6 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     */
 
     //! Temporarily clip triangles by nuking them when one vertex is offscreen.
-    /*
-    if (clipCoords[0].w >= 0 ||
-        clipCoords[1].w >= 0 ||
-        clipCoords[2].w >= 0)
-        return;
-    */
-   
     for (int i = 0; i < 3; i++)
     {
         if (!(-abs(clipCoords[i].w) <= clipCoords[i].x && clipCoords[i].x <= abs(clipCoords[i].w) &&
@@ -242,37 +235,34 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     // Check if the triangle is inside out.
     if (angle0 < PI/2)
     {
+        // Switch vertices and depth.
         Vector3 tempVec = screenCoords[0];
         screenCoords[0] = screenCoords[1];
         screenCoords[1] = tempVec;
-
         float tempDepth = viewCoords[0].z;
         viewCoords[0].z = viewCoords[1].z;
         viewCoords[1].z = tempDepth;
     }
     else if (angle1 < PI/2)
     {
+        // Switch vertices and depth.
         Vector3 tempVec = screenCoords[1];
         screenCoords[1] = screenCoords[2];
         screenCoords[2] = tempVec;
-
         float tempDepth = viewCoords[1].z;
         viewCoords[1].z = viewCoords[2].z;
         viewCoords[2].z = tempDepth;
     }
     else if (angle2 < PI/2)
     {
+        // Switch vertices and depth.
         Vector3 tempVec = screenCoords[2];
         screenCoords[2] = screenCoords[0];
         screenCoords[0] = tempVec;
-
         float tempDepth = viewCoords[2].z;
         viewCoords[2].z = viewCoords[0].z;
         viewCoords[0].z = tempDepth;
     }
-
-    //* https://fgiesen.wordpress.com/2013/02/08/triangle-rasterization-in-practice/
-    //* https://fgiesen.wordpress.com/2013/02/10/optimizing-the-basic-rasterizer/
 
     // Compute triangle bounding box.
     int minX = min(min(screenCoords[0].x, screenCoords[1].x), screenCoords[2].x);
@@ -318,9 +308,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                            _triangle.a.color.b * w0n + _triangle.b.color.b * w1n + _triangle.c.color.b * w2n, 
                            _triangle.a.color.a * w0n + _triangle.b.color.a * w1n + _triangle.c.color.a * w2n };
 
-            // Compute depth
-            // TODO: Wrong way to compute depth
-            //? See: https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/visibility-problem-depth-buffer-depth-interpolation
+            // Compute depth.
             float depth = abs(viewCoords[0].z * w0n + viewCoords[1].z * w1n + viewCoords[2].z * w2n);
 
             if (p.x >= maxX-1 && p.y >= maxY-1)
