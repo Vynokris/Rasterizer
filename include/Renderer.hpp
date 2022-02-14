@@ -3,6 +3,7 @@
 #include <Renderer.hpp>
 #include <Framebuffer.hpp>
 #include <Camera.hpp>
+#include <BmpLoader.hpp>
 
 struct Viewport
 {
@@ -13,7 +14,7 @@ struct Viewport
     unsigned int width, height;
 };
 
-enum class ViewMode : int
+enum class RenderMode : int
 {
     DEFAULT,
     WIREFRAME,
@@ -23,14 +24,14 @@ enum class ViewMode : int
 class Renderer
 {
 private:
+    TextureData texture;
     Viewport viewport;
-    Color lineColor = { 1.f, 1.f, 1.f, 1.f };
 
     std::vector<Mat4> modelMat;
     Mat4 viewMat;
     Mat4 projectionMat;
 
-    ViewMode currentView = ViewMode::DEFAULT;
+    RenderMode renderMode = RenderMode::DEFAULT;
 
 public:
     Framebuffer framebuffer;
@@ -56,7 +57,7 @@ public:
 
     // --------- Drawing functions -------- //
 
-    void setTexture(float* _colors32Bits, const int& _width, const int& _height);
+    void setTexture(const TextureData& _textureData);
     void drawPixel(const unsigned int& _x, const unsigned int& _y, const float& _depth, const Color& _color);
     void drawLine(const geometry3D::Vertex& _p0, const geometry3D::Vertex& _p1);
     void drawTriangles(geometry3D::Triangle3* _triangles, const unsigned int& _count);
@@ -66,8 +67,8 @@ public:
 
     // --- View mode getters / setters --- //
 
-    ViewMode getViewMode() const;
-    void     setViewMode(const ViewMode& _mode);
+    RenderMode getRenderMode() const;
+    void     setRenderMode(const RenderMode& _mode);
 
     // ---------- Miscellaneous ---------- //
     

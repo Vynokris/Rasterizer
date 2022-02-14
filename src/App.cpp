@@ -95,7 +95,11 @@ void App::update()
     Renderer renderer(800, 800);
     Scene scene;
     CameraInputs inputs;
-    Camera camera(renderer.framebuffer.getWidth(), renderer.framebuffer.getHeight(), 90.f, 0.01f, 1000.f, 2.5f);
+    Camera camera(renderer.framebuffer.getWidth(), renderer.framebuffer.getHeight(), 90.f, 0.001f, 1000.f, 2.5f);
+
+    // Load a texture.
+    TextureData floorTexture = loadBmpData("art/floor.bmp");
+    renderer.setTexture(floorTexture);
 
     bool mouseCaptured = false;
     double mouseX = 0.0, mouseY = 0.0;
@@ -136,10 +140,8 @@ void App::update()
         renderer.framebuffer.clear(camera.getFar());
 
         // Setup matrices
-        Mat4 projection = camera.getProjection();
-        Mat4 view       = camera.getViewMatrix();
-        renderer.setProjection(projection);
-        renderer.setView(view);
+        renderer.setProjection(camera.getPerspective());
+        renderer.setView(camera.getViewMat());
 
         // Render scene
         scene.update(ImGui::GetIO().DeltaTime, renderer, camera);
