@@ -4,9 +4,9 @@
 
 Light::Light() { params = { Vector3(), 0.f, 0.f, 0.f }; }
 
-Light::Light(const LightParams& p) : params(p) {}
+Light::Light(const LightParams& _p) : params(_p) {}
 
-void Light::setParams(const LightParams& p)
+void Light::setParams(const LightParams& _p)
 {
-    params = p;
+    params = _p;
 }

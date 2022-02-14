@@ -13,6 +13,6 @@ private:
 public:
     Scene();
     ~Scene();
-    void update(const float& _deltaTime, Renderer& renderer, const Camera& camera);
+    void update(const float& _deltaTime, Renderer& _renderer, const Camera& _camera);
     void showImGuiControls();
 };

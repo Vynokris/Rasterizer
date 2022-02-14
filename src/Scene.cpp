@@ -28,33 +28,35 @@ Scene::~Scene()
     triangles.clear();
 }
 
-void Scene::update(const float& _deltaTime, Renderer& renderer, const Camera& camera)
+void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _camera)
 {
     // Set the matrices.
-    renderer.setModel(getTransformMatrix({ 0, 0, 0 }, { 0, 0, 0 }, { scale, scale, scale }));
-    renderer.setView(camera.getViewMatrix());
-    renderer.setProjection(camera.getProjection());
+    _renderer.setModel(getTransformMatrix({ 0, 0, 0 }, { 0, 0, 0 }, { scale, scale, scale }));
+    _renderer.setView(_camera.getViewMatrix());
+    _renderer.setProjection(_camera.getProjection());
 
     // Draw the first triangle.
-    // renderer.modelPushMat();
-    // renderer.modelTranslate(0, 0, -4);
-    // renderer.drawTriangles(&triangles[0], 1, camera.getFrustum());
-    // renderer.modelPopMat();
+    // _renderer.modelPushMat();
+    // _renderer.modelTranslate(0, 0, -4);
+    // _renderer.drawTriangles(&triangles[0], 1);
+    // _renderer.modelPopMat();
 
     // Draw the second triangle.
-    //renderer.modelTranslate(0, 0, -2);
-    //renderer.drawTriangles(&triangles[1], 1, camera.getFrustum());
+    // _renderer.modelPushMat();
+    // _renderer.modelTranslate(0, 0, -2);
+    // _renderer.drawTriangles(&triangles[1], 1);
+    // _renderer.modelPushMat();
 
     // Draw scene components.
-    renderer.modelPushMat();
-    renderer.modelTranslate(-0.5, 0, -2);
-    renderer.drawCube(camera.getFrustum(), RED);
-    renderer.modelPopMat();
+    _renderer.modelPushMat();
+    _renderer.modelTranslate(-0.5, 0, -2);
+    _renderer.drawCube(RED);
+    _renderer.modelPopMat();
 
-    renderer.modelPushMat();
-    renderer.modelTranslate(0.5, 0, -2);
-    renderer.drawSphere(camera.getFrustum(), 1, 8, 8, BLUE);
-    renderer.modelPopMat();
+    _renderer.modelPushMat();
+    _renderer.modelTranslate(0.5, 0, -2);
+    _renderer.drawSphere(1, 8, 8, BLUE);
+    _renderer.modelPopMat();
     
     deltaTime = _deltaTime;
     time      += deltaTime;

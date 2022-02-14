@@ -37,7 +37,7 @@ public:
     GLFWwindow* window;
 
     // Constructor/Destructor.
-    App(const AppInit& p_init);
+    App(const AppInit& _init);
     ~App();
 
     // The app's main loop.
@@ -48,6 +48,6 @@ public:
 
 private:
     // Frame creation and addition.
-    void newFrame(bool mouseCaptured = true);
+    void newFrame(bool _mouseCaptured = true);
     void endFrame();
 };

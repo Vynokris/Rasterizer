@@ -9,9 +9,9 @@ using namespace geometry3D;
 
 #include "Renderer.hpp"
 
-Renderer::Renderer(const unsigned int& width, const unsigned int& height, const int& depth)
-    : viewport(0, 0, width, height)
-    , framebuffer(width, height, depth)
+Renderer::Renderer(const unsigned int& _width, const unsigned int& _height)
+        : viewport(0, 0, _width, _height)
+        , framebuffer(_width, _height)
 {}
 
 Renderer::~Renderer()
@@ -19,53 +19,56 @@ Renderer::~Renderer()
 
 // -- Setters for the three matrices -- //
 
-void Renderer::setModel(const Mat4& modelMatrix)           { modelMat.clear(); modelMat.push_back(modelMatrix); }
-void Renderer::setView(const Mat4& viewMatrix)             { viewMat = viewMatrix;                              }
-void Renderer::setProjection(const Mat4& projectionMatrix) { projectionMat = projectionMatrix;                  }
+void Renderer::setModel(const Mat4& _modelMatrix)           { modelMat.clear(); modelMat.push_back(_modelMatrix); }
+void Renderer::setView(const Mat4& _viewMatrix)             { viewMat = _viewMatrix;                              }
+void Renderer::setProjection(const Mat4& _projectionMatrix) { projectionMat = _projectionMatrix;                  }
 
 // ------- Model transformations ------ //
 
-void Renderer::modelPushMat  ()                                                              { modelMat.push_back(modelMat.back());                                            }
-void Renderer::modelPopMat   ()                                                              { if (modelMat.size() > 1) modelMat.pop_back();                                   }
-void Renderer::modelTranslate(const float& x, const float& y, const float& z)                { modelMat.back() = getTranslationMatrix({ x, y, z })          * modelMat.back(); }
-void Renderer::modelRotateX  (const float& angle)                                            { modelMat.back() = getXRotationMatrix(angle)                  * modelMat.back(); }
-void Renderer::modelRotateY  (const float& angle)                                            { modelMat.back() = getYRotationMatrix(angle)                  * modelMat.back(); }
-void Renderer::modelRotateZ  (const float& angle)                                            { modelMat.back() = getZRotationMatrix(angle)                  * modelMat.back(); }
-void Renderer::modelScale    (const float& scaleX, const float& scaleY, const float& scaleZ) { modelMat.back() = getScaleMatrix({ scaleX, scaleY, scaleZ }) * modelMat.back(); }
+void Renderer::modelPushMat  ()                                                                 { modelMat.push_back(modelMat.back());                                               }
+void Renderer::modelPopMat   ()                                                                 { if (modelMat.size() > 1) modelMat.pop_back();                                      }
+void Renderer::modelTranslate(const float& _x, const float& _y, const float& _z)                { modelMat.back() = getTranslationMatrix({ _x, _y, _z })          * modelMat.back(); }
+void Renderer::modelRotateX  (const float& _angle)                                              { modelMat.back() = getXRotationMatrix(_angle)                    * modelMat.back(); }
+void Renderer::modelRotateY  (const float& _angle)                                              { modelMat.back() = getYRotationMatrix(_angle)                    * modelMat.back(); }
+void Renderer::modelRotateZ  (const float& _angle)                                              { modelMat.back() = getZRotationMatrix(_angle)                    * modelMat.back(); }
+void Renderer::modelScale    (const float& _scaleX, const float& _scaleY, const float& _scaleZ) { modelMat.back() = getScaleMatrix({ _scaleX, _scaleY, _scaleZ }) * modelMat.back(); }
 
 // --------- Drawing functions -------- //
 
-void Renderer::setTexture(float* colors32Bits, const unsigned int& width, const unsigned int& height)
+void Renderer::setTexture(float* _colors32Bits, const int& _width, const int& _height)
 {
     // TODO
 }
 
-void Renderer::drawPixel(const unsigned int& x, const unsigned int& y, const float& depth, const Color& color)
+void Renderer::drawPixel(const unsigned int& _x, const unsigned int& _y, const float& _depth, const Color& _color)
 {
-    int index = y * framebuffer.getWidth() + x;
+    int index = _y * framebuffer.getWidth() + _x;
     
-    if (depth <= framebuffer.depthBuffer[index])
+    if (_depth <= framebuffer.depthBuffer[index])
     {
-        framebuffer.depthBuffer[index] = depth;
+        framebuffer.depthBuffer[index] = _depth;
         switch (getViewMode())
         {
         case ViewMode::DEFAULT:
-        case ViewMode::WIREFRAME: framebuffer.colorBuffer[index] = color;                      break;
-        case ViewMode::ZBUFFER:   framebuffer.colorBuffer[index] = { depth/5, depth/5, depth/5, 1 }; break;
+        case ViewMode::WIREFRAME: framebuffer.colorBuffer[index] = _color;                        break;
+        case ViewMode::ZBUFFER:   framebuffer.colorBuffer[index] = { _depth, _depth, _depth, 1 }; break;
         default: break;
         }
     }
 }
 
-void Renderer::drawLine(Vector3 p0, Vector3 p1, const Color& color)
+void Renderer::drawLine(const Vertex& _p0, const Vertex& _p1)
 {
     // Get the distance between the two points
-    int dx =  abs(p1.x - p0.x);
-    int dy = -abs(p1.y - p0.y);
+    int dx =  abs(_p1.pos.x - _p0.pos.x);
+    int dy = -abs(_p1.pos.y - _p0.pos.y);
+
+    // Create a point to be moved along the line.
+    Vector2 point = { _p0.pos.x, _p0.pos.y };
 
     // Calculate the slope increments along the x and y axes.
-    int sx = p0.x < p1.x ? 1 : -1;
-    int sy = p0.y < p1.y ? 1 : -1;
+    int sx = _p0.pos.x < _p1.pos.x ? 1 : -1;
+    int sy = _p0.pos.y < _p1.pos.y ? 1 : -1;
 
     // Compute the error margins.
     int err = dx + dy;
@@ -73,45 +76,49 @@ void Renderer::drawLine(Vector3 p0, Vector3 p1, const Color& color)
 
     while (true)
     {
-        //? This probably will be avoidable one we get the clip space right.
-        if (0 <= p0.x && p0.x < viewport.width && 0 <= p0.y && p0.y < viewport.height)
-            drawPixel(p0.x, p0.y, 0, color);
+        //? This if statement will probably be avoidable one we get the cliping right.
+        if (0 <= point.x && point.x < viewport.width && 
+            0 <= point.y && point.y < viewport.height)
+        {
+            float lerpFactor = (getLerp(point.x, _p1.pos.x, _p1.pos.x) + getLerp(point.y, _p1.pos.y, _p1.pos.y)) / 2;
+            drawPixel(point.x, point.y, 0, colorLerp(lerpFactor, _p0.color, _p1.color));
+        }
 
         e2 = 2 * err;
         if (e2 >= dy)
         {
             // Stop if the first point reached the second one.
-            if (roundInt(p0.x) == roundInt(p1.x)) break;
+            if (roundInt(point.x) == roundInt(_p1.pos.x)) break;
 
             // Increment the error and the first point's x coordinate.
-            err += dy; p0.x += sx;
+            err += dy; point.x += sx;
         }
         if (e2 <= dx)
         {
             // Stop if the first point reached the second one.
-            if (roundInt(p0.y) == roundInt(p1.y)) break;
+            if (roundInt(point.y) == roundInt(_p1.pos.y)) break;
 
             // Increment the error and the first point's y coordinate.
-            err += dx; p0.y += sy;
+            err += dx; point.y += sy;
         }
     }
 }
 
-static Vector3 ndcToScreenCoords(const Vector3& ndc, const Viewport& viewport)
+static Vector3 ndcToScreenCoords(const Vector3& _ndc, const Viewport& _viewport)
 {
     return {
-        ndc.x * viewport.width  + viewport.width  / 2, 
-        ndc.y * viewport.height + viewport.height / 2, 
-        ndc.z
+        _ndc.x * _viewport.width  + _viewport.width  / 2, 
+        _ndc.y * _viewport.height + _viewport.height / 2, 
+        _ndc.z
     };
 }
 
-static int barycentricCoords(const Vector3& a, const Vector3& b, const Vector3& c)
+static int barycentricCoords(const Vector3& _a, const Vector3& _b, const Vector3& _c)
 {
-    return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+    return (_b.x - _a.x) * (_c.y - _a.y) - (_b.y - _a.y) * (_c.x - _a.x);
 }
 
-void Renderer::drawTriangle(Triangle3 triangle, const Frustum& frustum, bool wasClipped)
+void Renderer::drawTriangle(Triangle3 _triangle)
 {
     Vector3 localCoords[3];
     Vector4 worldCoords[3];
@@ -119,9 +126,9 @@ void Renderer::drawTriangle(Triangle3 triangle, const Frustum& frustum, bool was
     Vector4 clipCoords[3];
 
     // Store triangle vertices positions.
-    localCoords[0] = triangle.a.pos;
-    localCoords[1] = triangle.b.pos;
-    localCoords[2] = triangle.c.pos;
+    localCoords[0] = _triangle.a.pos;
+    localCoords[1] = _triangle.b.pos;
+    localCoords[2] = _triangle.c.pos;
     
     // Local space (3D) -> World space (3D).
     worldCoords[0] = { (Vector4{ localCoords[0], 1 } * modelMat.back()) };
@@ -144,9 +151,9 @@ void Renderer::drawTriangle(Triangle3 triangle, const Frustum& frustum, bool was
     {
         // Clip the triangle against the frustum.
         Triangle3 viewTriangle(
-            { clipCoords[0].toVector3(), triangle.a.normal, triangle.a.color, triangle.a.uv }, 
-            { clipCoords[1].toVector3(), triangle.b.normal, triangle.b.color, triangle.b.uv }, 
-            { clipCoords[2].toVector3(), triangle.c.normal, triangle.c.color, triangle.c.uv }
+            { clipCoords[0].toVector3(), _triangle.a.normal, _triangle.a.color, _triangle.a.uv }, 
+            { clipCoords[1].toVector3(), _triangle.b.normal, _triangle.b.color, _triangle.b.uv }, 
+            { clipCoords[2].toVector3(), _triangle.c.normal, _triangle.c.color, _triangle.c.uv }
         );
         float vertexAbsW[3] = { abs(clipCoords[0].w), abs(clipCoords[1].w), abs(clipCoords[2].w) };
         std::vector<Triangle3> clippedTriangles = clipHomogeneousTriangle(viewTriangle, vertexAbsW);
@@ -175,9 +182,9 @@ void Renderer::drawTriangle(Triangle3 triangle, const Frustum& frustum, bool was
     /*
     if (wasClipped)
     {
-        ndcCoords[0] = triangle.a.pos;
-        ndcCoords[1] = triangle.b.pos;
-        ndcCoords[2] = triangle.c.pos;
+        ndcCoords[0] = _triangle.a.pos;
+        ndcCoords[1] = _triangle.b.pos;
+        ndcCoords[2] = _triangle.c.pos;
     }
     */
     
@@ -203,9 +210,12 @@ void Renderer::drawTriangle(Triangle3 triangle, const Frustum& frustum, bool was
     // Draw triangle wireframe
     if (getViewMode() == ViewMode::WIREFRAME)
     {
-        drawLine(screenCoords[0], screenCoords[1], lineColor);
-        drawLine(screenCoords[1], screenCoords[2], lineColor);
-        drawLine(screenCoords[2], screenCoords[0], lineColor);
+        drawLine({ screenCoords[0], _triangle.a.normal, _triangle.a.color, _triangle.a.uv }, 
+                 { screenCoords[1], _triangle.b.normal, _triangle.b.color, _triangle.b.uv });
+        drawLine({ screenCoords[1], _triangle.b.normal, _triangle.b.color, _triangle.b.uv }, 
+                 { screenCoords[2], _triangle.c.normal, _triangle.c.color, _triangle.c.uv });
+        drawLine({ screenCoords[2], _triangle.c.normal, _triangle.c.color, _triangle.c.uv }, 
+                 { screenCoords[0], _triangle.a.normal, _triangle.a.color, _triangle.a.uv });
         return;
     }
 
@@ -279,10 +289,10 @@ void Renderer::drawTriangle(Triangle3 triangle, const Frustum& frustum, bool was
             float w2n = w2 / (float)(w0 + w1 + w2);
 
             // Calculate the pixel's color. (This is not very efficient but will probably be disabled once we implement textures)
-            Color pCol = { triangle.a.color.r * w0n + triangle.b.color.r * w1n + triangle.c.color.r * w2n, 
-                           triangle.a.color.g * w0n + triangle.b.color.g * w1n + triangle.c.color.g * w2n, 
-                           triangle.a.color.b * w0n + triangle.b.color.b * w1n + triangle.c.color.b * w2n, 
-                           triangle.a.color.a * w0n + triangle.b.color.a * w1n + triangle.c.color.a * w2n };
+            Color pCol = { _triangle.a.color.r * w0n + _triangle.b.color.r * w1n + _triangle.c.color.r * w2n, 
+                           _triangle.a.color.g * w0n + _triangle.b.color.g * w1n + _triangle.c.color.g * w2n, 
+                           _triangle.a.color.b * w0n + _triangle.b.color.b * w1n + _triangle.c.color.b * w2n, 
+                           _triangle.a.color.a * w0n + _triangle.b.color.a * w1n + _triangle.c.color.a * w2n };
 
             // Compute depth
             // TODO: Wrong way to compute depth
@@ -312,32 +322,32 @@ void Renderer::drawTriangle(Triangle3 triangle, const Frustum& frustum, bool was
     }
 }
 
-void Renderer::drawTriangles(Triangle3* triangles, const unsigned int& count, const Frustum& frustum)
+void Renderer::drawTriangles(Triangle3* _triangles, const unsigned int& _count)
 {
-    for (int i = 0; i < (int)count; i++) drawTriangle(triangles[i], frustum);
+    for (int i = 0; i < (int)_count; i++) drawTriangle(_triangles[i]);
 }
 
 
-void Renderer::drawDividedQuad(const Frustum& frustum, const Color& color, const float& size, const bool& negateNormals)
+void Renderer::drawDividedQuad(const Color& _color, const float& _size, const bool& _negateNormals)
 {
     Triangle3 triangles[2] = 
     {
         {
-            { { -size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1.f : -1.f) }, color, { 0, 0 } },
-            { { -size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1.f : -1.f) }, color, { 0, 1 } },
-            { {  size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1.f : -1.f) }, color, { 1, 0 } },
+            { { -_size / 2,  _size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 0, 0 } },
+            { { -_size / 2, -_size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 0, 1 } },
+            { {  _size / 2,  _size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 1, 0 } },
         },
         {
-            { {  size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1.f : -1.f) }, color, { 1, 1 } },
-            { {  size / 2,  size / 2, 0 }, { 0, 0, (negateNormals ? 1.f : -1.f) }, color, { 1, 0 } },
-            { { -size / 2, -size / 2, 0 }, { 0, 0, (negateNormals ? 1.f : -1.f) }, color, { 0, 1}  },
+            { {  _size / 2, -_size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 1, 1 } },
+            { {  _size / 2,  _size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 1, 0 } },
+            { { -_size / 2, -_size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 0, 1 } },
         },
     };
     
-    drawTriangles(triangles, 2, frustum);
+    drawTriangles(triangles, 2);
 }
 
-void Renderer::drawCube(const Frustum& frustum, const Color& color, const float& size)
+void Renderer::drawCube(const Color& _color, const float& _size)
 {
     // Render all the faces.
     for (int i = 0; i < 6; i++)
@@ -347,44 +357,44 @@ void Renderer::drawCube(const Frustum& frustum, const Color& color, const float&
         else if (i == 5) modelRotateX(PI);
 
         modelPushMat();
-        modelTranslate(0, 0, size / 2);
-        drawDividedQuad(frustum, color,  size, true);
+        modelTranslate(0, 0, _size / 2);
+        drawDividedQuad(_color, _size, true);
         modelPopMat();
     }
 }
 
-void Renderer::drawSphere(const geometry3D::Frustum& frustum, const float& r, const int& lon, const int& lat, const Color& color)
+void Renderer::drawSphere(const float& _r, const int& _lon, const int& _lat, const Color& _color)
 {
-    for (int j = 0; j < lat; j++)
+    for (int j = 0; j < _lat; j++)
     {
-        float theta0 = ( (j + 0) / (float)lat) * PI;
-        float theta1 = ( (j + 1) / (float)lat) * PI;
+        float theta0 = ( (j + 0) / (float)_lat) * PI;
+        float theta1 = ( (j + 1) / (float)_lat) * PI;
 
-        for (int i = 0; i < lon; i++)
+        for (int i = 0; i < _lon; i++)
         {
-            float phi0 = ( (i + 0) / (float)lon) * 2.f * PI;
-            float phi1 = ( (i + 1) / (float)lon) * 2.f * PI;
+            float phi0 = ( (i + 0) / (float)_lon) * 2.f * PI;
+            float phi1 = ( (i + 1) / (float)_lon) * 2.f * PI;
 
-            Vector3 c0 = getSphericalCoords(r, theta0, phi0);
-            Vector3 c1 = getSphericalCoords(r, theta0, phi1);
-            Vector3 c2 = getSphericalCoords(r, theta1, phi1);
-            Vector3 c3 = getSphericalCoords(r, theta1, phi0);
+            Vector3 c0 = getSphericalCoords(_r, theta0, phi0);
+            Vector3 c1 = getSphericalCoords(_r, theta0, phi1);
+            Vector3 c2 = getSphericalCoords(_r, theta1, phi1);
+            Vector3 c3 = getSphericalCoords(_r, theta1, phi0);
 
             Triangle3 triangles[2] = 
             {
                 {
-                    { c0, { 0, 0, 1 }, color, { 0, 0 } },
-                    { c1, { 0, 0, 1 }, color, { 0, 1 } },
-                    { c2, { 0, 0, 1 }, color, { 1, 0 } },
+                    { c0, { 0, 0, 1 }, _color, { 0, 0 } },
+                    { c1, { 0, 0, 1 }, _color, { 0, 1 } },
+                    { c2, { 0, 0, 1 }, _color, { 1, 0 } },
                 },
                 {
-                    { c0, { 0, 0, 1 }, color, { 1, 1 } },
-                    { c2, { 0, 0, 1 }, color, { 1, 0 } },
-                    { c3, { 0, 0, 1 }, color, { 0, 1 } },
+                    { c0, { 0, 0, 1 }, _color, { 1, 1 } },
+                    { c2, { 0, 0, 1 }, _color, { 1, 0 } },
+                    { c3, { 0, 0, 1 }, _color, { 0, 1 } },
                 }
             };
     
-            drawTriangles(triangles, 2, frustum);
+            drawTriangles(triangles, 2);
         }
     }
 }
@@ -396,9 +406,9 @@ ViewMode Renderer::getViewMode() const
     return currentView;
 }
 
-void Renderer::setViewMode(const ViewMode& mode)
+void Renderer::setViewMode(const ViewMode& _mode)
 {
-    currentView = mode;
+    currentView = _mode;
 }
 
 // ---------- Miscellaneous ---------- //

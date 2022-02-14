@@ -8,10 +8,10 @@ class Framebuffer
 {
 private:
     // Framebuffer size.
-    int _width = 0, _height = 0, _depth = 0;
+    int width = 0, height = 0;
 
     // OpenGL texture (in VRAM)
-    GLuint _colorTexture = 0;
+    GLuint colorTexture = 0;
 
 public:
     // In-RAM buffers.
@@ -22,17 +22,17 @@ public:
     Color clearColor = { 0.f, 0.f, 0.f, 1.f };
 
     // Constructor/Destructor.
-    Framebuffer(const int& width, const int& height, const int& depth);
+    Framebuffer(const int& _width, const int& _height);
     ~Framebuffer();
 
     // Fill the framebuffer with the clear color.
-    void clear();
+    void clear(const int& zFar);
 
     // Update the opengl texture with the color buffer.
     void updateTexture();
 
     // Getters.
-    int    getWidth()        const { return _width; }
-    int    getHeight()       const { return _height; }
-    GLuint getColorTexture() const { return _colorTexture; }
+    int    getWidth()        const { return width; }
+    int    getHeight()       const { return height; }
+    GLuint getColorTexture() const { return colorTexture; }
 };

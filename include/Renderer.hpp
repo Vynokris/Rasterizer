@@ -34,46 +34,46 @@ private:
 public:
     Framebuffer framebuffer;
     
-    Renderer(const unsigned int& width, const unsigned int& height, const int& depth);
+    Renderer(const unsigned int& _width, const unsigned int& _height);
     ~Renderer();
 
     // -- Setters for the three matrices -- //
 
-    void setModel(const Mat4& modelMatrix);
-    void setView(const Mat4& viewMatrix);
-    void setProjection(const Mat4& projectionMatrix);
+    void setModel(const Mat4& _modelMatrix);
+    void setView(const Mat4& _viewMatrix);
+    void setProjection(const Mat4& _projectionMatrix);
 
     // ------- Model transformations ------ //
 
     void modelPushMat  ();
     void modelPopMat   ();
-    void modelTranslate(const float& x, const float& y, const float& z);
-    void modelRotateX  (const float& angle);
-    void modelRotateY  (const float& angle);
-    void modelRotateZ  (const float& angle);
-    void modelScale    (const float& scaleX, const float& scaleY, const float& scaleZ);
+    void modelTranslate(const float& _x, const float& _y, const float& _z);
+    void modelRotateX  (const float& _angle);
+    void modelRotateY  (const float& _angle);
+    void modelRotateZ  (const float& _angle);
+    void modelScale    (const float& _scaleX, const float& _scaleY, const float& _scaleZ);
 
     // --------- Drawing functions -------- //
 
-    void setTexture(float* colors32Bits, const unsigned int& width, const unsigned int& height);
-    void drawPixel(const unsigned int& x, const unsigned int& y, const float& depth, const Color& color);
-    void drawLine(Vector3 p0, Vector3 p1, const Color& color);
-    void drawTriangles(geometry3D::Triangle3* triangles, const unsigned int& count, const geometry3D::Frustum& frustum);
-    void drawDividedQuad(const geometry3D::Frustum& frustum, const Color& color, const float& size = 1.f, const bool& negateNormals = false);
-    void drawCube(const geometry3D::Frustum& frustum, const Color& color, const float& size = 1.f);
-    void drawSphere(const geometry3D::Frustum& frustum, const float& r, const int& lon, const int& lat, const Color& color);
+    void setTexture(float* _colors32Bits, const int& _width, const int& _height);
+    void drawPixel(const unsigned int& _x, const unsigned int& _y, const float& _depth, const Color& _color);
+    void drawLine(const geometry3D::Vertex& _p0, const geometry3D::Vertex& _p1);
+    void drawTriangles(geometry3D::Triangle3* _triangles, const unsigned int& _count);
+    void drawDividedQuad(const Color& _color, const float& _size = 1.f, const bool& _negateNormals = false);
+    void drawCube(const Color& _color, const float& _size = 1.f);
+    void drawSphere(const float& _r, const int& _lon, const int& _lat, const Color& _color);
 
     // --- View mode getters / setters --- //
 
     ViewMode getViewMode() const;
-    void     setViewMode(const ViewMode& mode);
+    void     setViewMode(const ViewMode& _mode);
 
     // ---------- Miscellaneous ---------- //
     
     void showImGuiControls();
 
 private:
-    void drawTriangle(geometry3D::Triangle3 triangle, const geometry3D::Frustum& frustum, bool wasClipped = false);
+    void drawTriangle(geometry3D::Triangle3 _triangle);
 };
 
 
