@@ -37,9 +37,9 @@ void Renderer::modelScale    (const float& _scaleX, const float& _scaleY, const 
 
 // --------- Drawing functions -------- //
 
-void Renderer::setTexture(float* _colors32Bits, const int& _width, const int& _height)
+void Renderer::setTexture(const TextureData& _textureData)
 {
-    // TODO
+    texture = _textureData;
 }
 
 void Renderer::drawPixel(const unsigned int& _x, const unsigned int& _y, const float& _depth, const Color& _color)
@@ -49,11 +49,11 @@ void Renderer::drawPixel(const unsigned int& _x, const unsigned int& _y, const f
     if (_depth <= framebuffer.depthBuffer[index])
     {
         framebuffer.depthBuffer[index] = _depth;
-        switch (getViewMode())
+        switch (getRenderMode())
         {
-        case ViewMode::DEFAULT:
-        case ViewMode::WIREFRAME: framebuffer.colorBuffer[index] = _color;                        break;
-        case ViewMode::ZBUFFER:   framebuffer.colorBuffer[index] = { _depth, _depth, _depth, 1 }; break;
+        case RenderMode::DEFAULT:
+        case RenderMode::WIREFRAME: framebuffer.colorBuffer[index] = _color;                        break;
+        case RenderMode::ZBUFFER:   framebuffer.colorBuffer[index] = { _depth, _depth, _depth, 1 }; break;
         default: break;
         }
     }
@@ -82,8 +82,8 @@ void Renderer::drawLine(const Vertex& _p0, const Vertex& _p1)
         if (0 <= point.x && point.x < viewport.width && 
             0 <= point.y && point.y < viewport.height)
         {
-            float lerpFactor = (getLerp(point.x, _p1.pos.x, _p1.pos.x) + getLerp(point.y, _p1.pos.y, _p1.pos.y)) / 2;
-            drawPixel(point.x, point.y, 0, colorLerp(lerpFactor, _p0.color, _p1.color));
+            float lerpFactor = (getLerp(point.x, _p0.pos.x, _p1.pos.x) + getLerp(point.y, _p0.pos.y, _p1.pos.y)) / 2;
+            drawPixel(point.x, point.y, lerp(lerpFactor, _p0.pos.z, _p1.pos.z), colorLerp(lerpFactor, _p0.color, _p1.color));
         }
 
         e2 = 2 * err;
@@ -118,6 +118,58 @@ static Vector3 ndcToScreenCoords(const Vector3& _ndc, const Viewport& _viewport)
 static int barycentricCoords(const Vector3& _a, const Vector3& _b, const Vector3& _c)
 {
     return (_b.x - _a.x) * (_c.y - _a.y) - (_b.y - _a.y) * (_c.x - _a.x);
+}
+
+static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords, Vertex* _vertices)
+{
+    // Get the triangle's sides and normals.
+    Vector2 p0p1(Vector2{ _screenCoords[0].x, _screenCoords[0].y }, Vector2{ _screenCoords[1].x, _screenCoords[1].y });
+    Vector2 p1p2(Vector2{ _screenCoords[1].x, _screenCoords[1].y }, Vector2{ _screenCoords[2].x, _screenCoords[2].y });
+    Vector2 p2p0(Vector2{ _screenCoords[2].x, _screenCoords[2].y }, Vector2{ _screenCoords[0].x, _screenCoords[0].y });
+    float angle0 = p0p1.getAngleWithVector2(p1p2.getNormal());
+    float angle1 = p1p2.getAngleWithVector2(p2p0.getNormal());
+    float angle2 = p2p0.getAngleWithVector2(p0p1.getNormal());
+
+    // Check if the triangle is inside out.
+    if (angle0 < PI/2)
+    {
+        // Switch position, depth and vertices.
+        Vector3 tempVec  = _screenCoords[0];
+        _screenCoords[0] = _screenCoords[1];
+        _screenCoords[1] = tempVec;
+        float tempDepth  = _viewCoords[0].z;
+        _viewCoords[0].z = _viewCoords[1].z;
+        _viewCoords[1].z = tempDepth;
+        Vertex tempVertex = _vertices[0];
+        _vertices[0] = _vertices[1];
+        _vertices[1] = tempVertex;
+    }
+    else if (angle1 < PI/2)
+    {
+        // Switch position, depth and vertices.
+        Vector3 tempVec  = _screenCoords[1];
+        _screenCoords[1] = _screenCoords[2];
+        _screenCoords[2] = tempVec;
+        float tempDepth  = _viewCoords[1].z;
+        _viewCoords[1].z = _viewCoords[2].z;
+        _viewCoords[2].z = tempDepth;
+        Vertex tempVertex = _vertices[1];
+        _vertices[1] = _vertices[2];
+        _vertices[2] = tempVertex;
+    }
+    else if (angle2 < PI/2)
+    {
+        // Switch position, depth and vertices.
+        Vector3 tempVec  = _screenCoords[2];
+        _screenCoords[2] = _screenCoords[0];
+        _screenCoords[0] = tempVec;
+        float tempDepth  = _viewCoords[2].z;
+        _viewCoords[2].z = _viewCoords[0].z;
+        _viewCoords[0].z = tempDepth;
+        Vertex tempVertex = _vertices[2];
+        _vertices[2] = _vertices[0];
+        _vertices[0] = tempVertex;
+    }
 }
 
 void Renderer::drawTriangle(Triangle3 _triangle)
@@ -162,16 +214,21 @@ void Renderer::drawTriangle(Triangle3 _triangle)
         
         // Draw the clipped triangles.
         for (int i = 0; i < (int)clippedTriangles.size(); i++)
-            drawTriangle(clippedTriangles[i], frustum, true);
+            drawTriangle(clippedTriangles[i]);
         return;
     }
     */
 
     //! Temporarily clip triangles by nuking them when one vertex is offscreen.
-    if (clipCoords[0].w >= 0 ||
-        clipCoords[1].w >= 0 ||
-        clipCoords[2].w >= 0)
-        return;
+    for (int i = 0; i < 3; i++)
+    {
+        if (!(-abs(clipCoords[i].w) <= clipCoords[i].x && clipCoords[i].x <= abs(clipCoords[i].w) &&
+              -abs(clipCoords[i].w) <= clipCoords[i].y && clipCoords[i].y <= abs(clipCoords[i].w) &&
+              -abs(clipCoords[i].w) <= clipCoords[i].z && clipCoords[i].z <= abs(clipCoords[i].w)))
+        {
+            return;
+        }
+    }
     
     // Clip space (4D) -> NDC (3D).
     Vector3 ndcCoords[3] = {
@@ -210,7 +267,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     ImGui::End();
 
     // Draw triangle wireframe
-    if (getViewMode() == ViewMode::WIREFRAME)
+    if (getRenderMode() == RenderMode::WIREFRAME)
     {
         drawLine({ screenCoords[0], _triangle.a.normal, _triangle.a.color, _triangle.a.uv }, 
                  { screenCoords[1], _triangle.b.normal, _triangle.b.color, _triangle.b.uv });
@@ -221,36 +278,8 @@ void Renderer::drawTriangle(Triangle3 _triangle)
         return;
     }
 
-    // Get the triangle's sides and normals.
-    Vector2 p0p1(Vector2{ screenCoords[0].x, screenCoords[0].y }, Vector2{ screenCoords[1].x, screenCoords[1].y });
-    Vector2 p1p2(Vector2{ screenCoords[1].x, screenCoords[1].y }, Vector2{ screenCoords[2].x, screenCoords[2].y });
-    Vector2 p2p0(Vector2{ screenCoords[2].x, screenCoords[2].y }, Vector2{ screenCoords[0].x, screenCoords[0].y });
-    float angle0 = p0p1.getAngleWithVector2(p1p2.getNormal());
-    float angle1 = p1p2.getAngleWithVector2(p2p0.getNormal());
-    float angle2 = p2p0.getAngleWithVector2(p0p1.getNormal());
-
-    // Check if the triangle is inside out.
-    if (angle0 < PI/2)
-    {
-        Vector3 tempVec = screenCoords[0];
-        screenCoords[0] = screenCoords[1];
-        screenCoords[1] = tempVec;
-    }
-    else if (angle1 < PI/2)
-    {
-        Vector3 tempVec = screenCoords[1];
-        screenCoords[1] = screenCoords[2];
-        screenCoords[2] = tempVec;
-    }
-    else if (angle2 < PI/2)
-    {
-        Vector3 tempVec = screenCoords[2];
-        screenCoords[2] = screenCoords[0];
-        screenCoords[0] = tempVec;
-    }
-
-    //* https://fgiesen.wordpress.com/2013/02/08/triangle-rasterization-in-practice/
-    //* https://fgiesen.wordpress.com/2013/02/10/optimizing-the-basic-rasterizer/
+    // Make sure the triangle vertices are in the right order to be drawn.
+    swapTriangleVertices(screenCoords, viewCoords, &_triangle.a);
 
     // Compute triangle bounding box.
     int minX = min(min(screenCoords[0].x, screenCoords[1].x), screenCoords[2].x);
@@ -290,21 +319,32 @@ void Renderer::drawTriangle(Triangle3 _triangle)
             float w1n = w1 / (float)(w0 + w1 + w2);
             float w2n = w2 / (float)(w0 + w1 + w2);
 
-            // Calculate the pixel's color. (This is not very efficient but will probably be disabled once we implement textures)
-            Color pCol = { _triangle.a.color.r * w0n + _triangle.b.color.r * w1n + _triangle.c.color.r * w2n, 
-                           _triangle.a.color.g * w0n + _triangle.b.color.g * w1n + _triangle.c.color.g * w2n, 
-                           _triangle.a.color.b * w0n + _triangle.b.color.b * w1n + _triangle.c.color.b * w2n, 
-                           _triangle.a.color.a * w0n + _triangle.b.color.a * w1n + _triangle.c.color.a * w2n };
+            Color pCol;
+            switch (texture.width)
+            {
+            case 0:
+                // Calculate the pixel's color.
+                pCol = { _triangle.a.color.r * w0n + _triangle.b.color.r * w1n + _triangle.c.color.r * w2n, 
+                         _triangle.a.color.g * w0n + _triangle.b.color.g * w1n + _triangle.c.color.g * w2n, 
+                         _triangle.a.color.b * w0n + _triangle.b.color.b * w1n + _triangle.c.color.b * w2n, 
+                         _triangle.a.color.a * w0n + _triangle.b.color.a * w1n + _triangle.c.color.a * w2n };
+                break;
+            default:
+                // Compute uv coordinates and get pixel color from texture.
+                Vector2 texCoords = { _triangle.a.uv.x * w0n + _triangle.b.uv.x * w1n + _triangle.c.uv.x * w2n,
+                                      _triangle.a.uv.y * w0n + _triangle.b.uv.y * w1n + _triangle.c.uv.y * w2n };
+                pCol = texture.getPixelColor(roundInt(lerp(texCoords.x, 0, texture.width)), roundInt(lerp(texCoords.y, 0, texture.height)));
+                break;
+            }
 
-            // Compute depth
-            // TODO: Wrong way to compute depth
-            //? See: https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/visibility-problem-depth-buffer-depth-interpolation
+            // Compute depth.
             float depth = abs(viewCoords[0].z * w0n + viewCoords[1].z * w1n + viewCoords[2].z * w2n);
 
-            if (p.x >= maxX-1 && p.y >= maxY-1)
+            if (p.x > maxX-1 && p.y > maxY-1)
             {
                 ImGui::Begin("Debug info");
                 ImGui::Text("Pixel depth: %f", depth);
+                ImGui::Text("Pixel uv:    %f, %f", _triangle.a.uv.x * w0n + _triangle.b.uv.x * w1n + _triangle.c.uv.x * w2n, _triangle.a.uv.y * w0n + _triangle.b.uv.y * w1n + _triangle.c.uv.y * w2n);
                 ImGui::End();
             }
 
@@ -403,14 +443,14 @@ void Renderer::drawSphere(const float& _r, const int& _lon, const int& _lat, con
 
 // --- View mode getters / setters --- //
 
-ViewMode Renderer::getViewMode() const
+RenderMode Renderer::getRenderMode() const
 {
-    return currentView;
+    return renderMode;
 }
 
-void Renderer::setViewMode(const ViewMode& _mode)
+void Renderer::setRenderMode(const RenderMode& _mode)
 {
-    currentView = _mode;
+    renderMode = _mode;
 }
 
 // ---------- Miscellaneous ---------- //
@@ -423,10 +463,8 @@ void Renderer::showImGuiControls()
     
     // Displaying components.
     ImGui::ColorEdit4("BG Color", &framebuffer.clearColor.r);
-
-    ImGui::Combo("View Mode", &curItem, items, IM_ARRAYSIZE(items));
-    setViewMode((ViewMode)curItem);
-
+    ImGui::Combo("Render Mode", &curItem, items, IM_ARRAYSIZE(items));
+    setRenderMode((RenderMode)curItem);
     ImGui::Text("\nMatrices:");
     ImGui::Text("Model:\n%s",      modelMat.back().printStr(false).c_str());
     ImGui::Text("View:\n%s",       viewMat.printStr        (false).c_str());
