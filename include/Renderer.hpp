@@ -12,7 +12,7 @@ struct Viewport
     unsigned int width, height;
 };
 
-enum class ViewMode : int
+enum class RenderMode : int
 {
     DEFAULT,
     WIREFRAME,
@@ -29,7 +29,7 @@ private:
     Mat4 viewMat;
     Mat4 projectionMat;
 
-    ViewMode currentView = ViewMode::DEFAULT;
+    RenderMode renderMode = RenderMode::DEFAULT;
 
 public:
     Framebuffer framebuffer;
@@ -65,8 +65,8 @@ public:
 
     // --- View mode getters / setters --- //
 
-    ViewMode getViewMode() const;
-    void     setViewMode(const ViewMode& _mode);
+    RenderMode getRenderMode() const;
+    void     setRenderMode(const RenderMode& _mode);
 
     // ---------- Miscellaneous ---------- //
     
