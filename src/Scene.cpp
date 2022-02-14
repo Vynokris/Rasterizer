@@ -1,7 +1,8 @@
 #include <imgui.h>
 #include <my_math.hpp>
 
-#include "Scene.hpp"
+#include <Light.hpp>
+#include <Scene.hpp>
 
 using namespace geometry3D;
 
@@ -10,6 +11,7 @@ Scene::Scene()
     // HERE: Load the scene
     // Setup some vertices to test
     triangles.clear();
+    lights.clear();
 
     // FIRST TRIANGLE      |        pos        |  |      normal      |  |         color          |  |     uv     |
     triangles.push_back({ { { -0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },
@@ -20,12 +22,16 @@ Scene::Scene()
     triangles.push_back({ { { -1.0f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },
                           { { 1.0f, -0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } },
                           { { 1.0f,  0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } } });
+
+    // LIGHT 1
+    lights.push_back((LightParams){ { 2, 2, 2 }, Vector3(), WHITEV3, WHITEV3, WHITEV3 });
 }
 
 Scene::~Scene()
 {
     // HERE: Unload the scene
     triangles.clear();
+    lights.clear();
 }
 
 void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _camera)
