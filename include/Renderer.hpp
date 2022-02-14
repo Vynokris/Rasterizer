@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Renderer.hpp>
 #include <Framebuffer.hpp>
 #include <Camera.hpp>
 
