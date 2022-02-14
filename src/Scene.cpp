@@ -62,10 +62,10 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     _renderer.drawCube(RED);
     _renderer.modelPopMat();
 
-    // _renderer.modelPushMat();
-    // _renderer.modelTranslate(0.5, 0, 2);
-    // _renderer.drawSphere(1, 8, 8, BLUE);
-    // _renderer.modelPopMat();
+    _renderer.modelPushMat();
+    _renderer.modelTranslate(0.5, 0, 2);
+    _renderer.drawSphere(1, 8, 8, BLUE);
+    _renderer.modelPopMat();
     
     deltaTime = _deltaTime;
     time      += deltaTime;
