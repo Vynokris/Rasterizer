@@ -47,11 +47,11 @@ void Renderer::drawPixel(const unsigned int& _x, const unsigned int& _y, const f
     if (_depth <= framebuffer.depthBuffer[index])
     {
         framebuffer.depthBuffer[index] = _depth;
-        switch (getViewMode())
+        switch (getRenderMode())
         {
-        case ViewMode::DEFAULT:
-        case ViewMode::WIREFRAME: framebuffer.colorBuffer[index] = _color;                        break;
-        case ViewMode::ZBUFFER:   framebuffer.colorBuffer[index] = { _depth, _depth, _depth, 1 }; break;
+        case RenderMode::DEFAULT:
+        case RenderMode::WIREFRAME: framebuffer.colorBuffer[index] = _color;                        break;
+        case RenderMode::ZBUFFER:   framebuffer.colorBuffer[index] = { _depth, _depth, _depth, 1 }; break;
         default: break;
         }
     }
@@ -160,16 +160,28 @@ void Renderer::drawTriangle(Triangle3 _triangle)
         
         // Draw the clipped triangles.
         for (int i = 0; i < (int)clippedTriangles.size(); i++)
-            drawTriangle(clippedTriangles[i], frustum, true);
+            drawTriangle(clippedTriangles[i]);
         return;
     }
     */
 
     //! Temporarily clip triangles by nuking them when one vertex is offscreen.
+    /*
     if (clipCoords[0].w >= 0 ||
         clipCoords[1].w >= 0 ||
         clipCoords[2].w >= 0)
         return;
+    */
+   
+    for (int i = 0; i < 3; i++)
+    {
+        if (!(-abs(clipCoords[i].w) <= clipCoords[i].x && clipCoords[i].x <= abs(clipCoords[i].w) &&
+              -abs(clipCoords[i].w) <= clipCoords[i].y && clipCoords[i].y <= abs(clipCoords[i].w) &&
+              -abs(clipCoords[i].w) <= clipCoords[i].z && clipCoords[i].z <= abs(clipCoords[i].w)))
+        {
+            return;
+        }
+    }
     
     // Clip space (4D) -> NDC (3D).
     Vector3 ndcCoords[3] = {
@@ -208,7 +220,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     ImGui::End();
 
     // Draw triangle wireframe
-    if (getViewMode() == ViewMode::WIREFRAME)
+    if (getRenderMode() == RenderMode::WIREFRAME)
     {
         drawLine({ screenCoords[0], _triangle.a.normal, _triangle.a.color, _triangle.a.uv }, 
                  { screenCoords[1], _triangle.b.normal, _triangle.b.color, _triangle.b.uv });
@@ -401,14 +413,14 @@ void Renderer::drawSphere(const float& _r, const int& _lon, const int& _lat, con
 
 // --- View mode getters / setters --- //
 
-ViewMode Renderer::getViewMode() const
+RenderMode Renderer::getRenderMode() const
 {
-    return currentView;
+    return renderMode;
 }
 
-void Renderer::setViewMode(const ViewMode& _mode)
+void Renderer::setRenderMode(const RenderMode& _mode)
 {
-    currentView = _mode;
+    renderMode = _mode;
 }
 
 // ---------- Miscellaneous ---------- //
@@ -421,10 +433,8 @@ void Renderer::showImGuiControls()
     
     // Displaying components.
     ImGui::ColorEdit4("BG Color", &framebuffer.clearColor.r);
-
-    ImGui::Combo("View Mode", &curItem, items, IM_ARRAYSIZE(items));
-    setViewMode((ViewMode)curItem);
-
+    ImGui::Combo("Render Mode", &curItem, items, IM_ARRAYSIZE(items));
+    setRenderMode((RenderMode)curItem);
     ImGui::Text("\nMatrices:");
     ImGui::Text("Model:\n%s",      modelMat.back().printStr(false).c_str());
     ImGui::Text("View:\n%s",       viewMat.printStr        (false).c_str());

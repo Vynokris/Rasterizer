@@ -136,10 +136,8 @@ void App::update()
         renderer.framebuffer.clear(camera.getFar());
 
         // Setup matrices
-        Mat4 projection = camera.getProjection();
-        Mat4 view       = camera.getViewMatrix();
-        renderer.setProjection(projection);
-        renderer.setView(view);
+        renderer.setProjection(camera.getPerspective());
+        renderer.setView(camera.getViewMat());
 
         // Render scene
         scene.update(ImGui::GetIO().DeltaTime, renderer, camera);
