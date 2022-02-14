@@ -152,7 +152,20 @@ void App::update()
         // Display info.
         if (ImGui::Begin("Info"))
         {
-            ImGui::Text("FPS: %.f", 1 / ImGui::GetIO().DeltaTime);
+            // Compute smooth FPS.
+            static int counter = 0;
+            static float deltaTimes = 0, fps = 0;
+            counter++;
+            deltaTimes += ImGui::GetIO().DeltaTime;
+            if (counter >= 10)
+            {
+                counter = 0;
+                fps = 1 / (deltaTimes / 10);
+                deltaTimes = 0;
+            }
+
+            // Show FPS and frame duration.
+            ImGui::Text("FPS: %.f", fps);
             ImGui::Text("Frame duration: %f seconds.", ImGui::GetIO().DeltaTime);
         }
         ImGui::End();
