@@ -72,6 +72,9 @@ namespace arithmetic
     // Compute linear interpolation between start and end for the parameter val (if 0 <= val <= 1: start <= return <= end).
     float lerp(const float& val, const float& start, const float& end);
 
+    // Compute the linear interpolation factor that returns val when lerping between start and end.
+    float getLerp(const float& val, const float& start, const float& end);
+
     // Linear interpolation between two given colors.
     Color colorLerp(const float& val, const Color& start, const Color& end);
 
