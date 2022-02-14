@@ -12,9 +12,9 @@ Scene::Scene()
     triangles.clear();
 
     // FIRST TRIANGLE      |        pos        |  |      normal      |  |         color          |  |     uv     |
-    triangles.push_back({ { { -0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },
-                          { {  0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } },
-                          { {  0.0f, 0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } } });
+    triangles.push_back({ { { -0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } },
+                          { {  0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f } },
+                          { {  0.0f, 0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 0.5f, 0.5f } } });
     
     // SECOND TRIANGLE     |        pos        |  |      normal      |  |         color          |  |     uv     |
     triangles.push_back({ { { -1.0f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },
@@ -45,10 +45,10 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     _renderer.setProjection(_camera.getPerspective());
 
     // Draw the first triangle.
-    // _renderer.modelPushMat();
-    // _renderer.modelTranslate(0, 0, 4);
-    // _renderer.drawTriangles(&triangles[0], 1);
-    // _renderer.modelPopMat();
+    _renderer.modelPushMat();
+    _renderer.modelTranslate(0, 0, 4);
+    _renderer.drawTriangles(&triangles[0], 1);
+    _renderer.modelPopMat();
 
     // Draw the second triangle.
     // _renderer.modelPushMat();
@@ -57,15 +57,15 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     // _renderer.modelPushMat();
 
     // Draw scene components.
-    _renderer.modelPushMat();
-    _renderer.modelTranslate(-0.5, 0, 2);
-    _renderer.drawCube(RED);
-    _renderer.modelPopMat();
+    // _renderer.modelPushMat();
+    // _renderer.modelTranslate(-0.5, 0, 2);
+    // _renderer.drawCube(RED);
+    // _renderer.modelPopMat();
 
-    _renderer.modelPushMat();
-    _renderer.modelTranslate(0.5, 0, 2);
-    _renderer.drawSphere(1, 8, 8, BLUE);
-    _renderer.modelPopMat();
+    // _renderer.modelPushMat();
+    // _renderer.modelTranslate(0.5, 0, 2);
+    // _renderer.drawSphere(1, 8, 8, BLUE);
+    // _renderer.modelPopMat();
     
     deltaTime = _deltaTime;
     time      += deltaTime;
