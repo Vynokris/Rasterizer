@@ -17,8 +17,8 @@ private:
 
 public:
     Light();
-    Light(const LightParams& p);
+    Light(const LightParams& _p);
     ~Light();
 
-    void setParams(const LightParams& p);
+    void setParams(const LightParams& _p);
 };

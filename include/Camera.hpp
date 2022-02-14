@@ -12,33 +12,33 @@ struct CameraInputs
 class Camera
 {
 private:
-    unsigned int m_width, m_height;
+    unsigned int width, height;
 
-    float m_fov, m_aspect, m_near, m_far,
-          m_pitch, m_yaw, m_speed, m_acceleration;
+    float fov, aspect, near, far,
+          pitch, yaw, speed, acceleration;
           
-    Vector3 m_pos, m_direction;
-    geometry3D::Frustum m_frustum;
+    Vector3 pos, direction;
 
 public:
-    Camera(const unsigned int width, const unsigned int height,
-           const float fov, const float near, const float far,
-           const float acceleration);
+    Camera(const unsigned int _width, const unsigned int _height,
+           const float _fov, const float _near, const float _far,
+           const float _acceleration);
 
     // Main methods.
-    void update(const float deltaTime, const CameraInputs& inputs);
+    void update(const float _deltaTime, const CameraInputs& _inputs);
 
     // Getters.
     Mat4                getWorldTransform() const;
     float               getPitch()          const;
     float               getYaw()            const;
+    float               getNear()           const;
+    float               getFar()            const;
     matrix::Mat4        getProjection()     const;
     matrix::Mat4        getViewMatrix()     const;
-    geometry3D::Frustum getFrustum()        const;
 
     // Setters.
-    void setPosition(const Vector3& pos);
-    void setRotation(const float pitch, const float yaw);
+    void setPosition(const Vector3& _pos);
+    void setRotation(const float _pitch, const float _yaw);
 
     // Misc.
     void showImGuiControls();

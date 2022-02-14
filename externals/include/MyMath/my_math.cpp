@@ -64,6 +64,14 @@ float arithmetic::lerp(const float& val, const float& start, const float& end)
     return start + val * (end - start);
 }
 
+// Compute the linear interpolation factor that returns val when lerping between start and end.
+float arithmetic::getLerp(const float& val, const float& start, const float& end)
+{
+    if (end - start != 0)
+        return (val - start) / (end - start);
+    return 0;
+}
+
 // Linear interpolation between two given colors.
 Color arithmetic::colorLerp(const float& val, const Color& start, const Color& end)
 {

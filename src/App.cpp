@@ -8,12 +8,12 @@
 using namespace matrix;
 
 //Get back Events and setup ImGUI frame
-void App::newFrame(bool mouseCaptured)
+void App::newFrame(bool _mouseCaptured)
 {
     glfwPollEvents();
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
-    if (mouseCaptured)
+    if (_mouseCaptured)
         ImGui::GetIO().MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
     ImGui::NewFrame();
 }
@@ -29,22 +29,22 @@ void App::endFrame()
 }
 
 //Constructor with Init struct
-App::App(const AppInit& p_init)
+App::App(const AppInit& _init)
 {
     // Setup glfw
-    glfwSetErrorCallback(p_init.ErrorCallback);
+    glfwSetErrorCallback(_init.ErrorCallback);
     if (!glfwInit())
     {
-        printf("glfwInit failed\n");
+        printf("glfwInit failed.\n");
         state = GLFWFAILED;
         return;
     }
 
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-    window = glfwCreateWindow(p_init.width, p_init.height, p_init.title, nullptr, nullptr);
+    window = glfwCreateWindow(_init.width, _init.height, _init.title, nullptr, nullptr);
     if (window == nullptr)
     {
-        printf("glfwCreateWindow failed\n");
+        printf("glfwCreateWindow failed.\n");
         state = WINDOWFAILED;
         return;
     }
@@ -55,7 +55,7 @@ App::App(const AppInit& p_init)
     // Setup glad
     if (gladLoadGL((GLADloadfunc)glfwGetProcAddress) == 0)
     {
-        printf("gladLoaderLoadGL failed\n");
+        printf("gladLoaderLoadGL failed.\n");
         state = GLADFAILED;
         return;
     }
@@ -64,23 +64,23 @@ App::App(const AppInit& p_init)
     if (GLAD_GL_KHR_debug)
     {
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(p_init.DebugMessageCallback, NULL);
+        glDebugMessageCallback(_init.DebugMessageCallback, NULL);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
         glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_PERFORMANCE, GL_DONT_CARE, 0, nullptr, GL_FALSE);
         glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_OTHER, GL_DONT_CARE, 0, nullptr, GL_FALSE);
     }
 
-    printf("GL_VENDOR: %s\n", glGetString(GL_VENDOR));
-    printf("GL_VERSION: %s\n", glGetString(GL_VERSION));
-    printf("GL_RENDERER: %s\n", glGetString(GL_RENDERER));
+    printf("GL Vendor: %s\n", glGetString(GL_VENDOR));
+    printf("GL Version: %s\n", glGetString(GL_VERSION));
+    printf("GL Renderer: %s\n", glGetString(GL_RENDERER));
 
     // Setup Dear ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
+    ImGui::LoadIniSettingsFromDisk("externals/include/imgui.ini");
     ImGui::StyleColorsDark();
     ImGuiStyle& style = ImGui::GetStyle();
-    ImGui::LoadIniSettingsFromDisk("externals/include/imgui.ini");
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
@@ -91,10 +91,8 @@ App::App(const AppInit& p_init)
 //Update device and call the renderer
 void App::update()
 {
-    // Create renderer framebuffer (color+depth+opengl texture)
-    // We need an OpenGL texture to display the result of the renderer to the screen
-    // Init renderer
-    Renderer renderer(800, 800, 1000);
+    // Initialize app objects.
+    Renderer renderer(800, 800);
     Scene scene;
     CameraInputs inputs;
     Camera camera(renderer.framebuffer.getWidth(), renderer.framebuffer.getHeight(), 90.f, 0.01f, 1000.f, 2.5f);
@@ -135,7 +133,7 @@ void App::update()
         }
 
         // Clear buffers
-        renderer.framebuffer.clear();
+        renderer.framebuffer.clear(camera.getFar());
 
         // Setup matrices
         Mat4 projection = camera.getProjection();
