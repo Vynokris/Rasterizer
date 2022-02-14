@@ -35,9 +35,9 @@ void Renderer::modelScale    (const float& _scaleX, const float& _scaleY, const 
 
 // --------- Drawing functions -------- //
 
-void Renderer::setTexture(float* _colors32Bits, const int& _width, const int& _height)
+void Renderer::setTexture(const TextureData& _textureData)
 {
-    // TODO
+    texture = _textureData;
 }
 
 void Renderer::drawPixel(const unsigned int& _x, const unsigned int& _y, const float& _depth, const Color& _color)
@@ -116,6 +116,58 @@ static Vector3 ndcToScreenCoords(const Vector3& _ndc, const Viewport& _viewport)
 static int barycentricCoords(const Vector3& _a, const Vector3& _b, const Vector3& _c)
 {
     return (_b.x - _a.x) * (_c.y - _a.y) - (_b.y - _a.y) * (_c.x - _a.x);
+}
+
+static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords, Vertex* _vertices)
+{
+    // Get the triangle's sides and normals.
+    Vector2 p0p1(Vector2{ _screenCoords[0].x, _screenCoords[0].y }, Vector2{ _screenCoords[1].x, _screenCoords[1].y });
+    Vector2 p1p2(Vector2{ _screenCoords[1].x, _screenCoords[1].y }, Vector2{ _screenCoords[2].x, _screenCoords[2].y });
+    Vector2 p2p0(Vector2{ _screenCoords[2].x, _screenCoords[2].y }, Vector2{ _screenCoords[0].x, _screenCoords[0].y });
+    float angle0 = p0p1.getAngleWithVector2(p1p2.getNormal());
+    float angle1 = p1p2.getAngleWithVector2(p2p0.getNormal());
+    float angle2 = p2p0.getAngleWithVector2(p0p1.getNormal());
+
+    // Check if the triangle is inside out.
+    if (angle0 < PI/2)
+    {
+        // Switch position, depth and vertices.
+        Vector3 tempVec  = _screenCoords[0];
+        _screenCoords[0] = _screenCoords[1];
+        _screenCoords[1] = tempVec;
+        float tempDepth  = _viewCoords[0].z;
+        _viewCoords[0].z = _viewCoords[1].z;
+        _viewCoords[1].z = tempDepth;
+        Vertex tempVertex = _vertices[0];
+        _vertices[0] = _vertices[1];
+        _vertices[1] = tempVertex;
+    }
+    else if (angle1 < PI/2)
+    {
+        // Switch position, depth and vertices.
+        Vector3 tempVec  = _screenCoords[1];
+        _screenCoords[1] = _screenCoords[2];
+        _screenCoords[2] = tempVec;
+        float tempDepth  = _viewCoords[1].z;
+        _viewCoords[1].z = _viewCoords[2].z;
+        _viewCoords[2].z = tempDepth;
+        Vertex tempVertex = _vertices[1];
+        _vertices[1] = _vertices[2];
+        _vertices[2] = tempVertex;
+    }
+    else if (angle2 < PI/2)
+    {
+        // Switch position, depth and vertices.
+        Vector3 tempVec  = _screenCoords[2];
+        _screenCoords[2] = _screenCoords[0];
+        _screenCoords[0] = tempVec;
+        float tempDepth  = _viewCoords[2].z;
+        _viewCoords[2].z = _viewCoords[0].z;
+        _viewCoords[0].z = tempDepth;
+        Vertex tempVertex = _vertices[2];
+        _vertices[2] = _vertices[0];
+        _vertices[0] = tempVertex;
+    }
 }
 
 void Renderer::drawTriangle(Triangle3 _triangle)
@@ -224,45 +276,8 @@ void Renderer::drawTriangle(Triangle3 _triangle)
         return;
     }
 
-    // Get the triangle's sides and normals.
-    Vector2 p0p1(Vector2{ screenCoords[0].x, screenCoords[0].y }, Vector2{ screenCoords[1].x, screenCoords[1].y });
-    Vector2 p1p2(Vector2{ screenCoords[1].x, screenCoords[1].y }, Vector2{ screenCoords[2].x, screenCoords[2].y });
-    Vector2 p2p0(Vector2{ screenCoords[2].x, screenCoords[2].y }, Vector2{ screenCoords[0].x, screenCoords[0].y });
-    float angle0 = p0p1.getAngleWithVector2(p1p2.getNormal());
-    float angle1 = p1p2.getAngleWithVector2(p2p0.getNormal());
-    float angle2 = p2p0.getAngleWithVector2(p0p1.getNormal());
-
-    // Check if the triangle is inside out.
-    if (angle0 < PI/2)
-    {
-        // Switch vertices and depth.
-        Vector3 tempVec = screenCoords[0];
-        screenCoords[0] = screenCoords[1];
-        screenCoords[1] = tempVec;
-        float tempDepth = viewCoords[0].z;
-        viewCoords[0].z = viewCoords[1].z;
-        viewCoords[1].z = tempDepth;
-    }
-    else if (angle1 < PI/2)
-    {
-        // Switch vertices and depth.
-        Vector3 tempVec = screenCoords[1];
-        screenCoords[1] = screenCoords[2];
-        screenCoords[2] = tempVec;
-        float tempDepth = viewCoords[1].z;
-        viewCoords[1].z = viewCoords[2].z;
-        viewCoords[2].z = tempDepth;
-    }
-    else if (angle2 < PI/2)
-    {
-        // Switch vertices and depth.
-        Vector3 tempVec = screenCoords[2];
-        screenCoords[2] = screenCoords[0];
-        screenCoords[0] = tempVec;
-        float tempDepth = viewCoords[2].z;
-        viewCoords[2].z = viewCoords[0].z;
-        viewCoords[0].z = tempDepth;
-    }
+    // Make sure the triangle vertices are in the right order to be drawn.
+    swapTriangleVertices(screenCoords, viewCoords, &_triangle.a);
 
     // Compute triangle bounding box.
     int minX = min(min(screenCoords[0].x, screenCoords[1].x), screenCoords[2].x);
@@ -302,19 +317,32 @@ void Renderer::drawTriangle(Triangle3 _triangle)
             float w1n = w1 / (float)(w0 + w1 + w2);
             float w2n = w2 / (float)(w0 + w1 + w2);
 
-            // Calculate the pixel's color. (This is not very efficient but will probably be disabled once we implement textures)
-            Color pCol = { _triangle.a.color.r * w0n + _triangle.b.color.r * w1n + _triangle.c.color.r * w2n, 
-                           _triangle.a.color.g * w0n + _triangle.b.color.g * w1n + _triangle.c.color.g * w2n, 
-                           _triangle.a.color.b * w0n + _triangle.b.color.b * w1n + _triangle.c.color.b * w2n, 
-                           _triangle.a.color.a * w0n + _triangle.b.color.a * w1n + _triangle.c.color.a * w2n };
+            Color pCol;
+            switch (texture.width)
+            {
+            case 0:
+                // Calculate the pixel's color.
+                pCol = { _triangle.a.color.r * w0n + _triangle.b.color.r * w1n + _triangle.c.color.r * w2n, 
+                         _triangle.a.color.g * w0n + _triangle.b.color.g * w1n + _triangle.c.color.g * w2n, 
+                         _triangle.a.color.b * w0n + _triangle.b.color.b * w1n + _triangle.c.color.b * w2n, 
+                         _triangle.a.color.a * w0n + _triangle.b.color.a * w1n + _triangle.c.color.a * w2n };
+                break;
+            default:
+                // Compute uv coordinates and get pixel color from texture.
+                Vector2 texCoords = { _triangle.a.uv.x * w0n + _triangle.b.uv.x * w1n + _triangle.c.uv.x * w2n,
+                                      _triangle.a.uv.y * w0n + _triangle.b.uv.y * w1n + _triangle.c.uv.y * w2n };
+                pCol = texture.getPixelColor(roundInt(lerp(texCoords.x, 0, texture.width)), roundInt(lerp(texCoords.y, 0, texture.height)));
+                break;
+            }
 
             // Compute depth.
             float depth = abs(viewCoords[0].z * w0n + viewCoords[1].z * w1n + viewCoords[2].z * w2n);
 
-            if (p.x >= maxX-1 && p.y >= maxY-1)
+            if (p.x > maxX-1 && p.y > maxY-1)
             {
                 ImGui::Begin("Debug info");
                 ImGui::Text("Pixel depth: %f", depth);
+                ImGui::Text("Pixel uv:    %f, %f", _triangle.a.uv.x * w0n + _triangle.b.uv.x * w1n + _triangle.c.uv.x * w2n, _triangle.a.uv.y * w0n + _triangle.b.uv.y * w1n + _triangle.c.uv.y * w2n);
                 ImGui::End();
             }
 
