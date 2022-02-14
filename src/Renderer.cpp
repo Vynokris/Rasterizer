@@ -81,7 +81,7 @@ void Renderer::drawLine(const Vertex& _p0, const Vertex& _p1)
             0 <= point.y && point.y < viewport.height)
         {
             float lerpFactor = (getLerp(point.x, _p0.pos.x, _p1.pos.x) + getLerp(point.y, _p0.pos.y, _p1.pos.y)) / 2;
-            drawPixel(point.x, point.y, 0, colorLerp(lerpFactor, _p0.color, _p1.color));
+            drawPixel(point.x, point.y, lerp(lerpFactor, _p0.pos.z, _p1.pos.z), colorLerp(lerpFactor, _p0.color, _p1.color));
         }
 
         e2 = 2 * err;
@@ -245,18 +245,30 @@ void Renderer::drawTriangle(Triangle3 _triangle)
         Vector3 tempVec = screenCoords[0];
         screenCoords[0] = screenCoords[1];
         screenCoords[1] = tempVec;
+
+        float tempDepth = viewCoords[0].z;
+        viewCoords[0].z = viewCoords[1].z;
+        viewCoords[1].z = tempDepth;
     }
     else if (angle1 < PI/2)
     {
         Vector3 tempVec = screenCoords[1];
         screenCoords[1] = screenCoords[2];
         screenCoords[2] = tempVec;
+
+        float tempDepth = viewCoords[1].z;
+        viewCoords[1].z = viewCoords[2].z;
+        viewCoords[2].z = tempDepth;
     }
     else if (angle2 < PI/2)
     {
         Vector3 tempVec = screenCoords[2];
         screenCoords[2] = screenCoords[0];
         screenCoords[0] = tempVec;
+
+        float tempDepth = viewCoords[2].z;
+        viewCoords[2].z = viewCoords[0].z;
+        viewCoords[0].z = tempDepth;
     }
 
     //* https://fgiesen.wordpress.com/2013/02/08/triangle-rasterization-in-practice/
