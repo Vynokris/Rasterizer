@@ -12,14 +12,14 @@ Scene::Scene()
     triangles.clear();
 
     // FIRST TRIANGLE      |        pos        |  |      normal      |  |         color          |  |     uv     |
-    triangles.push_back({ { { -0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } },
-                          { {  0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f } },
-                          { {  0.0f, 0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 0.5f, 0.5f } } });
+    triangles.push_back({ { { -0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } },
+                          { {  0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } },
+                          { {  0.5f, 0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } } });
     
     // SECOND TRIANGLE     |        pos        |  |      normal      |  |         color          |  |     uv     |
-    triangles.push_back({ { { -1.0f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },
-                          { { 1.0f, -0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } },
-                          { { 1.0f,  0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } } });
+    triangles.push_back({ { { -0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 0.0f, 1.0f }, {  0.0f, 0.0f } },
+                          { { -0.5f, 0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, {  0.0f, 1.0f } },
+                          { {  0.5f, 0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, {  1.0f, 1.0f } } });
 }
 
 Scene::~Scene()
@@ -46,15 +46,15 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
 
     // Draw the first triangle.
     _renderer.modelPushMat();
-    _renderer.modelTranslate(0, 0, 4);
+    _renderer.modelTranslate(0, 0, 2);
     _renderer.drawTriangles(&triangles[0], 1);
     _renderer.modelPopMat();
 
     // Draw the second triangle.
-    // _renderer.modelPushMat();
-    // _renderer.modelTranslate(0, 0, 2);
-    // _renderer.drawTriangles(&triangles[1], 1);
-    // _renderer.modelPushMat();
+    _renderer.modelPushMat();
+    _renderer.modelTranslate(0, 0, 2);
+    _renderer.drawTriangles(&triangles[1], 1);
+    _renderer.modelPushMat();
 
     // Draw scene components.
     // _renderer.modelPushMat();
