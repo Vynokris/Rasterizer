@@ -4,10 +4,12 @@
 
 #include <imgui.h>
 #include <my_math.hpp>
+
+#include "Light.hpp"
+#include "Renderer.hpp"
+
 using namespace arithmetic;
 using namespace geometry3D;
-
-#include "Renderer.hpp"
 
 Renderer::Renderer(const unsigned int& _width, const unsigned int& _height)
         : viewport(0, 0, _width, _height)
