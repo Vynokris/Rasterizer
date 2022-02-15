@@ -83,6 +83,140 @@ Color arithmetic::colorLerp(const float& val, const Color& start, const Color& e
     };
 }
 
+// Returns the hue of an RGB color (0 <= rgba <= 1) (output in radians).
+float arithmetic::colorGetHue(const Color& color)
+{
+    float minV = min(min(color.r, color.g), color.b);
+    float maxV = max(max(color.r, color.g), color.b);
+    float diff = maxV - minV;
+
+    float hue;
+
+    // If red is the maximum value.
+    if (color.r > color.g && color.r > color.b)
+        hue = (color.g - color.b) / diff;
+
+    // If green is the maximum value.
+    else if (color.g > color.r && color.g > color.b)
+        hue = 2 + (color.b - color.r) / diff;
+
+    // If blue is the maximum value.
+    else
+        hue = 4 + (color.r - color.g) / diff;
+    
+    // Keep the hue between 0 and 2pi;
+    if (hue < 0)
+        hue += 2*PI;
+    else if (hue > 2*PI)
+        hue -= 2*PI;
+    
+    return hue;
+}
+
+HSV arithmetic::RGBtoHSV(const Color& color)
+{
+    HSV hsv;
+
+    float minV = min(min(color.r, color.g), color.b);
+    float maxV = max(max(color.r, color.g), color.b);
+    float diff = maxV - minV;
+
+    float r = color.r;
+    float g = color.g;
+    float b = color.b;
+    
+    // Set Value.
+    hsv.v = maxV;
+
+    // If max and min are the same, return.
+    if (diff  < 0.00001f)
+        return { 0, 0, hsv.v };
+
+    // Set Saturation.
+    if (maxV > 0)
+        hsv.s = diff/maxV;
+    else
+        return { 0, 0, hsv.v };
+
+    // Set Hue.
+    if (r >= maxV)
+        hsv.h = (g - b) / diff;
+    else if (g >= maxV)
+        hsv.h = 2.0f + (b - r) / diff;
+    else if (b >= maxV)
+        hsv.h = 4.0f + (r - g) / diff;
+    
+    // Keep Hue above 0.
+    if (hsv.h < 0)
+        hsv.h += 2*PI;
+
+    return hsv;
+}
+
+Color arithmetic::HSVtoRGB(const HSV& hsv)
+{
+    Color color = { 0, 0, 0, 1 };
+
+    // Red channel
+    float k = fmodf((5.0f + hsv.h), 6);
+    float t = 4.0f - k;
+    k = (t < k)? t : k;
+    k = (k < 1)? k : 1;
+    k = (k > 0)? k : 0;
+    color.r = hsv.v - hsv.v*hsv.s*k;
+
+    // Green channel
+    k = fmodf((3.0f + hsv.h), 6);
+    t = 4.0f - k;
+    k = (t < k)? t : k;
+    k = (k < 1)? k : 1;
+    k = (k > 0)? k : 0;
+    color.g = hsv.v - hsv.v*hsv.s*k;
+
+    // Blue channel
+    k = fmodf((1.0f + hsv.h), 6);
+    t = 4.0f - k;
+    k = (t < k)? t : k;
+    k = (k < 1)? k : 1;
+    k = (k > 0)? k : 0;
+    color.b = hsv.v - hsv.v*hsv.s*k;
+
+    return color;
+}
+
+// Shifts the hue of the given color.
+Color arithmetic::colorShift(const Color& color, const float& hue)
+{
+    /*
+    float cosH   = cos(hue);
+    float thirdH = (1-cosH)/3;
+    float sqrtH  = sqrt(1/3)*sin(hue);
+
+    matrix::Mat3 rot = matrix::Mat3(
+        cosH+thirdH,  thirdH-sqrtH, thirdH+sqrtH,
+        thirdH+sqrtH, cosH+thirdH,  thirdH-sqrtH,
+        thirdH-sqrtH, thirdH+sqrtH, cosH+thirdH
+    );
+
+    Color out = {
+        clamp(color.r * rot[0][0] + color.g * rot[0][1] + color.b * rot[0][2], 0, 1),
+        clamp(color.r * rot[1][0] + color.g * rot[1][1] + color.b * rot[1][2], 0, 1),
+        clamp(color.r * rot[2][0] + color.g * rot[2][1] + color.b * rot[2][2], 0, 1),
+        1
+    };
+    */
+
+    HSV hsv = RGBtoHSV(color);
+    hsv.h += hue;
+    if (hsv.h >= 2*PI)
+        hsv.h -= 2*PI;
+    else if (hsv.h < 0)
+        hsv.h += 2*PI;
+    Color out = HSVtoRGB(hsv);
+
+    return out;
+}
+
 // Remaps the given value from one range to another.
 float arithmetic::remap(const float& val, const float& inputStart, const float& inputEnd, const float& outputStart, const float& outputEnd)
 {

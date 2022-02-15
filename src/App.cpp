@@ -98,8 +98,8 @@ void App::update()
     Camera camera(renderer.framebuffer.getWidth(), renderer.framebuffer.getHeight(), 90.f, 0.001f, 1000.f, 2.5f);
 
     // Load a texture.
-    TextureData floorTexture = loadBmpData("art/floor.bmp");
-    renderer.setTexture(floorTexture);
+    TextureData baseTexture = loadBmpData("art/UrAppreciated.bmp");
+    renderer.setTexture(baseTexture);
 
     bool mouseCaptured = false;
     double mouseX = 0.0, mouseY = 0.0;

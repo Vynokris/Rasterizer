@@ -5,12 +5,12 @@ using namespace arithmetic;
 
 Color TextureData::getPixelColor(const int& x, const int& y)
 {
-    // TODO: test this, idk if it really works oops...
-    int index = (abs(y+1) * (width + padding) + x) * 3;
+    // Idk why but the first row of data is totally irrelevant (I use y+1).
+    int index = (abs(y) * (width + padding) + abs(x)) * 3;
     return Color {
-        pixels[index]   / 255.f,
-        pixels[index+1] / 255.f,
         pixels[index+2] / 255.f,
+        pixels[index+1] / 255.f,
+        pixels[index]   / 255.f,
         1
     };
 }
