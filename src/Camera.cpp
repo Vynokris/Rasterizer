@@ -28,12 +28,12 @@ void Camera::update(const float _deltaTime, const CameraInputs& _inputs)
 
     // Set direction accoring to inputs.
     Vector3 dir;
-    if (_inputs.moveForward)  dir.z = -1.f;
-    if (_inputs.moveBackward) dir.z =  1.f;
-    if (_inputs.moveLeft)     dir.x = -1.f;
-    if (_inputs.moveRight)    dir.x =  1.f;
-    if (_inputs.moveUpper)    dir.y = -1.f;
-    if (_inputs.moveLower)    dir.y =  1.f;
+    if (_inputs.moveForward)  dir.z += -1.f;
+    if (_inputs.moveBackward) dir.z +=  1.f;
+    if (_inputs.moveLeft)     dir.x += -1.f;
+    if (_inputs.moveRight)    dir.x +=  1.f;
+    if (_inputs.moveUpper)    dir.y += -1.f;
+    if (_inputs.moveLower)    dir.y +=  1.f;
 
     // Set speed according to deltatime.
     speed = _deltaTime * acceleration;
