@@ -36,7 +36,7 @@ private:
     // Scene components copied datas.
     std::vector<Light> lights;
 
-    RenderMode   renderMode   = RenderMode::UNLIT;
+    RenderMode   renderMode   = RenderMode::LIT;
     LightingMode lightingMode = LightingMode::PHONG;
 
 public:

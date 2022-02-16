@@ -3,14 +3,16 @@
 
 #include <Light.hpp>
 
+
+using namespace arithmetic;
+
 Color computePhong(Light _light, const Material& _mat, Vector3 _pixel, const Vector3& _normal, const Vector3& _view)
 {
     // Compute light direction vector.
-    _light.params.dir = _pixel - _light.params.pos;
-    _light.params.dir = _light.params.dir.getNormalized();
+    _light.params.dir = (_pixel - _light.params.pos).getNormalized();
 
     // Compute result color of Phong's model.
-    float result = (_normal & _light.params.dir);
+    float result = clamp((_normal & _light.params.dir), 0, 1);
 
     //! DEBUG PANNEL
     ImGui::Begin("Lighting rendering info");
