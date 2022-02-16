@@ -75,6 +75,7 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     _renderer.drawSphere(1, 15, 15, BLUE);
     _renderer.modelPopMat();
     
+    
     deltaTime = _deltaTime;
     time      += deltaTime;
 }

@@ -17,7 +17,7 @@ struct Viewport
     unsigned int width, height;
 };
 
-enum class RenderMode : int   { DEFAULT, WIREFRAME, ZBUFFER };
+enum class RenderMode : int   { UNLIT, LIT, WIREFRAME, ZBUFFER };
 
 enum class LightingMode : int { PHONG, BLINN };   
 
@@ -36,7 +36,7 @@ private:
     // Scene components copied datas.
     std::vector<Light> lights;
 
-    RenderMode   renderMode   = RenderMode::DEFAULT;
+    RenderMode   renderMode   = RenderMode::LIT;
     LightingMode lightingMode = LightingMode::PHONG;
 
 public:
