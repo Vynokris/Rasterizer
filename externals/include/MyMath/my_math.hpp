@@ -95,6 +95,15 @@ namespace arithmetic
     // Linear interpolation between two given colors.
     Color colorLerp(const float& val, const Color& start, const Color& end);
 
+    // Returns the hue of an RGB color (0 <= rgba <= 1).
+    float colorGetHue(const Color& color);
+
+    HSV   RGBtoHSV(const Color& color);
+    Color HSVtoRGB(const HSV& hsv);
+
+    // Shifts the hue of the given color.
+    Color colorShift(const Color& color, const float& hue);
+
     // Remaps the given value from one range to another.
     float remap(const float& val, const float& inputStart, const float& inputEnd, const float& outputStart, const float& outputEnd);
 
