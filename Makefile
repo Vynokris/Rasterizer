@@ -56,4 +56,4 @@ $(BIN): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 clean:
-	rm -f $(BIN) $(OBJS) $(DEPS) && clear
+	rm -f $(BIN) $(OBJS) $(DEPS) imgui.ini && clear

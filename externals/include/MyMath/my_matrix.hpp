@@ -359,7 +359,7 @@ class Matrix
             return result;
         }
 
-        // Transpose.
+        // Transposition.
         Matrix<R, C> transpose()
         {
             Matrix<C, R> result;
