@@ -172,87 +172,46 @@ static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords, V
     }
 }
 
+void Renderer::transformVertices(int count, Vertex* vertices, Vector3* local, Vector4* world, Vector4* view, Vector4* clip, Vector3* ndc, Vector3* screen)
+{
+    for (int i = 0; i < count; i++)
+    {
+        // Store triangle vertices positions.
+        local[i] = vertices[i].pos;
+        
+        // Local space (3D) -> World space (3D).
+        world[i] = Vector4{ local[i], 1 } * modelMat.back();
+        
+        // World space (3D) -> View space (3D).
+        view[i] = world[i] * viewMat;
+        
+        // View space (3D) -> Clip space (4D).
+        clip[i] = view[i] * projectionMat;
+
+        // TODO: fix clipping.
+
+        //! Temporarily clip triangles by nuking them when one vertex is offscreen.
+        if (!(-abs(clip[i].w) <= clip[i].x && clip[i].x <= abs(clip[i].w)))
+            return;
+        
+        // Clip space (4D) -> NDC (3D).
+        ndc[i] = clip[i].toVector3(true);
+        
+        // NDC (3D) -> screen coords (2D).
+        screen[i] = ndcToScreenCoords(ndc[i], viewport);
+    }
+}
+
 void Renderer::drawTriangle(Triangle3 _triangle)
 {
     Vector3 localCoords[3];
     Vector4 worldCoords[3];
     Vector4 viewCoords[3];
     Vector4 clipCoords[3];
+    Vector3 ndcCoords[3];
+    Vector3 screenCoords[3];
 
-    // Store triangle vertices positions.
-    localCoords[0] = _triangle.a.pos;
-    localCoords[1] = _triangle.b.pos;
-    localCoords[2] = _triangle.c.pos;
-    
-    // Local space (3D) -> World space (3D).
-    worldCoords[0] = { (Vector4{ localCoords[0], 1 } * modelMat.back()) };
-    worldCoords[1] = { (Vector4{ localCoords[1], 1 } * modelMat.back()) };
-    worldCoords[2] = { (Vector4{ localCoords[2], 1 } * modelMat.back()) };
-    
-    // World space (3D) -> View space (3D).
-    viewCoords[0] = { (worldCoords[0] * viewMat) };
-    viewCoords[1] = { (worldCoords[1] * viewMat) };
-    viewCoords[2] = { (worldCoords[2] * viewMat) };
-    
-    // View space (3D) -> Clip space (4D).
-    clipCoords[0] = { viewCoords[0] * projectionMat };
-    clipCoords[1] = { viewCoords[1] * projectionMat };
-    clipCoords[2] = { viewCoords[2] * projectionMat };
-
-    // TODO: fix clipping.
-    /*
-    if (!wasClipped)
-    {
-        // Clip the triangle against the frustum.
-        Triangle3 viewTriangle(
-            { clipCoords[0].toVector3(), _triangle.a.normal, _triangle.a.color, _triangle.a.uv }, 
-            { clipCoords[1].toVector3(), _triangle.b.normal, _triangle.b.color, _triangle.b.uv }, 
-            { clipCoords[2].toVector3(), _triangle.c.normal, _triangle.c.color, _triangle.c.uv }
-        );
-        float vertexAbsW[3] = { abs(clipCoords[0].w), abs(clipCoords[1].w), abs(clipCoords[2].w) };
-        std::vector<Triangle3> clippedTriangles = clipHomogeneousTriangle(viewTriangle, vertexAbsW);
-        
-        // Draw the clipped triangles.
-        for (int i = 0; i < (int)clippedTriangles.size(); i++)
-            drawTriangle(clippedTriangles[i]);
-        return;
-    }
-    */
-
-    //! Temporarily clip triangles by nuking them when one vertex is offscreen.
-    for (int i = 0; i < 3; i++)
-    {
-        if (!(-abs(clipCoords[i].w) <= clipCoords[i].x && clipCoords[i].x <= abs(clipCoords[i].w) &&
-              -abs(clipCoords[i].w) <= clipCoords[i].y && clipCoords[i].y <= abs(clipCoords[i].w) &&
-              -abs(clipCoords[i].w) <= clipCoords[i].z && clipCoords[i].z <= abs(clipCoords[i].w)))
-        {
-            return;
-        }
-    }
-    
-    // Clip space (4D) -> NDC (3D).
-    Vector3 ndcCoords[3] = {
-        clipCoords[0].toVector3(true),
-        clipCoords[1].toVector3(true),
-        clipCoords[2].toVector3(true)
-    };
-
-    // TODO: fix clipping.
-    /*
-    if (wasClipped)
-    {
-        ndcCoords[0] = _triangle.a.pos;
-        ndcCoords[1] = _triangle.b.pos;
-        ndcCoords[2] = _triangle.c.pos;
-    }
-    */
-    
-    // NDC (3D) -> screen coords (2D).
-    Vector3 screenCoords[3] = {
-        ndcToScreenCoords(ndcCoords[0], viewport),
-        ndcToScreenCoords(ndcCoords[1], viewport),
-        ndcToScreenCoords(ndcCoords[2], viewport),
-    };
+    transformVertices(3, &_triangle.a, localCoords, worldCoords, viewCoords, clipCoords, ndcCoords, screenCoords);
 
     ImGui::Begin("Debug info");
     {
