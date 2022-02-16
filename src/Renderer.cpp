@@ -102,11 +102,9 @@ void Renderer::drawLine(const Vertex& _p0, const Vertex& _p1)
 
 static Vector3 ndcToScreenCoords(const Vector3& _ndc, const Viewport& _viewport)
 {
-    return {
-        _ndc.x * _viewport.width  + _viewport.width  / 2, 
-        _ndc.y * _viewport.height + _viewport.height / 2, 
-        _ndc.z
-    };
+    return { _ndc.x * _viewport.width  + _viewport.width  / 2, 
+             _ndc.y * _viewport.height + _viewport.height / 2, 
+             _ndc.z };
 }
 
 static int barycentricCoords(const Vector3& _a, const Vector3& _b, const Vector3& _c)
@@ -212,6 +210,7 @@ bool Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local,
 static bool isTowardsCamera(const Vector3 _worldPos, const Vector3& _worldNormal, const Vector3& _camPos)
 {
     float  dotProduct  = _worldNormal & Vector3(_camPos, _worldPos);
+    
     ImGui::Begin("Debug info");
     ImGui::Text("Triangle position: %.2f, %.2f, %.2f", _worldPos.x, _worldPos.y, _worldPos.z);
     ImGui::Text("Triangle normal:   %.2f, %.2f, %.2f", _worldNormal.x, _worldNormal.y, _worldNormal.z);
@@ -219,6 +218,7 @@ static bool isTowardsCamera(const Vector3 _worldPos, const Vector3& _worldNormal
     ImGui::Text("Dot product:       %.2f",             dotProduct);
     ImGui::Text("\n");
     ImGui::End();
+
     return dotProduct >= 0;
 }
 
@@ -240,13 +240,19 @@ void Renderer::drawTriangle(Triangle3 _triangle)
             cameraPos.y *= -1;
 
     // Get the triangle's normal in world coordinates.
-    Vector3 worldNormal = ((Vector4( _triangle.a.normal, 1 ) * modelMat.back().inv4().transpose()).toVector3()
-                        +  (Vector4( _triangle.b.normal, 1 ) * modelMat.back().inv4().transpose()).toVector3()
-                        +  (Vector4( _triangle.c.normal, 1 ) * modelMat.back().inv4().transpose()).toVector3())
+    Vector3 worldNormal = ((Vector4(_triangle.a.normal, 0) * modelMat.back()).toVector3()
+                        +  (Vector4(_triangle.b.normal, 0) * modelMat.back()).toVector3()
+                        +  (Vector4(_triangle.c.normal, 0) * modelMat.back()).toVector3())
                         /  3;
 
     // Back face culling.
+    /*
     if (!isTowardsCamera(trianglePos, worldNormal, cameraPos))
+        return;
+    */
+
+    // Transform the triangle's vertices through the renderer's matrices.
+    if (!transformVertices(3, &_triangle.a, localCoords, worldCoords, viewCoords, clipCoords, ndcCoords, screenCoords, perspectiveUV))
         return;
 
     // Draw triangle wireframe
@@ -261,9 +267,6 @@ void Renderer::drawTriangle(Triangle3 _triangle)
         return;
     }
 
-    // Make sure the triangle vertices are in the right order to be drawn.
-    swapTriangleVertices(screenCoords, viewCoords, &_triangle.a);
-
     // Compute Phong lighting for each vertex.
     Color lightIntensity[3] = { { 1, 1, 1, 1 }, { 1, 1, 1, 1 }, { 1, 1, 1, 1 }, };
     for (Light it : lights)
@@ -271,13 +274,9 @@ void Renderer::drawTriangle(Triangle3 _triangle)
         for (int i = 0; i < 3; i++)
         {
             if (getRenderMode() == RenderMode::LIT)
-            {
                 lightIntensity[i] *= computePhong(it, mat, worldCoords[i].toVector3(), worldNormal, cameraPos);
-            }
             else
-            {
                 lightIntensity[i] = WHITE;
-            }
         }
     }
     
@@ -489,7 +488,7 @@ void Renderer::showImGuiControls()
 {
     // Static variables.
     static const char* items[]{"Unlit", "Lit", "Wireframe", "Z-Buffer"};
-    static int curItem = 0;
+    static int curItem = 1;
     
     // Displaying components.
     ImGui::ColorEdit4("BG Color", &framebuffer.clearColor.r);
