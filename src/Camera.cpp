@@ -24,7 +24,7 @@ void Camera::update(const float _deltaTime, const CameraInputs& _inputs)
 {
     // Rotate camera (Yaw locked between -90° and 90°, Pitch reset to 0 when it reaches 360°).
     setRotation(fmodf(pitch + _inputs.deltaX / 180.f, 2*PI), 
-                clamp(yaw   - _inputs.deltaY / 180.f, -PI/2, PI/2));
+                clamp(yaw   - _inputs.deltaY / 180.f, -PI/2 + 0.001, PI/2 - 0.001));
 
     // Set direction accoring to inputs.
     Vector3 dir;
