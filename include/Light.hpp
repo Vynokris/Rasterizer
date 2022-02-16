@@ -4,10 +4,11 @@
 
 struct Material
 {
-    float   ambient;
-    float   diffuse;
-    float   specular;
-    float   attenuation;
+    Color ambient;
+    Color diffuse;
+    Color specular;
+    float shiness;
+    float attenuation;
 };
 
 struct LightParams
@@ -19,20 +20,15 @@ struct LightParams
     Vector3 specularComponent;
 };
 
-class Light
+struct Light
 {
-private:
     LightParams params;
 
-public:
-    Light() {}
-    Light(const LightParams& _p);
-    ~Light() {}
-
-    void setParams(const LightParams& _p);
-
-    Color computePhong(const Material& mat,
-                       const Vector3& pixel,
-                       const Vector3& surfaceNormal,
-                       const Vector3& viewVector);
+    Light(const LightParams& _p) : params(_p) {}
 };
+
+Color computePhong(Light    _light,
+                   const Material& _mat,
+                   Vector3  _pixel,
+                   const Vector3&  _surfaceNormal,
+                   const Vector3&  _viewVector);

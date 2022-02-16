@@ -17,6 +17,8 @@ private:
 public:
     Scene();
     ~Scene();
+
     void update(const float& _deltaTime, Renderer& _renderer, const Camera& _camera);
+    std::vector<Light> getLights() const;
     void showImGuiControls();
 };
