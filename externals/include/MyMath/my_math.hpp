@@ -12,7 +12,9 @@
 #include <cstdint>
 #include <vector>
 #include <ctime>
-#include "my_matrix.hpp"
+
+#include <my_matrix.hpp>
+
 using namespace std;
 
 // ----------------------- DEFINES ------------------------ //
@@ -22,19 +24,34 @@ using namespace std;
 #define RED     (Color)   { 1, 0, 0, 1 }
 #define GREEN   (Color)   { 0, 1, 0, 1 }
 #define BLUE    (Color)   { 0, 0, 1, 1 }
+#define YELLOW  (Color)   { 1, 1, 0, 1 }
+#define CYAN    (Color)   { 0, 1, 1, 1 }
+#define MAGENTA (Color)   { 1, 0, 1, 1 }
 #define WHITE   (Color)   { 1, 1, 1, 1 }
 #define BLACK   (Color)   { 0, 0, 0, 1 }
 
-#define REDV3   (Vector3) { 1, 0, 0 }
-#define GREENV3 (Vector3) { 0, 1, 0 }
-#define BLUEV3  (Vector3) { 0, 0, 1 }
-#define WHITEV3 (Vector3) { 1, 1, 1 }
-#define BLACKV3 (Vector3) { 0, 0, 0 }
+#define ColorToVec3(c) Vector3{ c.r, c.g, c.b }
 
-// --------------------- STRUCTURES ----------------------- //
+// ------------- GLOBAL FORWARD DECLARATION --------------- //
 
-typedef struct { float r, g, b, a; } Color;
-typedef struct { float h, s, v;    } HSV;
+class Color //? NOTE: [0, 1]
+{
+public:
+    float r, g, b, a = 1.f;
+    
+    Color operator+(const Color& c)  { return { r + c.r, g + c.g, b + c.b, a + c.a };     }
+    Color operator-(const Color& c)  { return { r - c.r, g - c.g, b - c.b, a - c.a };     }
+    Color operator*(const Color& c)  { return { r * c.r, g * c.g, b * c.b, a * c.a };     }
+    Color operator/(const Color& c)  { return { r / c.r, g / c.g, b / c.b, a / c.a };     }
+    Color operator+=(const Color& c) { return { r += c.r, g += c.g, b += c.b, a += c.a }; }
+    Color operator-=(const Color& c) { return { r -= c.r, g -= c.g, b -= c.b, a -= c.a }; }
+    Color operator*=(const Color& c) { return { r *= c.r, g *= c.g, b *= c.b, a *= c.a }; }
+    Color operator/=(const Color& c) { return { r /= c.r, g /= c.g, b /= c.b, a /= c.a }; }
+
+    // Returns the hue of an RGB color (0 <= rgba <= 1).
+    float getHue();
+};
+typedef struct { float h, s, v; } HSV;
 
 // --------------------- ARITHMECTIC ---------------------- //
 
@@ -85,10 +102,10 @@ namespace arithmetic
     // Linear interpolation between two given colors.
     Color colorLerp(const float& val, const Color& start, const Color& end);
 
-    // Returns the hue of an RGB color (0 <= rgba <= 1).
-    float colorGetHue(const Color& color);
-
+    // Convert an RGB color (0 <= rgba <= 1) to HSV.
     HSV   RGBtoHSV(const Color& color);
+
+    // Convert an HSV color to RGB.
     Color HSVtoRGB(const HSV& hsv);
 
     // Shifts the hue of the given color.
@@ -399,7 +416,7 @@ namespace geometry3D
 
             // -- Constructors & Destructor -- //
             Vector3();                                                                               // Null vector.
-            Vector3(const float& _x, const float& _y, const float& _z);                     // Vector with 3 coordinates.
+            Vector3(const float& _x, const float& _y, const float& _z);                              // Vector with 3 coordinates.
             Vector3(const Vector3& p1,  const Vector3& p2);                                          // Vector from 2 points.
             Vector3(const Segment3& seg);                                                            // Vector from semgent.
             Vector3(const float& theta, const float& phi, const float& length, const bool& isAngle); // Vector from angles (useless bool).
