@@ -8,7 +8,6 @@ using namespace geometry3D;
 
 Scene::Scene()
 {
-    // HERE: Load the scene
     // Setup some vertices to test
     triangles.clear();
     lights.clear();
@@ -22,14 +21,13 @@ Scene::Scene()
     triangles.push_back({ { { -1.0f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },
                           { { 1.0f, -0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } },
                           { { 1.0f,  0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } } });
-
+    
     // LIGHT 1
-    lights.push_back((LightParams){ { 2, 2, 2 }, Vector3(), WHITEV3, WHITEV3, WHITEV3 });
+    lights.push_back((LightParams){ { 2, 2, 2 }, Vector3(), ColorToVec3(WHITE), ColorToVec3(WHITE), ColorToVec3(WHITE) });
 }
 
 Scene::~Scene()
 {
-    // HERE: Unload the scene
     triangles.clear();
     lights.clear();
 }
@@ -63,10 +61,11 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     // _renderer.modelPushMat();
 
     // Draw scene components.
-    // _renderer.modelPushMat();
-    // _renderer.modelTranslate(-0.5, 0, 2);
-    // _renderer.drawCube(RED);
-    // _renderer.modelPopMat();
+    Material mat = { { 0.0215, 0.1745, 0.0215 }, { 0.07568, 0.61424, 0.07568 },	{ 0.633, 0.727811, 0.633 },	0.6, 1 };
+    _renderer.modelPushMat();
+    _renderer.modelTranslate(-0.5, 0, 2);
+    _renderer.drawCube(RED);
+    _renderer.modelPopMat();
 
     // _renderer.modelPushMat();
     // _renderer.modelTranslate(0.5, 0, 2);
@@ -77,6 +76,6 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     time      += deltaTime;
 }
 
-void Scene::showImGuiControls()
-{
-}
+std::vector<Light> Scene::getLights() const { return lights; }
+
+void Scene::showImGuiControls() { }

@@ -92,8 +92,8 @@ App::App(const AppInit& _init)
 void App::update()
 {
     // Initialize app objects.
-    Renderer renderer(800, 800);
     Scene scene;
+    Renderer renderer(800, 800, scene.getLights());
     CameraInputs inputs;
     Camera camera(renderer.framebuffer.getWidth(), renderer.framebuffer.getHeight(), 90.f, 0.001f, 1000.f, 2.5f);
 
