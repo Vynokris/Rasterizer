@@ -232,9 +232,9 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     
     // Clip space (4D) -> NDC (3D).
     Vector3 ndcCoords[3] = {
-        { clipCoords[0].toVector3(true) },
-        { clipCoords[1].toVector3(true) },
-        { clipCoords[2].toVector3(true) }
+        clipCoords[0].toVector3(true),
+        clipCoords[1].toVector3(true),
+        clipCoords[2].toVector3(true)
     };
 
     // TODO: fix clipping.
@@ -249,9 +249,9 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     
     // NDC (3D) -> screen coords (2D).
     Vector3 screenCoords[3] = {
-        { ndcToScreenCoords(ndcCoords[0], viewport) },
-        { ndcToScreenCoords(ndcCoords[1], viewport) },
-        { ndcToScreenCoords(ndcCoords[2], viewport) },
+        ndcToScreenCoords(ndcCoords[0], viewport),
+        ndcToScreenCoords(ndcCoords[1], viewport),
+        ndcToScreenCoords(ndcCoords[2], viewport),
     };
 
     ImGui::Begin("Debug info");
@@ -262,7 +262,6 @@ void Renderer::drawTriangle(Triangle3 _triangle)
         for (int i = 0; i < 3; i++) ImGui::Text("Clip   coords %d: (%.2f, %.2f, %.2f, %.2f)%s", i, clipCoords[i].x,   clipCoords[i].y,   clipCoords[i].z,   clipCoords[i].w,  (i == 2 ? "\n " : ""));
         for (int i = 0; i < 3; i++) ImGui::Text("NDC    coords %d: (%.2f, %.2f, %.2f)%s",       i, ndcCoords[i].x,    ndcCoords[i].y,    ndcCoords[i].z,                      (i == 2 ? "\n " : ""));
         for (int i = 0; i < 3; i++) ImGui::Text("Screen coords %d: (%.0f, %.0f, %.3f)%s",       i, screenCoords[i].x, screenCoords[i].y, screenCoords[i].z,                   (i == 2 ? "\n " : ""));
-        ImGui::Text("\n");
     }
     ImGui::End();
 
@@ -280,6 +279,13 @@ void Renderer::drawTriangle(Triangle3 _triangle)
 
     // Make sure the triangle vertices are in the right order to be drawn.
     swapTriangleVertices(screenCoords, viewCoords, &_triangle.a);
+
+    // Bring uv coords to clip space.
+    Vector3 perspectiveUV[3] = {
+        { _triangle.a.uv.x / viewCoords[0].z, _triangle.a.uv.y / viewCoords[0].z, 1 / viewCoords[0].z },
+        { _triangle.b.uv.x / viewCoords[1].z, _triangle.b.uv.y / viewCoords[1].z, 1 / viewCoords[1].z },
+        { _triangle.c.uv.x / viewCoords[2].z, _triangle.c.uv.y / viewCoords[2].z, 1 / viewCoords[2].z }
+    };
 
     // Compute triangle bounding box.
     int minX = min(min(screenCoords[0].x, screenCoords[1].x), screenCoords[2].x);
@@ -320,7 +326,8 @@ void Renderer::drawTriangle(Triangle3 _triangle)
             float w2n = w2 / (float)(w0 + w1 + w2);
 
             // Compute the pixel depth.
-            float depth = abs(viewCoords[0].z * w0n + viewCoords[1].z * w1n + viewCoords[2].z * w2n);
+            float depth = abs(perspectiveUV[0].z * w0n + perspectiveUV[1].z * w1n + perspectiveUV[2].z * w2n);
+                  depth = 1 / depth;
 
             // Define the pixel color.
             Color pCol { 0, 0, 0, 0 };
@@ -337,11 +344,12 @@ void Renderer::drawTriangle(Triangle3 _triangle)
             if (texture.pixels != nullptr)
             {
                 // Compute the uv coordinates.
-                Vector2 uv = { clamp(_triangle.a.uv.x * w0n + _triangle.b.uv.x * w1n + _triangle.c.uv.x * w2n, 0, 1),
-                               clamp(_triangle.a.uv.y * w0n + _triangle.b.uv.y * w1n + _triangle.c.uv.y * w2n, 0, 1) };
+                Vector2 uv = { clamp(depth * (perspectiveUV[0].x * w0n + perspectiveUV[1].x * w1n + perspectiveUV[2].x * w2n), 0, 1),
+                               clamp(depth * (perspectiveUV[0].y * w0n + perspectiveUV[1].y * w1n + perspectiveUV[2].y * w2n), 0, 1) };
 
                 // Get the pixel color from the current texture.
-                Color texColor = texture.getPixelColor(floorInt(lerp(uv.x, 0, texture.width)), floorInt(lerp(uv.y, 0, texture.height)));
+                Color texColor = texture.getPixelColor(floorInt(clampAbove(lerp(uv.x, 0, abs(texture.width )), 0)), 
+                                                       floorInt(clampAbove(lerp(uv.y, 0, abs(texture.height)), 0)));
 
                 // Apply the texture color to the pixel color.
                 if (texture.applyVertexColor)
@@ -357,6 +365,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                 ImGui::Text("Pixel uv:    %f, %f", _triangle.a.uv.x * w0n + _triangle.b.uv.x * w1n + _triangle.c.uv.x * w2n, _triangle.a.uv.y * w0n + _triangle.b.uv.y * w1n + _triangle.c.uv.y * w2n);
                 ImGui::Text("Pixel color: %.2f, %.2f, %.2f", pCol.r, pCol.g, pCol.b);
                 ImGui::Text("Pixel hue:   %.2f", colorGetHue(pCol));
+                ImGui::Text("\n\n");
                 ImGui::End();
             }
 
@@ -387,14 +396,14 @@ void Renderer::drawDividedQuad(const Color& _color, const float& _size, const bo
     Triangle3 triangles[2] = 
     {
         {
-            { { -_size / 2,  _size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 0, 0 } },
-            { { -_size / 2, -_size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 0, 1 } },
-            { {  _size / 2,  _size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 1, 0 } },
+            { { -_size / 2, -_size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 1, 0 } },
+            { {  _size / 2, -_size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 0, 0 } },
+            { {  _size / 2,  _size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 0, 1 } },
         },
         {
-            { {  _size / 2, -_size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 1, 1 } },
-            { {  _size / 2,  _size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 1, 0 } },
-            { { -_size / 2, -_size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 0, 1 } },
+            { { -_size / 2, -_size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 1, 0 } },
+            { { -_size / 2,  _size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 1, 1 } },
+            { {  _size / 2,  _size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 0, 1 } },
         },
     };
     
