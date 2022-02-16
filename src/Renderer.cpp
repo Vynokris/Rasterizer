@@ -326,6 +326,13 @@ void Renderer::drawTriangle(Triangle3 _triangle)
             // Compute the pixel depth.
             float depth = abs(perspectiveUV[0].z * w0n + perspectiveUV[1].z * w1n + perspectiveUV[2].z * w2n);
                   depth = 1 / depth;
+                
+            // Interpolate pixel lighting.
+            Color pLight { 
+                w0n * lightIntensity[0].r + w1n * lightIntensity[0].g + w2n * lightIntensity[0].b,
+                w0n * lightIntensity[1].r + w1n * lightIntensity[1].g + w2n * lightIntensity[1].b,
+                w0n * lightIntensity[2].r + w1n * lightIntensity[2].g + w2n * lightIntensity[2].b,
+            };
 
             // Define the pixel color.
             Color pCol { 0, 0, 0, 0 };
@@ -333,9 +340,9 @@ void Renderer::drawTriangle(Triangle3 _triangle)
             if (texture.pixels == nullptr || texture.applyVertexColor)
             {
                 // Get the pixel color from barycentric coordinates.
-                pCol.r = _triangle.a.color.r * w0n * lightIntensity[0].r + _triangle.b.color.r * w1n * lightIntensity[0].g + _triangle.c.color.r * w2n * lightIntensity[0].b; 
-                pCol.g = _triangle.a.color.g * w0n * lightIntensity[1].r + _triangle.b.color.g * w1n * lightIntensity[1].g + _triangle.c.color.g * w2n * lightIntensity[1].b; 
-                pCol.b = _triangle.a.color.b * w0n * lightIntensity[2].r + _triangle.b.color.b * w1n * lightIntensity[2].g + _triangle.c.color.b * w2n * lightIntensity[2].b; 
+                pCol.r = _triangle.a.color.r * w0n + _triangle.b.color.r * w1n + _triangle.c.color.r * w2n; 
+                pCol.g = _triangle.a.color.g * w0n + _triangle.b.color.g * w1n + _triangle.c.color.g * w2n; 
+                pCol.b = _triangle.a.color.b * w0n + _triangle.b.color.b * w1n + _triangle.c.color.b * w2n; 
                 pCol.a = _triangle.a.color.a * w0n + _triangle.b.color.a * w1n + _triangle.c.color.a * w2n;
             }
 
@@ -350,16 +357,19 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                                                        floorInt(clampAbove(lerp(uv.y, 0, abs(texture.height)), 0)));
 
                 // Apply the texture color to the pixel color.
-                if (texture.applyVertexColor)
-                {
+                if (texture.applyVertexColor) {
                     HSV pHSV = RGBtoHSV(texColor);
                     pCol = HSVtoRGB({ pCol.getHue(), pHSV.s, pHSV.v });
                 }
-                else
-                {
+                else {
                     pCol = texColor;
                 }
             }
+
+            // Apply the pixel lighting to the pixel color.
+            pCol.r *= pLight.r;
+            pCol.g *= pLight.g;
+            pCol.b *= pLight.b;
 
             // If p is on or inside all edges, render pixel.
             if ((w0 | w1 | w2) >= 0) drawPixel(p.x, p.y, depth, pCol);
