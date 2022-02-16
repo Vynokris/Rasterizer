@@ -1,8 +1,11 @@
 #pragma once
 
+#include <vector>
+
 #include <Renderer.hpp>
 #include <Framebuffer.hpp>
 #include <Camera.hpp>
+#include <Light.hpp>
 #include <BmpLoader.hpp>
 
 struct Viewport
@@ -14,35 +17,37 @@ struct Viewport
     unsigned int width, height;
 };
 
-enum class RenderMode : int
-{
-    DEFAULT,
-    WIREFRAME,
-    ZBUFFER,
-};
+enum class RenderMode : int   { DEFAULT, WIREFRAME, ZBUFFER };
+
+enum class LightingMode : int { PHONG, BLINN };   
 
 class Renderer
 {
 private:
+    // TODO: Make object class and apply texture and material.
     TextureData texture;
-    Viewport viewport;
+    Material    mat; 
+    Viewport    viewport;
 
     std::vector<Mat4> modelMat;
     Mat4 viewMat;
     Mat4 projectionMat;
 
-    RenderMode renderMode = RenderMode::DEFAULT;
+    // Scene components copied datas.
+    std::vector<Light> lights;
+
+    RenderMode   renderMode   = RenderMode::DEFAULT;
+    LightingMode lightingMode = LightingMode::PHONG;
 
 public:
     Framebuffer framebuffer;
     
-    Renderer(const unsigned int& _width, const unsigned int& _height);
-    ~Renderer();
+    Renderer(const unsigned int& _width, const unsigned int& _height, const std::vector<Light>& _lights);
 
     // -- Setters for the three matrices -- //
 
-    void setModel(const Mat4& _modelMatrix);
-    void setView(const Mat4& _viewMatrix);
+    void setModel     (const Mat4& _modelMatrix);
+    void setView      (const Mat4& _viewMatrix);
     void setProjection(const Mat4& _projectionMatrix);
 
     // ------- Model transformations ------ //
@@ -57,18 +62,22 @@ public:
 
     // --------- Drawing functions -------- //
 
-    void setTexture(const TextureData& _textureData);
-    void drawPixel(const unsigned int& _x, const unsigned int& _y, const float& _depth, const Color& _color);
-    void drawLine(const geometry3D::Vertex& _p0, const geometry3D::Vertex& _p1);
-    void drawTriangles(geometry3D::Triangle3* _triangles, const unsigned int& _count);
+    void drawPixel      (const unsigned int& _x, const unsigned int& _y, const float& _depth, const Color& _color);
+    void drawLine       (const geometry3D::Vertex& _p0, const geometry3D::Vertex& _p1);
+    void drawTriangles  (geometry3D::Triangle3* _triangles, const unsigned int& _count);
     void drawDividedQuad(const Color& _color, const float& _size = 1.f, const bool& _negateNormals = false);
-    void drawCube(const Color& _color, const float& _size = 1.f);
-    void drawSphere(const float& _r, const int& _lon, const int& _lat, const Color& _color);
+    void drawCube       (const Color& _color, const float& _size = 1.f);
+    void drawSphere     (const float& _r, const int& _lon, const int& _lat, const Color& _color);
 
     // --- View mode getters / setters --- //
 
     RenderMode getRenderMode() const;
-    void     setRenderMode(const RenderMode& _mode);
+    void       setRenderMode(const RenderMode& _mode);
+
+    // --- Material and texture setters --- //
+
+    void setTexture (const TextureData& _textureData);
+    void setMaterial(const Material& _material);
 
     // ---------- Miscellaneous ---------- //
     
@@ -77,5 +86,3 @@ public:
 private:
     void drawTriangle(geometry3D::Triangle3 _triangle);
 };
-
-

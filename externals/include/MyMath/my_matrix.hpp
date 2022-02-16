@@ -268,6 +268,17 @@ class Matrix
                     m[i][j] *= val;
         }
 
+        // Matrix power.
+        Matrix<R,C> operator^(const float& n) const
+        {
+            Matrix<R,C> tmp;
+            for (int n0 = 0; n0 < n; n0++)
+                for (int i = 0; i < R; i++)
+                    for (int j = 0; j < C; j++)
+                        tmp[i][j] *= m[i][j];
+            return tmp;
+        }
+
         // ----- Methods ----- //
 
         // Getters.
