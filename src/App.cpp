@@ -210,6 +210,9 @@ void App::update()
 
         endFrame();
     }
+
+    //! Temporary.
+    delete[] baseTexture.pixels;
 }
 
 //destructor who kill glfw and clean the window buffer
