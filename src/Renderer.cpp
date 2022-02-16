@@ -165,7 +165,7 @@ static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords, V
     }
 }
 
-void Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local, Vector4* _world, Vector4* _view, Vector4* _clip, Vector3* _ndc, Vector3* _screen, Vector3* _perspectiveUV)
+bool Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local, Vector4* _world, Vector4* _view, Vector4* _clip, Vector3* _ndc, Vector3* _screen, Vector3* _perspectiveUV)
 {
     for (int i = 0; i < _count; i++)
     {
@@ -184,8 +184,10 @@ void Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local,
         // TODO: fix clipping.
 
         //! Temporarily clip triangles by nuking them when one vertex is offscreen.
-        if (!(-abs(_clip[i].w) <= _clip[i].x && _clip[i].x <= abs(_clip[i].w)))
-            return;
+        if (!((-abs(_clip[i].w) <= _clip[i].x) && (_clip[i].x <= abs(_clip[i].w)) &&
+              (-abs(_clip[i].w) <= _clip[i].y) && (_clip[i].y <= abs(_clip[i].w)) &&
+              (-abs(_clip[i].w) <= _clip[i].z) && (_clip[i].z <= abs(_clip[i].w))))
+            return false;
         
         // Clip space (4D) -> NDC (3D).
         _ndc[i] = _clip[i].toVector3(true);
@@ -202,6 +204,8 @@ void Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local,
         // Bring uv coords to clip space.
         _perspectiveUV[i] = { _vertices[i].uv.x / _view[i].z, _vertices[i].uv.y / _view[i].z, 1 / _view[i].z };
     }
+
+    return true;
 }
 
 void Renderer::drawTriangle(Triangle3 _triangle)
@@ -214,8 +218,8 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     Vector3 screenCoords[3];
     Vector3 perspectiveUV[3];
 
-    // Transform the triangle's vertices and UV throught the renderer's matrices.
-    transformVertices(3, &_triangle.a, localCoords, worldCoords, viewCoords, clipCoords, ndcCoords, screenCoords, perspectiveUV);
+    if (!transformVertices(3, &_triangle.a, localCoords, worldCoords, viewCoords, clipCoords, ndcCoords, screenCoords, perspectiveUV))
+        return;
 
     //! Show debug info on triangles.
     ImGui::Begin("Debug info");
