@@ -99,7 +99,7 @@ void App::update()
 
     // Load a texture.
     TextureData baseTexture = loadBmpData("art/UrAppreciated.bmp");
-    renderer.setTexture(baseTexture);
+    // renderer.setTexture(baseTexture);
 
     bool mouseCaptured = false;
     double mouseX = 0.0, mouseY = 0.0;

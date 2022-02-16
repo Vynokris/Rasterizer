@@ -208,6 +208,19 @@ bool Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local,
     return true;
 }
 
+static bool isTowardsCamera(const Vector3 _worldPos, const Vector3& _worldNormal, const Vector3& _camPos)
+{
+    float  dotProduct  = _worldNormal & Vector3(_camPos, _worldPos);
+    ImGui::Begin("Debug info");
+    ImGui::Text("Triangle position: %.2f, %.2f, %.2f", _worldPos.x, _worldPos.y, _worldPos.z);
+    ImGui::Text("Triangle normal:   %.2f, %.2f, %.2f", _worldNormal.x, _worldNormal.y, _worldNormal.z);
+    ImGui::Text("Camera position:   %.2f, %.2f, %.2f", _camPos.x, _camPos.y, _camPos.z);
+    ImGui::Text("Dot product:       %.2f",             dotProduct);
+    ImGui::Text("\n");
+    ImGui::End();
+    return dotProduct >= 0;
+}
+
 void Renderer::drawTriangle(Triangle3 _triangle)
 {
     Vector3 localCoords[3];
@@ -218,6 +231,24 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     Vector3 screenCoords[3];
     Vector3 perspectiveUV[3];
 
+    // Get the triangle's world position.
+    Vector3 trianglePos = (Vector4(_triangle.getCenterOfMass().pos, 1) * modelMat.back()).toVector3();
+
+    // Get the camera's position.
+    Vector3 cameraPos    = (Vector4(0, 0, 0, 1) * viewMat.inv4()).toVector3(true);
+            cameraPos.y *= -1;
+
+    // Get the triangle's normal in world coordinates.
+    Vector3 worldNormal = ((Vector4( _triangle.a.normal, 1 ) * modelMat.back().inv4().transpose()).toVector3()
+                        +  (Vector4( _triangle.b.normal, 1 ) * modelMat.back().inv4().transpose()).toVector3()
+                        +  (Vector4( _triangle.c.normal, 1 ) * modelMat.back().inv4().transpose()).toVector3())
+                        /  3;
+
+    // Back face culling.
+    if (!isTowardsCamera(trianglePos, worldNormal, cameraPos))
+        return;
+
+    // Transform the triangle's vertices through the renderer's matrices.
     if (!transformVertices(3, &_triangle.a, localCoords, worldCoords, viewCoords, clipCoords, ndcCoords, screenCoords, perspectiveUV))
         return;
 
@@ -343,7 +374,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                 ImGui::Text("Pixel uv:    %f, %f", _triangle.a.uv.x * w0n + _triangle.b.uv.x * w1n + _triangle.c.uv.x * w2n, _triangle.a.uv.y * w0n + _triangle.b.uv.y * w1n + _triangle.c.uv.y * w2n);
                 ImGui::Text("Pixel color: %.2f, %.2f, %.2f", pCol.r, pCol.g, pCol.b);
                 ImGui::Text("Pixel hue:   %.2f", pCol.getHue());
-                ImGui::Text("\n\n");
+                ImGui::Text("\n\n\n");
                 ImGui::End();
             }
 
@@ -395,7 +426,7 @@ void Renderer::drawCube(const Color& _color, const float& _size)
 
         modelPushMat();
         modelTranslate(0, 0, _size / 2);
-        drawDividedQuad(_color, _size, true);
+        drawDividedQuad(_color, _size, (i >= 4 ? true : false));
         modelPopMat();
     }
 }
@@ -420,14 +451,14 @@ void Renderer::drawSphere(const float& _r, const int& _lon, const int& _lat, con
             Triangle3 triangles[2] = 
             {
                 {
-                    { c0, { 0, 0, 1 }, _color, { 0, 0 } },
-                    { c1, { 0, 0, 1 }, _color, { 0, 1 } },
-                    { c2, { 0, 0, 1 }, _color, { 1, 0 } },
+                    { c0, Vector3(2*PI-(theta0+theta1)/2, (phi0+phi1)/2, 1, true), _color, { 0, 0 } },
+                    { c1, Vector3(2*PI-(theta0+theta1)/2, (phi0+phi1)/2, 1, true), _color, { 0, 1 } },
+                    { c2, Vector3(2*PI-(theta0+theta1)/2, (phi0+phi1)/2, 1, true), _color, { 1, 0 } },
                 },
                 {
-                    { c0, { 0, 0, 1 }, _color, { 1, 1 } },
-                    { c2, { 0, 0, 1 }, _color, { 1, 0 } },
-                    { c3, { 0, 0, 1 }, _color, { 0, 1 } },
+                    { c0, Vector3(2*PI-(theta0+theta1)/2, (phi0+phi1)/2, 1, true), _color, { 1, 1 } },
+                    { c2, Vector3(2*PI-(theta0+theta1)/2, (phi0+phi1)/2, 1, true), _color, { 1, 0 } },
+                    { c3, Vector3(2*PI-(theta0+theta1)/2, (phi0+phi1)/2, 1, true), _color, { 0, 1 } },
                 }
             };
     
