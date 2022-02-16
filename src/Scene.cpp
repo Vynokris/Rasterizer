@@ -64,15 +64,19 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     // Material mat = { { 0.0215, 0.1745, 0.0215 }, { 0.07568, 0.61424, 0.07568 },	{ 0.633, 0.727811, 0.633 },	0.6, 1 };
     _renderer.modelPushMat();
     _renderer.modelTranslate(-0.5, 0, 2);
-    _renderer.modelRotateX(-fmod(time/2, 2*PI));
+    _renderer.modelRotateX(fmod(time/2, 2*PI));
+    _renderer.modelRotateY(fmod(time/2, 2*PI));
+    _renderer.modelRotateZ(fmod(time/2, 2*PI));
     _renderer.drawCube(MAGENTA);
     _renderer.modelPopMat();
 
     // Draw sphere.
     _renderer.modelPushMat();
     _renderer.modelTranslate(0.5, 0, 2);
-    _renderer.modelRotateX(-fmod(time/2, 2*PI));
-    _renderer.drawSphere(1, 15, 15, BLUE);
+    _renderer.modelRotateX(fmod(time/2, 2*PI));
+    _renderer.modelRotateY(fmod(time/2, 2*PI));
+    _renderer.modelRotateZ(fmod(time/2, 2*PI));
+    _renderer.drawSphere(1, 10, 10, CYAN);
     _renderer.modelPopMat();
     
     

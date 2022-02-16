@@ -44,11 +44,8 @@ void Renderer::drawPixel(const unsigned int& _x, const unsigned int& _y, const f
         framebuffer.depthBuffer[index] = _depth;
         switch (getRenderMode())
         {
-        case RenderMode::UNLIT:
-        case RenderMode::LIT:
-        case RenderMode::WIREFRAME: framebuffer.colorBuffer[index] = _color;                        break;
         case RenderMode::ZBUFFER:   framebuffer.colorBuffer[index] = { _depth, _depth, _depth, 1 }; break;
-        default: break;
+        default:                    framebuffer.colorBuffer[index] = _color;                        break;
         }
     }
 }
@@ -209,45 +206,43 @@ bool Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local,
 
 static bool isTowardsCamera(const Vector3 _worldPos, const Vector3& _worldNormal, const Vector3& _camPos)
 {
-    float  dotProduct  = _worldNormal & Vector3(_camPos, _worldPos);
-
-    ImGui::Begin("Debug info");
-    ImGui::Text("Triangle position:  %.2f, %.2f, %.2f", _worldPos.x, _worldPos.y, _worldPos.z);
-    ImGui::Text("Triangle normal:    %.2f, %.2f, %.2f", _worldNormal.x, _worldNormal.y, _worldNormal.z);
-    ImGui::Text("Vector to triangle: %.2f, %.2f, %.2f", Vector3(_camPos, _worldPos).x, Vector3(_camPos, _worldPos).y, Vector3(_camPos, _worldPos).z);
-    ImGui::Text("Camera position:    %.2f, %.2f, %.2f", _camPos.x, _camPos.y, _camPos.z);
-    ImGui::Text("Dot product:        %.2f",             dotProduct);
-    ImGui::Text("\n");
-    ImGui::End();
-    
-    return dotProduct >= 0;
+    return (_worldNormal & Vector3(_camPos, _worldPos)) <= 0;
 }
 
 void Renderer::drawTriangle(Triangle3 _triangle)
 {
-    Vector3 localCoords[3];
-    Vector4 worldCoords[3];
-    Vector4 viewCoords[3];
-    Vector4 clipCoords[3];
-    Vector3 ndcCoords[3];
-    Vector3 screenCoords[3];
+    Vector3 localCoords  [3];
+    Vector4 worldCoords  [3];
+    Vector4 viewCoords   [3];
+    Vector4 clipCoords   [3];
+    Vector3 ndcCoords    [3];
+    Vector3 screenCoords [3];
     Vector3 perspectiveUV[3];
 
     // Get the triangle's world position.
-    Vector3 trianglePos = (Vector4(_triangle.getCenterOfMass().pos, 1) * modelMat.back()).toVector3();
-
-    // Get the camera's position.
-    Vector3 cameraPos    = (Vector4(0, 0, 0, 1) * viewMat.inv4()).toVector3();
-            cameraPos.y *= -1;
+    Vector3 trianglePos = (Vector4(_triangle.getCenterOfMass().pos, 1) 
+                        * modelMat.back()).toVector3();
 
     // Get the triangle's normal in world coordinates.
-    Vector3 worldNormal = (Vector4((_triangle.a.normal + _triangle.b.normal + _triangle.c.normal) / 3, 0) * modelMat.back()).toVector3().getNormalized();
+    Vector3 worldNormal = (Vector4((_triangle.a.normal + _triangle.b.normal + _triangle.c.normal) / 3, 0)
+                        * modelMat.back()).toVector3().getNormalized();
+
+    // Get the camera's position.
+    Vector3 cameraPos = (Vector4(0, 0, 0, 1)
+                      * viewMat.inv4()).toVector3();
+
+    ImGui::Begin("Debug info");
+    ImGui::Text("Triangle position:  %.2f, %.2f, %.2f", trianglePos.x, trianglePos.y, trianglePos.z);
+    ImGui::Text("Triangle normal:    %.2f, %.2f, %.2f", worldNormal.x, worldNormal.y, worldNormal.z);
+    ImGui::Text("Vector to triangle: %.2f, %.2f, %.2f", Vector3(cameraPos, trianglePos).x, Vector3(cameraPos, trianglePos).y, Vector3(cameraPos, trianglePos).z);
+    ImGui::Text("Camera position:    %.2f, %.2f, %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
+    ImGui::Text("Dot product:        %.2f",             worldNormal & Vector3(cameraPos, trianglePos));
+    ImGui::Text("\n");
+    ImGui::End();
 
     // Back face culling.
-    /*
     if (!isTowardsCamera(trianglePos, worldNormal, cameraPos))
         return;
-    */
 
     // Transform the triangle's vertices through the renderer's matrices.
     if (!transformVertices(3, &_triangle.a, localCoords, worldCoords, viewCoords, clipCoords, ndcCoords, screenCoords, perspectiveUV))
@@ -401,17 +396,21 @@ void Renderer::drawTriangles(Triangle3* _triangles, const unsigned int& _count)
 
 void Renderer::drawDividedQuad(const Color& _color, const float& _size, const bool& _negateNormals)
 {
+    // Get the quad's normal.
+    Vector3 normal = (Vector3({ -_size / 2, -_size / 2, 0 }, {  _size / 2, -_size / 2, 0 }) 
+                   ^  Vector3({ -_size / 2, -_size / 2, 0 }, { -_size / 2,  _size / 2, 0 })).getNormalized();
+
     Triangle3 triangles[2] = 
     {
         {
-            { { -_size / 2, -_size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 1, 0 } },
-            { {  _size / 2, -_size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 0, 0 } },
-            { {  _size / 2,  _size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 0, 1 } },
+            { { -_size / 2, -_size / 2, 0 }, normal, _color, { 1, 0 } },
+            { {  _size / 2, -_size / 2, 0 }, normal, _color, { 0, 0 } },
+            { {  _size / 2,  _size / 2, 0 }, normal, _color, { 0, 1 } },
         },
         {
-            { { -_size / 2, -_size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 1, 0 } },
-            { { -_size / 2,  _size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 1, 1 } },
-            { {  _size / 2,  _size / 2, 0 }, { 0, 0, (_negateNormals ? 1.f : -1.f) }, _color, { 0, 1 } },
+            { { -_size / 2, -_size / 2, 0 }, normal, _color, { 1, 0 } },
+            { { -_size / 2,  _size / 2, 0 }, normal, _color, { 1, 1 } },
+            { {  _size / 2,  _size / 2, 0 }, normal, _color, { 0, 1 } },
         },
     };
     
@@ -421,6 +420,7 @@ void Renderer::drawDividedQuad(const Color& _color, const float& _size, const bo
 void Renderer::drawCube(const Color& _color, const float& _size)
 {
     // Render all the faces.
+    modelPushMat();
     for (int i = 0; i < 6; i++)
     {
         if      (i < 4)  modelRotateY(PI / 2);
@@ -432,6 +432,7 @@ void Renderer::drawCube(const Color& _color, const float& _size)
         drawDividedQuad(_color, _size, (i >= 4 ? true : false));
         modelPopMat();
     }
+    modelPopMat();
 }
 
 void Renderer::drawSphere(const float& _r, const int& _lon, const int& _lat, const Color& _color)
@@ -446,22 +447,30 @@ void Renderer::drawSphere(const float& _r, const int& _lon, const int& _lat, con
             float phi0 = ( (i + 0) / (float)_lon) * 2.f * PI;
             float phi1 = ( (i + 1) / (float)_lon) * 2.f * PI;
 
+            // Get the position of the 4 points of the current face.
             Vector3 c0 = getSphericalCoords(_r, theta0, phi0);
             Vector3 c1 = getSphericalCoords(_r, theta0, phi1);
             Vector3 c2 = getSphericalCoords(_r, theta1, phi1);
             Vector3 c3 = getSphericalCoords(_r, theta1, phi0);
 
+            // Compute the face normal.
+            Vector3 normal = (Vector3(c0, c1) ^ Vector3(c0, c2));
+            if (normal.x == 0 && normal.y == 0 && normal.z == 0)
+                normal = (Vector3(c0, c2) ^ Vector3(c0, c3));
+            normal.normalize();
+
+            // Create the face triangles.
             Triangle3 triangles[2] = 
             {
                 {
-                    { c0, Vector3(2*PI-(theta0+theta1)/2, (phi0+phi1)/2, 1, true), _color, { 0, 0 } },
-                    { c1, Vector3(2*PI-(theta0+theta1)/2, (phi0+phi1)/2, 1, true), _color, { 0, 1 } },
-                    { c2, Vector3(2*PI-(theta0+theta1)/2, (phi0+phi1)/2, 1, true), _color, { 1, 0 } },
+                    { c0, normal, _color, { 0, 0 } },
+                    { c1, normal, _color, { 0, 1 } },
+                    { c2, normal, _color, { 1, 0 } },
                 },
                 {
-                    { c0, Vector3(2*PI-(theta0+theta1)/2, (phi0+phi1)/2, 1, true), _color, { 1, 1 } },
-                    { c2, Vector3(2*PI-(theta0+theta1)/2, (phi0+phi1)/2, 1, true), _color, { 1, 0 } },
-                    { c3, Vector3(2*PI-(theta0+theta1)/2, (phi0+phi1)/2, 1, true), _color, { 0, 1 } },
+                    { c0, normal, _color, { 1, 1 } },
+                    { c2, normal, _color, { 1, 0 } },
+                    { c3, normal, _color, { 0, 1 } },
                 }
             };
     

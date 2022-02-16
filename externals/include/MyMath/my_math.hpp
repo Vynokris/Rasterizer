@@ -159,17 +159,19 @@ namespace geometry2D
 
             // -- Operators -- //
 
-                                  void    operator=(const Vector2& v);
-            template <typename T> Vector2 operator+(const T& val) const;
-            template <typename T> Vector2 operator-(const T& val) const;
-            template <typename T> Vector2 operator*(const T& val) const;
-            template <typename T> Vector2 operator/(const T &val) const;
+                                  void    operator= (const Vector2& v);
+            template <typename T> bool    operator==(const T& val) const;
+            template <typename T> bool    operator!=(const T& val) const;
+            template <typename T> Vector2 operator+ (const T& val) const;
+            template <typename T> Vector2 operator- (const T& val) const;
+            template <typename T> Vector2 operator* (const T& val) const;
+            template <typename T> Vector2 operator/ (const T &val) const;
             template <typename T> void    operator+=(const T &val);
             template <typename T> void    operator-=(const T &val);
             template <typename T> void    operator*=(const T &val);
             template <typename T> void    operator/=(const T &val);
-                                  float   operator&(const Vector2& v) const;
-                                  float   operator^(const Vector2& v) const;
+                                  float   operator& (const Vector2& v) const;
+                                  float   operator^ (const Vector2& v) const;
 
             // -- Methods -- //
 
@@ -425,6 +427,8 @@ namespace geometry3D
             // -- Operators -- //
 
                                   void    operator= (const Vector3& other);
+            template <typename T> bool    operator==(const T& val) const;
+            template <typename T> bool    operator!=(const T& val) const;
             template <typename T> Vector3 operator+ (const T& val) const;
             template <typename T> Vector3 operator- (const T& val) const;
             template <typename T> Vector3 operator* (const T& val) const;
@@ -498,6 +502,8 @@ namespace geometry3D
             // -- Operators -- //
             
                                   void    operator= (const Vector4& other);
+            template <typename T> bool    operator==(const T& val) const;
+            template <typename T> bool    operator!=(const T& val) const;
             template <typename T> Vector4 operator+ (const T& val) const;
             template <typename T> Vector4 operator- (const T& val) const;
             template <typename T> Vector4 operator* (const T& val) const;

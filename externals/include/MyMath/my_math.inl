@@ -7,6 +7,30 @@ using namespace geometry3D;
 
 // ---------- VECTOR2 ---------- //
 
+// Vector2 equality.
+template <typename T>
+inline bool Vector2::operator==(const T& val) const
+{
+    return (x == val && y == val);
+}
+template<>
+inline bool Vector2::operator==<Vector2>(const Vector2& val) const
+{
+    return (x == val.x && y == val.y);
+}
+
+// Vector2 inequality.
+template <typename T>
+inline bool Vector2::operator!=(const T& val) const
+{
+    return (x != val && y != val);
+}
+template<>
+inline bool Vector2::operator!=<Vector2>(const Vector2& val) const
+{
+    return (x != val.x && y != val.y);
+}
+
 // Vector2 addition.
 template <typename T>
 inline Vector2 Vector2::operator+(const T& val) const
@@ -112,6 +136,30 @@ inline void Vector2::operator/=<Vector2>(const Vector2& val)
 }
 
 // ---------- VECTOR3 ---------- //
+
+// Vector3 equality.
+template <typename T>
+inline bool Vector3::operator==(const T& val) const
+{
+    return (x == val && y == val && z == val);
+}
+template<>
+inline bool Vector3::operator==<Vector3>(const Vector3& val) const
+{
+    return (x == val.x && y == val.y && z == val.z);
+}
+
+// Vector3 inequality.
+template <typename T>
+inline bool Vector3::operator!=(const T& val) const
+{
+    return (x != val && y != val && z != val);
+}
+template<>
+inline bool Vector3::operator!=<Vector3>(const Vector3& val) const
+{
+    return (x != val.x && y != val.y && z != val.z);
+}
 
 // Vector3 addition.
 template <typename T>
@@ -226,6 +274,30 @@ inline void Vector3::operator/=<Vector3>(const Vector3& val)
 }
 
 // ---------- VECTOR4 ---------- //
+
+// Vector4 equality.
+template <typename T>
+inline bool Vector4::operator==(const T& val) const
+{
+    return (x == val && y == val && z == val && w == val);
+}
+template<>
+inline bool Vector4::operator==<Vector4>(const Vector4& val) const
+{
+    return (x == val.x && y == val.y && z == val.z && w == val.w);
+}
+
+// Vector4 inequality.
+template <typename T>
+inline bool Vector4::operator!=(const T& val) const
+{
+    return (x != val && y != val && z != val && w != val);
+}
+template<>
+inline bool Vector4::operator!=<Vector4>(const Vector4& val) const
+{
+    return (x != val.x && y != val.y && z != val.z && w != val.z);
+}
 
 // Vector4 addition.
 template <typename T>
