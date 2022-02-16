@@ -353,9 +353,14 @@ void Renderer::drawTriangle(Triangle3 _triangle)
 
                 // Apply the texture color to the pixel color.
                 if (texture.applyVertexColor)
-                    pCol = colorShift(texColor, colorGetHue(pCol));
+                {
+                    HSV pHSV = RGBtoHSV(texColor);
+                    pCol = HSVtoRGB({ colorGetHue(pCol), pHSV.s, pHSV.v });
+                }
                 else
+                {
                     pCol = texColor;
+                }
             }
 
             if (p.x > maxX-1 && p.y > maxY-1)
