@@ -2,12 +2,19 @@
 
 #include <cstdio>
 using namespace arithmetic;
+#include <imgui.h>
 
 Color TextureData::getPixelColor(const int& x, const int& y)
 {
-    // Idk why but the first row of data is totally irrelevant (I use y+1).
-    int index = (abs(y) * (width + padding) + abs(x)) * 3;
-    return Color {
+    // Idk why sometimes x and y go to -infinity so I just obliterate the pixel.
+    if (x <= -2147483648 || y <= -2147483648)
+        return { 0, 0, 0, 0 };
+
+    // Find the index at which the pixel is located.
+    int index = (y * (width + padding) + x) * 3;
+
+    // Return the pixel's color (BGR -> RGB).
+    return {
         pixels[index+2] / 255.f,
         pixels[index+1] / 255.f,
         pixels[index]   / 255.f,
