@@ -64,7 +64,7 @@ public:
     
     void drawPixel        (const unsigned int& _x, const unsigned int& _y, const float& _depth, const Color& _color);
     void drawLine         (const geometry3D::Vertex& _p0, const geometry3D::Vertex& _p1);
-    void transformVertices(int count, Vertex* vertices, Vector3* local, Vector4* world, Vector4* view, Vector4* clip, Vector3* ndc, Vector3* screen);
+    bool transformVertices(int count, Vertex* vertices, Vector3* local, Vector4* world, Vector4* view, Vector4* clip, Vector3* ndc, Vector3* screen);
     void drawTriangles    (geometry3D::Triangle3* _triangles, const unsigned int& _count);
     void drawDividedQuad  (const Color& _color, const float& _size = 1.f, const bool& _negateNormals = false);
     void drawCube         (const Color& _color, const float& _size = 1.f);
