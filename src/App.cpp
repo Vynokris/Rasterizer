@@ -81,6 +81,7 @@ App::App(const AppInit& _init)
     ImGui::LoadIniSettingsFromDisk("externals/include/imgui.ini");
     ImGui::StyleColorsDark();
     ImGuiStyle& style = ImGui::GetStyle();
+    ImGui::GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
