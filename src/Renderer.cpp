@@ -165,33 +165,42 @@ static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords, V
     }
 }
 
-void Renderer::transformVertices(int count, Vertex* vertices, Vector3* local, Vector4* world, Vector4* view, Vector4* clip, Vector3* ndc, Vector3* screen)
+void Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local, Vector4* _world, Vector4* _view, Vector4* _clip, Vector3* _ndc, Vector3* _screen, Vector3* _perspectiveUV)
 {
-    for (int i = 0; i < count; i++)
+    for (int i = 0; i < _count; i++)
     {
         // Store triangle vertices positions.
-        local[i] = vertices[i].pos;
+        _local[i] = _vertices[i].pos;
         
         // Local space (3D) -> World space (3D).
-        world[i] = Vector4{ local[i], 1 } * modelMat.back();
+        _world[i] = Vector4{ _local[i], 1 } * modelMat.back();
         
         // World space (3D) -> View space (3D).
-        view[i] = world[i] * viewMat;
+        _view[i] = _world[i] * viewMat;
         
         // View space (3D) -> Clip space (4D).
-        clip[i] = view[i] * projectionMat;
+        _clip[i] = _view[i] * projectionMat;
 
         // TODO: fix clipping.
 
         //! Temporarily clip triangles by nuking them when one vertex is offscreen.
-        if (!(-abs(clip[i].w) <= clip[i].x && clip[i].x <= abs(clip[i].w)))
+        if (!(-abs(_clip[i].w) <= _clip[i].x && _clip[i].x <= abs(_clip[i].w)))
             return;
         
         // Clip space (4D) -> NDC (3D).
-        ndc[i] = clip[i].toVector3(true);
+        _ndc[i] = _clip[i].toVector3(true);
         
         // NDC (3D) -> screen coords (2D).
-        screen[i] = ndcToScreenCoords(ndc[i], viewport);
+        _screen[i] = ndcToScreenCoords(_ndc[i], viewport);
+    }
+    
+    // Make sure the triangle vertices are in the right order to be drawn.
+    swapTriangleVertices(_screen, _view, _vertices);
+
+    for (int i = 0; i < _count; i++)
+    {
+        // Bring uv coords to clip space.
+        _perspectiveUV[i] = { _vertices[i].uv.x / _view[i].z, _vertices[i].uv.y / _view[i].z, 1 / _view[i].z };
     }
 }
 
@@ -203,10 +212,12 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     Vector4 clipCoords[3];
     Vector3 ndcCoords[3];
     Vector3 screenCoords[3];
+    Vector3 perspectiveUV[3];
 
-    transformVertices(3, &_triangle.a, localCoords, worldCoords, viewCoords, clipCoords, ndcCoords, screenCoords);
+    // Transform the triangle's vertices and UV throught the renderer's matrices.
+    transformVertices(3, &_triangle.a, localCoords, worldCoords, viewCoords, clipCoords, ndcCoords, screenCoords, perspectiveUV);
 
-    //! DEBUG PANNEL
+    //! Show debug info on triangles.
     ImGui::Begin("Debug info");
     {
         for (int i = 0; i < 3; i++) ImGui::Text("Local  coords %d: (%.2f, %.2f, %.2f)%s",       i, localCoords[i].x,  localCoords[i].y,  localCoords[i].z,                    (i == 2 ? "\n " : ""));
@@ -218,7 +229,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     }
     ImGui::End();
 
-    // Draw triangle wireframe
+    // Draw triangle wireframe.
     if (getRenderMode() == RenderMode::WIREFRAME)
     {
         drawLine({ screenCoords[0], _triangle.a.normal, _triangle.a.color, _triangle.a.uv }, 
@@ -229,16 +240,6 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                  { screenCoords[0], _triangle.a.normal, _triangle.a.color, _triangle.a.uv });
         return;
     }
-
-    // Make sure the triangle vertices are in the right order to be drawn.
-    swapTriangleVertices(screenCoords, viewCoords, &_triangle.a);
-
-    // Bring uv coords to clip space.
-    Vector3 perspectiveUV[3] = {
-        { _triangle.a.uv.x / viewCoords[0].z, _triangle.a.uv.y / viewCoords[0].z, 1 / viewCoords[0].z },
-        { _triangle.b.uv.x / viewCoords[1].z, _triangle.b.uv.y / viewCoords[1].z, 1 / viewCoords[1].z },
-        { _triangle.c.uv.x / viewCoords[2].z, _triangle.c.uv.y / viewCoords[2].z, 1 / viewCoords[2].z }
-    };
 
     // Compute triangle bounding box.
     int minX = min(min(screenCoords[0].x, screenCoords[1].x), screenCoords[2].x);
@@ -327,6 +328,10 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                 }
             }
 
+            // If p is on or inside all edges, render pixel.
+            if ((w0 | w1 | w2) >= 0) drawPixel(p.x, p.y, depth, pCol);
+
+            //! Show debug info on the last pixel.
             if (p.x > maxX-1 && p.y > maxY-1)
             {
                 ImGui::Begin("Debug info");
@@ -337,9 +342,6 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                 ImGui::Text("\n\n");
                 ImGui::End();
             }
-
-            // If p is on or inside all edges, render pixel.
-            if ((w0 | w1 | w2) >= 0) drawPixel(p.x, p.y, depth, pCol);
 
             // One step to the right.
             w0 += A12;
