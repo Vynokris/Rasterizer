@@ -44,7 +44,8 @@ void Renderer::drawPixel(const unsigned int& _x, const unsigned int& _y, const f
         framebuffer.depthBuffer[index] = _depth;
         switch (getRenderMode())
         {
-        case RenderMode::DEFAULT:
+        case RenderMode::UNLIT:
+        case RenderMode::LIT:
         case RenderMode::WIREFRAME: framebuffer.colorBuffer[index] = _color;                        break;
         case RenderMode::ZBUFFER:   framebuffer.colorBuffer[index] = { _depth, _depth, _depth, 1 }; break;
         default: break;
@@ -211,18 +212,6 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     if (!transformVertices(3, &_triangle.a, localCoords, worldCoords, viewCoords, clipCoords, ndcCoords, screenCoords))
         return;
 
-    //! DEBUG PANNEL
-    ImGui::Begin("Debug info");
-    {
-        for (int i = 0; i < 3; i++) ImGui::Text("Local  coords %d: (%.2f, %.2f, %.2f)%s",       i, localCoords[i].x,  localCoords[i].y,  localCoords[i].z,                    (i == 2 ? "\n " : ""));
-        for (int i = 0; i < 3; i++) ImGui::Text("World  coords %d: (%.2f, %.2f, %.2f, %.2f)%s", i, worldCoords[i].x,  worldCoords[i].y,  worldCoords[i].z,  worldCoords[i].w, (i == 2 ? "\n " : ""));
-        for (int i = 0; i < 3; i++) ImGui::Text("View   coords %d: (%.2f, %.2f, %.2f, %.2f)%s", i, viewCoords[i].x,   viewCoords[i].y,   viewCoords[i].z,   viewCoords[i].w,  (i == 2 ? "\n " : ""));
-        for (int i = 0; i < 3; i++) ImGui::Text("Clip   coords %d: (%.2f, %.2f, %.2f, %.2f)%s", i, clipCoords[i].x,   clipCoords[i].y,   clipCoords[i].z,   clipCoords[i].w,  (i == 2 ? "\n " : ""));
-        for (int i = 0; i < 3; i++) ImGui::Text("NDC    coords %d: (%.2f, %.2f, %.2f)%s",       i, ndcCoords[i].x,    ndcCoords[i].y,    ndcCoords[i].z,                      (i == 2 ? "\n " : ""));
-        for (int i = 0; i < 3; i++) ImGui::Text("Screen coords %d: (%.0f, %.0f, %.3f)%s",       i, screenCoords[i].x, screenCoords[i].y, screenCoords[i].z,                   (i == 2 ? "\n " : ""));
-    }
-    ImGui::End();
-
     // Draw triangle wireframe
     if (getRenderMode() == RenderMode::WIREFRAME)
     {
@@ -244,6 +233,44 @@ void Renderer::drawTriangle(Triangle3 _triangle)
         { _triangle.b.uv.x / viewCoords[1].z, _triangle.b.uv.y / viewCoords[1].z, 1 / viewCoords[1].z },
         { _triangle.c.uv.x / viewCoords[2].z, _triangle.c.uv.y / viewCoords[2].z, 1 / viewCoords[2].z }
     };
+
+    // Determine the view vector and normals in world space.
+    Vector3 viewVec = { -viewMat[3][0], -viewMat[3][1], -viewMat[3][2] };
+    Vector3 worldNormals[3] = {
+        (Vector4( _triangle.a.normal, 1 ) * modelMat.back()).getNormalized().toVector3(),
+        (Vector4( _triangle.b.normal, 1 ) * modelMat.back()).getNormalized().toVector3(),
+        (Vector4( _triangle.c.normal, 1 ) * modelMat.back()).getNormalized().toVector3()
+    };
+
+    // Compute Phong lighting for each vertex.
+    Color lightIntensity[3] = { { 1, 1, 1, 1 }, { 1, 1, 1, 1 }, { 1, 1, 1, 1 }, };
+    for (Light it : lights)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            if (getRenderMode() == RenderMode::LIT)
+            {
+                lightIntensity[i] *= computePhong(it, mat, worldCoords[i].toVector3(), worldNormals[i], viewVec);
+            }
+            else
+            {
+                lightIntensity[i] = WHITE;
+            }
+        }
+    }
+    
+    //! DEBUG PANNEL
+    ImGui::Begin("Debug info");
+    {
+        for (int i = 0; i < 3; i++) ImGui::Text("Local  coords %d: (%.2f, %.2f, %.2f)%s",       i, localCoords[i].x,  localCoords[i].y,  localCoords[i].z,                    (i == 2 ? "\n " : ""));
+        for (int i = 0; i < 3; i++) ImGui::Text("World  coords %d: (%.2f, %.2f, %.2f, %.2f)%s", i, worldCoords[i].x,  worldCoords[i].y,  worldCoords[i].z,  worldCoords[i].w, (i == 2 ? "\n " : ""));
+        for (int i = 0; i < 3; i++) ImGui::Text("View   coords %d: (%.2f, %.2f, %.2f, %.2f)%s", i, viewCoords[i].x,   viewCoords[i].y,   viewCoords[i].z,   viewCoords[i].w,  (i == 2 ? "\n " : ""));
+        for (int i = 0; i < 3; i++) ImGui::Text("View vector: (%.2f, %.2f, %.2f)%s",            viewVec.x, viewVec.y, viewVec.z,                                              (i == 2 ? "\n " : ""));
+        for (int i = 0; i < 3; i++) ImGui::Text("Clip   coords %d: (%.2f, %.2f, %.2f, %.2f)%s", i, clipCoords[i].x,   clipCoords[i].y,   clipCoords[i].z,   clipCoords[i].w,  (i == 2 ? "\n " : ""));
+        for (int i = 0; i < 3; i++) ImGui::Text("NDC    coords %d: (%.2f, %.2f, %.2f)%s",       i, ndcCoords[i].x,    ndcCoords[i].y,    ndcCoords[i].z,                      (i == 2 ? "\n " : ""));
+        for (int i = 0; i < 3; i++) ImGui::Text("Screen coords %d: (%.0f, %.0f, %.3f)%s",       i, screenCoords[i].x, screenCoords[i].y, screenCoords[i].z,                   (i == 2 ? "\n " : ""));
+    }
+    ImGui::End();
 
     // Compute triangle bounding box.
     int minX = min(min(screenCoords[0].x, screenCoords[1].x), screenCoords[2].x);
@@ -267,17 +294,6 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     int w0_row = barycentricCoords(screenCoords[1], screenCoords[2], p);
     int w1_row = barycentricCoords(screenCoords[2], screenCoords[0], p);
     int w2_row = barycentricCoords(screenCoords[0], screenCoords[1], p);
-
-    //! Compute Phong lighting.
-    /*
-    Vector3 viewVec = { -viewMat[3][0], -viewMat[3][1], -viewMat[3][2] };
-    for (Light it : lights)
-    {
-        _triangle.a.color *= computePhong(it, mat, worldCoords[0].toVector3(), worldNormals[0].toVector3(), viewVec);
-        _triangle.b.color *= computePhong(it, mat, worldCoords[1].toVector3(), worldNormals[1].toVector3(), viewVec);
-        _triangle.c.color *= computePhong(it, mat, worldCoords[2].toVector3(), worldNormals[2].toVector3(), viewVec);
-    }
-    */
 
     // Rasterize the triangle.
     for (p.y = minY; p.y <= maxY; p.y++) 
@@ -304,9 +320,9 @@ void Renderer::drawTriangle(Triangle3 _triangle)
             if (texture.pixels == nullptr || texture.applyVertexColor)
             {
                 // Get the pixel color from barycentric coordinates.
-                pCol.r = _triangle.a.color.r * w0n + _triangle.b.color.r * w1n + _triangle.c.color.r * w2n; 
-                pCol.g = _triangle.a.color.g * w0n + _triangle.b.color.g * w1n + _triangle.c.color.g * w2n; 
-                pCol.b = _triangle.a.color.b * w0n + _triangle.b.color.b * w1n + _triangle.c.color.b * w2n; 
+                pCol.r = _triangle.a.color.r * w0n * lightIntensity[0].r + _triangle.b.color.r * w1n * lightIntensity[0].g + _triangle.c.color.r * w2n * lightIntensity[0].b; 
+                pCol.g = _triangle.a.color.g * w0n * lightIntensity[1].r + _triangle.b.color.g * w1n * lightIntensity[1].g + _triangle.c.color.g * w2n * lightIntensity[1].b; 
+                pCol.b = _triangle.a.color.b * w0n * lightIntensity[2].r + _triangle.b.color.b * w1n * lightIntensity[2].g + _triangle.c.color.b * w2n * lightIntensity[2].b; 
                 pCol.a = _triangle.a.color.a * w0n + _triangle.b.color.a * w1n + _triangle.c.color.a * w2n;
             }
 
@@ -437,15 +453,8 @@ void Renderer::drawSphere(const float& _r, const int& _lon, const int& _lat, con
 
 // --- View mode getters / setters --- //
 
-RenderMode Renderer::getRenderMode() const
-{
-    return renderMode;
-}
-
-void Renderer::setRenderMode(const RenderMode& _mode)
-{
-    renderMode = _mode;
-}
+RenderMode Renderer::getRenderMode() const            { return renderMode; }
+void Renderer::setRenderMode(const RenderMode& _mode) { renderMode = _mode; }
 
 // --- Material and texture setters --- //
 
@@ -457,7 +466,7 @@ void Renderer::setMaterial(const Material& _material)       { mat     = _materia
 void Renderer::showImGuiControls()
 {
     // Static variables.
-    static const char* items[]{"Default", "Wireframe", "Z-Buffer"};
+    static const char* items[]{"Unlit", "Lit", "Wireframe", "Z-Buffer"};
     static int curItem = 0;
     
     // Displaying components.
