@@ -12,7 +12,9 @@
 #include <cstdint>
 #include <vector>
 #include <ctime>
-#include "my_matrix.hpp"
+
+#include <my_matrix.hpp>
+
 using namespace std;
 
 // ----------------------- DEFINES ------------------------ //
@@ -25,15 +27,24 @@ using namespace std;
 #define WHITE   (Color)   { 1, 1, 1, 1 }
 #define BLACK   (Color)   { 0, 0, 0, 1 }
 
-#define REDV3   (Vector3) { 1, 0, 0 }
-#define GREENV3 (Vector3) { 0, 1, 0 }
-#define BLUEV3  (Vector3) { 0, 0, 1 }
-#define WHITEV3 (Vector3) { 1, 1, 1 }
-#define BLACKV3 (Vector3) { 0, 0, 0 }
+#define ColorToVec3(c) Vector3{ c.r, c.g, c.b }
 
-// --------------------- STRUCTURES ----------------------- //
+// ------------- GLOBAL FORWARD DECLARATION --------------- //
 
-typedef struct { float r, g, b, a; } Color;
+class Color //? NOTE: [0, 1]
+{
+public:
+    float r, g, b, a = 1.f;
+    
+    Color operator+(const Color& c)  { return { r + c.r, g + c.g, b + c.b, a + c.a };     }
+    Color operator-(const Color& c)  { return { r - c.r, g - c.g, b - c.b, a - c.a };     }
+    Color operator*(const Color& c)  { return { r * c.r, g * c.g, b * c.b, a * c.a };     }
+    Color operator/(const Color& c)  { return { r / c.r, g / c.g, b / c.b, a / c.a };     }
+    Color operator+=(const Color& c) { return { r += c.r, g += c.g, b += c.b, a += c.a }; }
+    Color operator-=(const Color& c) { return { r -= c.r, g -= c.g, b -= c.b, a -= c.a }; }
+    Color operator*=(const Color& c) { return { r *= c.r, g *= c.g, b *= c.b, a *= c.a }; }
+    Color operator/=(const Color& c) { return { r /= c.r, g /= c.g, b /= c.b, a /= c.a }; }
+};
 
 // --------------------- ARITHMECTIC ---------------------- //
 
@@ -389,7 +400,7 @@ namespace geometry3D
 
             // -- Constructors & Destructor -- //
             Vector3();                                                                               // Null vector.
-            Vector3(const float& _x, const float& _y, const float& _z);                     // Vector with 3 coordinates.
+            Vector3(const float& _x, const float& _y, const float& _z);                              // Vector with 3 coordinates.
             Vector3(const Vector3& p1,  const Vector3& p2);                                          // Vector from 2 points.
             Vector3(const Segment3& seg);                                                            // Vector from semgent.
             Vector3(const float& theta, const float& phi, const float& length, const bool& isAngle); // Vector from angles (useless bool).
