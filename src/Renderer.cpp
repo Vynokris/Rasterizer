@@ -165,7 +165,7 @@ static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords, V
     }
 }
 
-void Renderer::transformVertices(int count, Vertex* vertices, Vector3* local, Vector4* world, Vector4* view, Vector4* clip, Vector3* ndc, Vector3* screen)
+bool Renderer::transformVertices(int count, Vertex* vertices, Vector3* local, Vector4* world, Vector4* view, Vector4* clip, Vector3* ndc, Vector3* screen)
 {
     for (int i = 0; i < count; i++)
     {
@@ -184,8 +184,10 @@ void Renderer::transformVertices(int count, Vertex* vertices, Vector3* local, Ve
         // TODO: fix clipping.
 
         //! Temporarily clip triangles by nuking them when one vertex is offscreen.
-        if (!(-abs(clip[i].w) <= clip[i].x && clip[i].x <= abs(clip[i].w)))
-            return;
+        if (!((-abs(clip[i].w) <= clip[i].x) && (clip[i].x <= abs(clip[i].w)) &&
+              (-abs(clip[i].w) <= clip[i].y) && (clip[i].y <= abs(clip[i].w)) &&
+              (-abs(clip[i].w) <= clip[i].z) && (clip[i].z <= abs(clip[i].w))))
+            return false;
         
         // Clip space (4D) -> NDC (3D).
         ndc[i] = clip[i].toVector3(true);
@@ -193,6 +195,8 @@ void Renderer::transformVertices(int count, Vertex* vertices, Vector3* local, Ve
         // NDC (3D) -> screen coords (2D).
         screen[i] = ndcToScreenCoords(ndc[i], viewport);
     }
+
+    return true;
 }
 
 void Renderer::drawTriangle(Triangle3 _triangle)
@@ -204,7 +208,8 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     Vector3 ndcCoords[3];
     Vector3 screenCoords[3];
 
-    transformVertices(3, &_triangle.a, localCoords, worldCoords, viewCoords, clipCoords, ndcCoords, screenCoords);
+    if (!transformVertices(3, &_triangle.a, localCoords, worldCoords, viewCoords, clipCoords, ndcCoords, screenCoords))
+        return;
 
     //! DEBUG PANNEL
     ImGui::Begin("Debug info");
