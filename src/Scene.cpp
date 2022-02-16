@@ -60,16 +60,19 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     // _renderer.drawTriangles(&triangles[1], 1);
     // _renderer.modelPopMat();
 
-    // Draw scene components.
+    // Draw cube.
     // Material mat = { { 0.0215, 0.1745, 0.0215 }, { 0.07568, 0.61424, 0.07568 },	{ 0.633, 0.727811, 0.633 },	0.6, 1 };
-    // _renderer.modelPushMat();
-    // _renderer.modelTranslate(-0.5, 0, 2);
-    // _renderer.drawCube(MAGENTA);
-    // _renderer.modelPopMat();
+    _renderer.modelPushMat();
+    _renderer.modelTranslate(-0.5, 0, 2);
+    _renderer.modelRotateX(-fmod(time/2, 2*PI));
+    _renderer.drawCube(MAGENTA);
+    _renderer.modelPopMat();
 
+    // Draw sphere.
     _renderer.modelPushMat();
     _renderer.modelTranslate(0.5, 0, 2);
-    _renderer.drawSphere(1, 20, 20, BLUE);
+    _renderer.modelRotateX(-fmod(time/2, 2*PI));
+    _renderer.drawSphere(1, 15, 15, BLUE);
     _renderer.modelPopMat();
     
     deltaTime = _deltaTime;

@@ -34,7 +34,7 @@ public:
     int width, height, padding;
 
     TextureData() : pixels(0), width(0), height(0), padding(0) {}
-    ~TextureData() {}
+    ~TextureData() {  }
 
     Color getPixelColor(const int& _x, const int& _y);
 };

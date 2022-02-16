@@ -211,13 +211,16 @@ bool Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local,
 static bool isTowardsCamera(const Vector3 _worldPos, const Vector3& _worldNormal, const Vector3& _camPos)
 {
     float  dotProduct  = _worldNormal & Vector3(_camPos, _worldPos);
+
     ImGui::Begin("Debug info");
-    ImGui::Text("Triangle position: %.2f, %.2f, %.2f", _worldPos.x, _worldPos.y, _worldPos.z);
-    ImGui::Text("Triangle normal:   %.2f, %.2f, %.2f", _worldNormal.x, _worldNormal.y, _worldNormal.z);
-    ImGui::Text("Camera position:   %.2f, %.2f, %.2f", _camPos.x, _camPos.y, _camPos.z);
-    ImGui::Text("Dot product:       %.2f",             dotProduct);
+    ImGui::Text("Triangle position:  %.2f, %.2f, %.2f", _worldPos.x, _worldPos.y, _worldPos.z);
+    ImGui::Text("Triangle normal:    %.2f, %.2f, %.2f", _worldNormal.x, _worldNormal.y, _worldNormal.z);
+    ImGui::Text("Vector to triangle: %.2f, %.2f, %.2f", Vector3(_camPos, _worldPos).x, Vector3(_camPos, _worldPos).y, Vector3(_camPos, _worldPos).z);
+    ImGui::Text("Camera position:    %.2f, %.2f, %.2f", _camPos.x, _camPos.y, _camPos.z);
+    ImGui::Text("Dot product:        %.2f",             dotProduct);
     ImGui::Text("\n");
     ImGui::End();
+    
     return dotProduct >= 0;
 }
 
@@ -235,14 +238,11 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     Vector3 trianglePos = (Vector4(_triangle.getCenterOfMass().pos, 1) * modelMat.back()).toVector3();
 
     // Get the camera's position.
-    Vector3 cameraPos    = (Vector4(0, 0, 0, 1) * viewMat.inv4()).toVector3(true);
+    Vector3 cameraPos    = (Vector4(0, 0, 0, 1) * viewMat.inv4()).toVector3();
             cameraPos.y *= -1;
 
     // Get the triangle's normal in world coordinates.
-    Vector3 worldNormal = ((Vector4( _triangle.a.normal, 1 ) * modelMat.back().inv4().transpose()).toVector3()
-                        +  (Vector4( _triangle.b.normal, 1 ) * modelMat.back().inv4().transpose()).toVector3()
-                        +  (Vector4( _triangle.c.normal, 1 ) * modelMat.back().inv4().transpose()).toVector3())
-                        /  3;
+    Vector3 worldNormal = (Vector4((_triangle.a.normal + _triangle.b.normal + _triangle.c.normal) / 3, 0) * modelMat.back()).toVector3().getNormalized();
 
     // Back face culling.
     if (!isTowardsCamera(trianglePos, worldNormal, cameraPos))
