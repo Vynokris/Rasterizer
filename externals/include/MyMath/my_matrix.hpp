@@ -359,6 +359,16 @@ class Matrix
             return result;
         }
 
+        // Transpose.
+        Matrix<R, C> transpose()
+        {
+            Matrix<C, R> result;
+            for (int i = 0; i < R; i++)
+                for (int j = 0; j < C; j++)
+                    result[i][j] = m[j][i];
+            return result;
+        }
+
 
         void print(bool showSize = true) const
         {

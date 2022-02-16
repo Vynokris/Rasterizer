@@ -64,7 +64,10 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     // Material mat = { { 0.0215, 0.1745, 0.0215 }, { 0.07568, 0.61424, 0.07568 },	{ 0.633, 0.727811, 0.633 },	0.6, 1 };
     _renderer.modelPushMat();
     _renderer.modelTranslate(-0.5, 0, 2);
-    _renderer.drawCube(MAGENTA);
+    _renderer.modelRotateY(cosf(time));
+    _renderer.modelRotateX(sinf(time));
+    _renderer.modelRotateZ(cosf(time));
+    _renderer.drawCube(WHITE);
     _renderer.modelPopMat();
 
     // _renderer.modelPushMat();
