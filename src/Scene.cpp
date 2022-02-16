@@ -49,13 +49,13 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
 
     // Draw the first triangle.
     // _renderer.modelPushMat();
-    // _renderer.modelTranslate(0, 0, 2);
+    // _renderer.modelTranslate(0, 0, 3);
     // _renderer.drawTriangles(&triangles[0], 1);
     // _renderer.modelPopMat();
 
     // Draw the second triangle.
     // _renderer.modelPushMat();
-    // _renderer.modelTranslate(0, 0, 2);
+    // _renderer.modelTranslate(0, 0, 3);
     // _renderer.drawTriangles(&triangles[1], 1);
     // _renderer.modelPopMat();
 
