@@ -11,13 +11,11 @@
 using namespace arithmetic;
 using namespace geometry3D;
 
-Renderer::Renderer(const unsigned int& _width, const unsigned int& _height)
+Renderer::Renderer(const unsigned int& _width, const unsigned int& _height, const std::vector<Light>& _lights)
         : viewport(0, 0, _width, _height)
+        , lights(_lights)
         , framebuffer(_width, _height)
-{}
-
-Renderer::~Renderer()
-{}
+{ }
 
 // -- Setters for the three matrices -- //
 
@@ -36,11 +34,6 @@ void Renderer::modelRotateZ  (const float& _angle)                              
 void Renderer::modelScale    (const float& _scaleX, const float& _scaleY, const float& _scaleZ) { modelMat.back() = getScaleMatrix({ _scaleX, _scaleY, _scaleZ }) * modelMat.back(); }
 
 // --------- Drawing functions -------- //
-
-void Renderer::setTexture(const TextureData& _textureData)
-{
-    texture = _textureData;
-}
 
 void Renderer::drawPixel(const unsigned int& _x, const unsigned int& _y, const float& _depth, const Color& _color)
 {
@@ -213,6 +206,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
 
     transformVertices(3, &_triangle.a, localCoords, worldCoords, viewCoords, clipCoords, ndcCoords, screenCoords);
 
+    //! DEBUG PANNEL
     ImGui::Begin("Debug info");
     {
         for (int i = 0; i < 3; i++) ImGui::Text("Local  coords %d: (%.2f, %.2f, %.2f)%s",       i, localCoords[i].x,  localCoords[i].y,  localCoords[i].z,                    (i == 2 ? "\n " : ""));
@@ -269,6 +263,17 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     int w1_row = barycentricCoords(screenCoords[2], screenCoords[0], p);
     int w2_row = barycentricCoords(screenCoords[0], screenCoords[1], p);
 
+    //! Compute Phong lighting.
+    /*
+    Vector3 viewVec = { -viewMat[3][0], -viewMat[3][1], -viewMat[3][2] };
+    for (Light it : lights)
+    {
+        _triangle.a.color *= computePhong(it, mat, worldCoords[0].toVector3(), worldNormals[0].toVector3(), viewVec);
+        _triangle.b.color *= computePhong(it, mat, worldCoords[1].toVector3(), worldNormals[1].toVector3(), viewVec);
+        _triangle.c.color *= computePhong(it, mat, worldCoords[2].toVector3(), worldNormals[2].toVector3(), viewVec);
+    }
+    */
+
     // Rasterize the triangle.
     for (p.y = minY; p.y <= maxY; p.y++) 
     {
@@ -314,7 +319,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                 if (texture.applyVertexColor)
                 {
                     HSV pHSV = RGBtoHSV(texColor);
-                    pCol = HSVtoRGB({ colorGetHue(pCol), pHSV.s, pHSV.v });
+                    pCol = HSVtoRGB({ pCol.getHue(), pHSV.s, pHSV.v });
                 }
                 else
                 {
@@ -328,7 +333,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                 ImGui::Text("Pixel depth: %f", depth);
                 ImGui::Text("Pixel uv:    %f, %f", _triangle.a.uv.x * w0n + _triangle.b.uv.x * w1n + _triangle.c.uv.x * w2n, _triangle.a.uv.y * w0n + _triangle.b.uv.y * w1n + _triangle.c.uv.y * w2n);
                 ImGui::Text("Pixel color: %.2f, %.2f, %.2f", pCol.r, pCol.g, pCol.b);
-                ImGui::Text("Pixel hue:   %.2f", colorGetHue(pCol));
+                ImGui::Text("Pixel hue:   %.2f", pCol.getHue());
                 ImGui::Text("\n\n");
                 ImGui::End();
             }
@@ -353,7 +358,6 @@ void Renderer::drawTriangles(Triangle3* _triangles, const unsigned int& _count)
 {
     for (int i = 0; i < (int)_count; i++) drawTriangle(_triangles[i]);
 }
-
 
 void Renderer::drawDividedQuad(const Color& _color, const float& _size, const bool& _negateNormals)
 {
@@ -437,6 +441,11 @@ void Renderer::setRenderMode(const RenderMode& _mode)
 {
     renderMode = _mode;
 }
+
+// --- Material and texture setters --- //
+
+void Renderer::setTexture (const TextureData& _textureData) { texture = _textureData; }
+void Renderer::setMaterial(const Material& _material)       { mat     = _material;    }
 
 // ---------- Miscellaneous ---------- //
 

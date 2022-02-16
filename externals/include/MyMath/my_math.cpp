@@ -1,5 +1,36 @@
 #include "my_math.hpp"
 
+
+// Returns the hue of an RGB color (0 <= rgba <= 1) (output in radians).
+float Color::getHue()
+{
+    float minV = min(min(r, g), b);
+    float maxV = max(max(r, g), b);
+    float diff = maxV - minV;
+
+    float hue;
+
+    // If red is the maximum value.
+    if (r > g && r > b)
+        hue = (g - b) / diff;
+
+    // If green is the maximum value.
+    else if (g > r && g > b)
+        hue = 2 + (b - r) / diff;
+
+    // If blue is the maximum value.
+    else
+        hue = 4 + (r - g) / diff;
+    
+    // Keep the hue between 0 and 2pi;
+    if (hue < 0)
+        hue += 2*PI;
+    else if (hue > 2*PI)
+        hue -= 2*PI;
+    
+    return hue;
+}
+
 //* ------------------------------ ARITHMECTIC ------------------------------ *//
 
 // --------- ARITHMETIC FUNCTIONS -------- //
@@ -81,36 +112,6 @@ Color arithmetic::colorLerp(const float& val, const Color& start, const Color& e
         start.b + val * (end.b - start.b),
         start.a + val * (end.a - start.a)
     };
-}
-
-// Returns the hue of an RGB color (0 <= rgba <= 1) (output in radians).
-float arithmetic::colorGetHue(const Color& color)
-{
-    float minV = min(min(color.r, color.g), color.b);
-    float maxV = max(max(color.r, color.g), color.b);
-    float diff = maxV - minV;
-
-    float hue;
-
-    // If red is the maximum value.
-    if (color.r > color.g && color.r > color.b)
-        hue = (color.g - color.b) / diff;
-
-    // If green is the maximum value.
-    else if (color.g > color.r && color.g > color.b)
-        hue = 2 + (color.b - color.r) / diff;
-
-    // If blue is the maximum value.
-    else
-        hue = 4 + (color.r - color.g) / diff;
-    
-    // Keep the hue between 0 and 2pi;
-    if (hue < 0)
-        hue += 2*PI;
-    else if (hue > 2*PI)
-        hue -= 2*PI;
-    
-    return hue;
 }
 
 HSV arithmetic::RGBtoHSV(const Color& color)
