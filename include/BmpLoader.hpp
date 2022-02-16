@@ -30,6 +30,7 @@ class TextureData
 {
 public:
     unsigned char* pixels;
+    bool applyVertexColor = false;
     int width, height, padding;
 
     TextureData() : pixels(0), width(0), height(0), padding(0) {}

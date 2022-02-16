@@ -328,33 +328,44 @@ void Renderer::drawTriangle(Triangle3 _triangle)
             float w1n = w1 / (float)(w0 + w1 + w2);
             float w2n = w2 / (float)(w0 + w1 + w2);
 
-            // Compute vertex color.
-            Color pCol;
-            switch (texture.width)
+            // Compute the pixel depth.
+            float depth = abs(viewCoords[0].z * w0n + viewCoords[1].z * w1n + viewCoords[2].z * w2n);
+
+            // Define the pixel color.
+            Color pCol { 0, 0, 0, 0 };
+
+            if (texture.pixels == nullptr || texture.applyVertexColor)
             {
-            case 0:
-                // Calculate the pixel's color.
-                pCol = { _triangle.a.color.r * w0n + _triangle.b.color.r * w1n + _triangle.c.color.r * w2n, 
-                         _triangle.a.color.g * w0n + _triangle.b.color.g * w1n + _triangle.c.color.g * w2n, 
-                         _triangle.a.color.b * w0n + _triangle.b.color.b * w1n + _triangle.c.color.b * w2n, 
-                         _triangle.a.color.a * w0n + _triangle.b.color.a * w1n + _triangle.c.color.a * w2n };
-                break;
-            default:
-                // Compute uv coordinates and get pixel color from texture.
-                Vector2 texCoords = { _triangle.a.uv.x * w0n + _triangle.b.uv.x * w1n + _triangle.c.uv.x * w2n,
-                                      _triangle.a.uv.y * w0n + _triangle.b.uv.y * w1n + _triangle.c.uv.y * w2n };
-                pCol = texture.getPixelColor(roundInt(lerp(texCoords.x, 0, texture.width)), roundInt(lerp(texCoords.y, 0, texture.height)));
-                break;
+                // Get the pixel color from barycentric coordinates.
+                pCol.r = _triangle.a.color.r * w0n + _triangle.b.color.r * w1n + _triangle.c.color.r * w2n; 
+                pCol.g = _triangle.a.color.g * w0n + _triangle.b.color.g * w1n + _triangle.c.color.g * w2n; 
+                pCol.b = _triangle.a.color.b * w0n + _triangle.b.color.b * w1n + _triangle.c.color.b * w2n; 
+                pCol.a = _triangle.a.color.a * w0n + _triangle.b.color.a * w1n + _triangle.c.color.a * w2n;
             }
 
-            // Compute depth.
-            float depth = abs(viewCoords[0].z * w0n + viewCoords[1].z * w1n + viewCoords[2].z * w2n);
+            if (texture.pixels != nullptr)
+            {
+                // Compute the uv coordinates.
+                Vector2 uv = { clamp(_triangle.a.uv.x * w0n + _triangle.b.uv.x * w1n + _triangle.c.uv.x * w2n, 0, 1),
+                               clamp(_triangle.a.uv.y * w0n + _triangle.b.uv.y * w1n + _triangle.c.uv.y * w2n, 0, 1) };
+
+                // Get the pixel color from the current texture.
+                Color texColor = texture.getPixelColor(floorInt(lerp(uv.x, 0, texture.width)), floorInt(lerp(uv.y, 0, texture.height)));
+
+                // Apply the texture color to the pixel color.
+                if (texture.applyVertexColor)
+                    pCol = colorShift(texColor, colorGetHue(pCol));
+                else
+                    pCol = texColor;
+            }
 
             if (p.x > maxX-1 && p.y > maxY-1)
             {
                 ImGui::Begin("Debug info");
                 ImGui::Text("Pixel depth: %f", depth);
                 ImGui::Text("Pixel uv:    %f, %f", _triangle.a.uv.x * w0n + _triangle.b.uv.x * w1n + _triangle.c.uv.x * w2n, _triangle.a.uv.y * w0n + _triangle.b.uv.y * w1n + _triangle.c.uv.y * w2n);
+                ImGui::Text("Pixel color: %.2f, %.2f, %.2f", pCol.r, pCol.g, pCol.b);
+                ImGui::Text("Pixel hue:   %.2f", colorGetHue(pCol));
                 ImGui::End();
             }
 
@@ -479,6 +490,7 @@ void Renderer::showImGuiControls()
     ImGui::ColorEdit4("BG Color", &framebuffer.clearColor.r);
     ImGui::Combo("Render Mode", &curItem, items, IM_ARRAYSIZE(items));
     setRenderMode((RenderMode)curItem);
+    ImGui::Checkbox("Apply vertex colors to texture", &texture.applyVertexColor);
     ImGui::Text("\nMatrices:");
     ImGui::Text("Model:\n%s",      modelMat.back().printStr(false).c_str());
     ImGui::Text("View:\n%s",       viewMat.printStr        (false).c_str());
