@@ -4,14 +4,18 @@
 
 #include <Light.hpp>
 #include <Camera.hpp>
+#include <Mesh.hpp>
 #include <Renderer.hpp>
 
 class Scene
 {
 private:
     double time = 0.f, deltaTime = 0.f;
-    std::vector<Triangle3> triangles;
+
+    //!std::vector<Triangle3> triangles;
+    std::vector<Mesh>  meshes;
     std::vector<Light> lights;
+
     float scale = 1.f;
     
 public:
@@ -19,6 +23,7 @@ public:
     ~Scene();
 
     void update(const float& _deltaTime, Renderer& _renderer, const Camera& _camera);
-    std::vector<Light> getLights() const;
+    std::vector<Light>& getLights();
+
     void showImGuiControls();
 };

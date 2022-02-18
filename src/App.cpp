@@ -4,10 +4,11 @@
 #include "Framebuffer.hpp"
 #include "Camera.hpp"
 #include "Scene.hpp"
+#include "Mesh.hpp"
 
 using namespace matrix;
 
-//Get back Events and setup ImGUI frame
+// Get back Events and setup ImGUI frame.
 void App::newFrame(bool _mouseCaptured)
 {
     glfwPollEvents();
@@ -18,7 +19,7 @@ void App::newFrame(bool _mouseCaptured)
     ImGui::NewFrame();
 }
 
-//Clear buffer et render ImGUI
+// Clear buffer et render ImGUI.
 void App::endFrame()
 {
     glClear(GL_COLOR_BUFFER_BIT);
@@ -28,10 +29,10 @@ void App::endFrame()
     glfwSwapBuffers(window);
 }
 
-//Constructor with Init struct
+// Constructor with Init struct.
 App::App(const AppInit& _init)
 {
-    // Setup glfw
+    // Setup glfw.
     glfwSetErrorCallback(_init.ErrorCallback);
     if (!glfwInit())
     {
@@ -52,7 +53,7 @@ App::App(const AppInit& _init)
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // V-Sync
     
-    // Setup glad
+    // Setup glad.
     if (gladLoadGL((GLADloadfunc)glfwGetProcAddress) == 0)
     {
         printf("gladLoaderLoadGL failed.\n");
@@ -60,7 +61,7 @@ App::App(const AppInit& _init)
         return;
     }
 
-    // Setup KHR debug
+    // Setup KHR debug.
     if (GLAD_GL_KHR_debug)
     {
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -74,7 +75,7 @@ App::App(const AppInit& _init)
     printf("GL Version: %s\n", glGetString(GL_VERSION));
     printf("GL Renderer: %s\n", glGetString(GL_RENDERER));
 
-    // Setup Dear ImGui
+    // Setup Dear ImGui.
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
@@ -89,18 +90,15 @@ App::App(const AppInit& _init)
     state = SUCCESS;
 }
 
-//Update device and call the renderer
+// Update device and call the renderer.
 void App::update()
 {
     // Initialize app objects.
     Scene scene;
-    Renderer renderer(800, 800, scene.getLights());
+    Renderer renderer(800, 800, &scene.getLights());
     CameraInputs inputs;
     Camera camera(renderer.framebuffer.getWidth(), renderer.framebuffer.getHeight(), 90.f, 0.001f, 1000.f, 2.5f);
 
-    // Load a texture.
-    TextureData baseTexture = loadBmpData("art/UrAppreciated.bmp");
-    renderer.setTexture(baseTexture);
 
     bool mouseCaptured = false;
     double mouseX = 0.0, mouseY = 0.0;
@@ -137,17 +135,17 @@ void App::update()
             camera.update(ImGui::GetIO().DeltaTime, inputs);
         }
 
-        // Clear buffers
+        // Clear buffers.
         renderer.framebuffer.clear(camera.getFar());
 
-        // Setup matrices
+        // Setup matrices.
         renderer.setProjection(camera.getPerspective());
         renderer.setView(camera.getViewMat());
 
-        // Render scene
+        // Render scene.
         scene.update(ImGui::GetIO().DeltaTime, renderer, camera);
 
-        // Update texture
+        // Update texture.
         renderer.framebuffer.updateTexture();
 
         // Display info.
@@ -211,12 +209,9 @@ void App::update()
 
         endFrame();
     }
-
-    //! Temporary.
-    delete[] baseTexture.pixels;
 }
 
-//destructor who kill glfw and clean the window buffer
+// Destructor who kill glfw and clean the window buffer.
 App::~App()
 {
     glfwDestroyWindow(window);
