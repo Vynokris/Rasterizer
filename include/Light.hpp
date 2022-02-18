@@ -1,15 +1,7 @@
 #pragma once
 
-#include "my_math.hpp"
-
-struct Material
-{
-    Color ambient;
-    Color diffuse;
-    Color specular;
-    float shiness;
-    float attenuation;
-};
+#include <Mesh.hpp>
+#include <my_math.hpp>
 
 struct LightParams
 {
