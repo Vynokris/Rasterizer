@@ -1,10 +1,11 @@
-#include "BmpLoader.hpp"
-
 #include <cstdio>
-using namespace arithmetic;
 #include <imgui.h>
 
-Color TextureData::getPixelColor(const int& x, const int& y)
+#include "BmpLoader.hpp"
+
+using namespace arithmetic;
+
+Color TextureData::getPixelColor(const int& x, const int& y) const
 {
     // Idk why sometimes x and y go to -infinity so I just obliterate the pixel.
     if (x <= -2147483648 || y <= -2147483648)

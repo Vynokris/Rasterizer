@@ -25,7 +25,7 @@ BIN    =  Rasterizer
 endif
 
 # PROGRAM OBJS
-OBJS = src/main.o src/App.o src/Camera.o src/Framebuffer.o src/Renderer.o src/Scene.o src/Light.o src/BmpLoader.o
+OBJS = src/main.o src/App.o src/Camera.o src/Framebuffer.o src/Renderer.o src/Scene.o src/Light.o src/BmpLoader.o src/Mesh.o
 
 # GLAD
 OBJS += externals/src/gl.o
