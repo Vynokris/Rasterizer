@@ -20,7 +20,7 @@ Renderer::Renderer(const unsigned int& _width, const unsigned int& _height, vect
 
 // -- Setters for the three matrices -- //
 
-Mat4& Renderer::getModel()                                   { return modelMat.back(); }
+Mat4& Renderer::getModel()                                   { return modelMat.back();                             }
 void  Renderer::setModel(const Mat4& _modelMatrix)           { modelMat.clear(); modelMat.push_back(_modelMatrix); }
 void  Renderer::setView(const Mat4& _viewMatrix)             { viewMat = _viewMatrix;                              }
 void  Renderer::setProjection(const Mat4& _projectionMatrix) { projectionMat = _projectionMatrix;                  }
