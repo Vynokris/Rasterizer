@@ -26,6 +26,7 @@ private:
     std::vector<int>    indices;
 
 public:
+    // Constructors / destrucors.
     Mesh() {}
     
     Mesh(const std::vector<Vertex>& _vertices,
@@ -33,20 +34,25 @@ public:
 
     ~Mesh();
 
+    // Main methods.
     void draw();
 
-          Mat4&        getTransform()                    ;
-    const Material&    getMaterial()                const;
-          TextureData* getTexture()                      ;
-    const Vertex&      getVertex(const int& _index) const;
-    const vector<int>& getIndices()                 const;
+    // Getters.
+          Mat4&                getTransform()                    ;
+    const Material&            getMaterial()                const;
+          TextureData*         getTexture()                      ;
+    const Vertex&              getVertex(const int& _index) const;
+    const int&                 getIndex(const int& _index)  const;
+    const int                  getVerticesNumber()          const;
+    const int                  getIndicesNumber()           const;
 
-    void setVisibility (const bool&                _visibility);
-    void setColor      (const Color&               _color     );
-    void setMaterial   (      Material*            _material  );
-    void setTexture    (      TextureData*         _texture   );
-    void appendVertices(const std::vector<Vertex>& _vertices  );
-    void appendTriangle(const int& index0, const int& index1, const int& index2);
+    // Setters.
+    void setVisibility (const bool&                _visibility)                    ;
+    void setColor      (const Color&               _color     )                    ;
+    void setMaterial   (      Material*            _material  )                    ;
+    void setTexture    (      TextureData*         _texture   )                    ;
+    void appendVertices(const std::vector<Vertex>& _vertices  )                    ;
+    void appendTriangle(const int& _index0, const int& _index1, const int& _index2);
 };
 
 // Primary shapes meshes.

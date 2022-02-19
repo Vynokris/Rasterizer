@@ -29,7 +29,7 @@ Scene::Scene()
     
     // Meshes.
     meshes.push_back(createCube(1));
-    meshes.push_back(createSphere(10, 10, 1));
+    //meshes.push_back(createSphere(10, 10, 1));
 
     // Load and bind a texture to the cube.
     TextureData baseTexture = loadBmpData("art/UrAppreciated.bmp");
@@ -61,16 +61,32 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     }
     _renderer.setProjection(_camera.getPerspective());
 
+    // Draw active meshes.
     for (Mesh mesh : meshes)
     {
         _renderer.modelPushMat();
-        _renderer.getModel() *= mesh.getTransform();
-        for (int i = 0; i < (int)mesh.getIndices().size(); i += 3)
+        _renderer.getModel() *= mesh.getTransform(); //! TO FIX
+        _renderer.modelTranslate(0.5, 0, 2);
+        for (int i = 0; i < mesh.getIndicesNumber(); i += 3)
         {
-            _renderer.drawTriangle({ mesh.getVertex(mesh.getIndices()[i]), 
-                                     mesh.getVertex(mesh.getIndices()[i+1]), 
-                                     mesh.getVertex(mesh.getIndices()[i+2]) },
-                                     mesh.getTexture());
+            // Get triangle indices and vertices.
+            int index[3]         = { mesh.getIndex(i),          mesh.getIndex(i + 1),     mesh.getIndex(i + 2)     };
+            Vertex meshVertex[3] = { mesh.getVertex(index[0]),  mesh.getVertex(index[1]), mesh.getVertex(index[3]) };
+
+            //! DEBUG ZONE ===========================================================================
+            
+            printf("TRIANGLE DRAWN: %d %d %d\n", index[0], index[1], index[2]);
+            for (int j = 0; j < 3; j++)
+            {
+                Vertex v = meshVertex[j];
+                printf(" - VERTEX: %.2f, %.2f, %.2f | %.2f, %.2f, %.2f | %.2f, %.2f\n",
+                v.pos.x, v.pos.y, v.pos.z, v.normal.x, v.normal.y, v.normal.z, v.uv.x, v.uv.y);
+            }
+            printf("\n");
+            
+            //! DEBUG ZONE ===========================================================================
+
+            _renderer.drawTriangle({ meshVertex[0], meshVertex[1], meshVertex[2] }, mesh.getTexture());
         }
         _renderer.modelPopMat();
     }

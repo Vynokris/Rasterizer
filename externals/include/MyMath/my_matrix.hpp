@@ -238,7 +238,10 @@ class Matrix
         void operator+=(const Matrix<_R,_C>& matrix)
         {
             assert(R == _R && C == _C);
-            *this = *this + matrix;
+            for (int i = 0; i < R; i++)
+                for (int j = 0; j < C; j++)
+                    m[i][j] += matrix[i][j];
+            //! *this = *this + matrix;
         }
 
         // Matrix substraction assignement.
@@ -253,7 +256,10 @@ class Matrix
         void operator-=(const Matrix<_R,_C>& matrix)
         {
             assert(R == _R && C == _C);
-            *this = *this - matrix;
+            for (int i = 0; i < R; i++)
+                for (int j = 0; j < C; j++)
+                    m[i][j] -= matrix[i][j];
+            //! *this = *this - matrix;
         }
 
         // Matrix multiplication assignement.
@@ -268,7 +274,10 @@ class Matrix
         void operator*=(const Matrix<_R,_C>& matrix)
         {
             assert(R == _R && C == _C);
-            *this = *this * matrix;
+            for (int i = 0; i < R; i++)
+                for (int j = 0; j < C; j++)
+                    m[i][j] *= matrix[i][j];
+            //! *this = *this * matrix;
         }
 
         // Matrix power.
