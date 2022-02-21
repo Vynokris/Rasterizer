@@ -15,7 +15,10 @@ Renderer::Renderer(const unsigned int& _width, const unsigned int& _height, cons
         : viewport(0, 0, _width, _height)
         , lights(_lights)
         , framebuffer(_width, _height)
-{ }
+{
+    renderMode   = RenderMode::LIT;
+    lightingMode = LightingMode::PHONG;
+}
 
 // -- Setters for the three matrices -- //
 
@@ -109,12 +112,13 @@ static int barycentricCoords(const Vector3& _a, const Vector3& _b, const Vector3
     return (_b.x - _a.x) * (_c.y - _a.y) - (_b.y - _a.y) * (_c.x - _a.x);
 }
 
-static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords, Vertex* _vertices)
+static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords)
 {
     // Get the triangle's sides and normals.
     Vector2 p0p1(Vector2{ _screenCoords[0].x, _screenCoords[0].y }, Vector2{ _screenCoords[1].x, _screenCoords[1].y });
     Vector2 p1p2(Vector2{ _screenCoords[1].x, _screenCoords[1].y }, Vector2{ _screenCoords[2].x, _screenCoords[2].y });
     Vector2 p2p0(Vector2{ _screenCoords[2].x, _screenCoords[2].y }, Vector2{ _screenCoords[0].x, _screenCoords[0].y });
+    
     float angle0 = p0p1.getAngleWithVector2(p1p2.getNormal());
     float angle1 = p1p2.getAngleWithVector2(p2p0.getNormal());
     float angle2 = p2p0.getAngleWithVector2(p0p1.getNormal());
@@ -126,12 +130,10 @@ static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords, V
         Vector3 tempVec  = _screenCoords[0];
         _screenCoords[0] = _screenCoords[1];
         _screenCoords[1] = tempVec;
+        
         float tempDepth  = _viewCoords[0].z;
         _viewCoords[0].z = _viewCoords[1].z;
         _viewCoords[1].z = tempDepth;
-        Vertex tempVertex = _vertices[0];
-        _vertices[0] = _vertices[1];
-        _vertices[1] = tempVertex;
     }
     else if (angle1 < PI/2)
     {
@@ -139,12 +141,10 @@ static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords, V
         Vector3 tempVec  = _screenCoords[1];
         _screenCoords[1] = _screenCoords[2];
         _screenCoords[2] = tempVec;
+
         float tempDepth  = _viewCoords[1].z;
         _viewCoords[1].z = _viewCoords[2].z;
         _viewCoords[2].z = tempDepth;
-        Vertex tempVertex = _vertices[1];
-        _vertices[1] = _vertices[2];
-        _vertices[2] = tempVertex;
     }
     else if (angle2 < PI/2)
     {
@@ -152,16 +152,14 @@ static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords, V
         Vector3 tempVec  = _screenCoords[2];
         _screenCoords[2] = _screenCoords[0];
         _screenCoords[0] = tempVec;
+
         float tempDepth  = _viewCoords[2].z;
         _viewCoords[2].z = _viewCoords[0].z;
         _viewCoords[0].z = tempDepth;
-        Vertex tempVertex = _vertices[2];
-        _vertices[2] = _vertices[0];
-        _vertices[0] = tempVertex;
     }
 }
 
-bool Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local, Vector4* _world, Vector4* _view, Vector4* _clip, Vector3* _ndc, Vector3* _screen, Vector3* _perspectiveUV)
+bool Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local, Vector4* _world, Vector4* _view, Vector4* _clip, Vector3* _ndc, Vector3* _screen)
 {
     for (int i = 0; i < _count; i++)
     {
@@ -190,15 +188,6 @@ bool Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local,
         
         // NDC (3D) -> screen coords (2D).
         _screen[i] = ndcToScreenCoords(_ndc[i], viewport);
-    }
-    
-    // Make sure the triangle vertices are in the right order to be drawn.
-    swapTriangleVertices(_screen, _view, _vertices);
-
-    for (int i = 0; i < _count; i++)
-    {
-        // Bring uv coords to clip space.
-        _perspectiveUV[i] = { _vertices[i].uv.x / _view[i].z, _vertices[i].uv.y / _view[i].z, 1 / _view[i].z };
     }
 
     return true;
@@ -245,7 +234,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
         return;
 
     // Transform the triangle's vertices through the renderer's matrices.
-    if (!transformVertices(3, &_triangle.a, localCoords, worldCoords, viewCoords, clipCoords, ndcCoords, screenCoords, perspectiveUV))
+    if (!transformVertices(3, &_triangle.a, localCoords, worldCoords, viewCoords, clipCoords, ndcCoords, screenCoords))
         return;
 
     // Draw triangle wireframe
@@ -260,19 +249,25 @@ void Renderer::drawTriangle(Triangle3 _triangle)
         return;
     }
 
-    // Compute Phong lighting for each vertex.
+    // Compute Phong lighting for each vertex / light.
     Color lightIntensity[3] = { { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, };
-    for (Light light : lights)
+    for (int i = 0; i < 3; i++)
     {
-        for (int i = 0; i < 3; i++)
-        {
-            if (getRenderMode() == RenderMode::LIT)
-                lightIntensity[i] += computePhong(light, mat, worldCoords[i].toVector3(), worldNormal, cameraPos);
-            else
-                lightIntensity[i] = WHITE;
-        }
+        if (renderMode == RenderMode::LIT)
+            lightIntensity[i] = computePhong(lights, material, worldCoords[i].toVector3(), worldNormal, cameraPos);
+        else 
+            lightIntensity[i] = WHITE;
     }
     
+    // Make sure the triangle vertices are in the right order to be drawn.
+    swapTriangleVertices(screenCoords, viewCoords);
+
+    for (int i = 0; i < 3; i++)
+    {
+        // Bring uv coords to clip space.
+        perspectiveUV[i] = { ((&_triangle.a)+i)->uv.x / viewCoords[i].z, ((&_triangle.a)+i)->uv.y / viewCoords[i].z, 1 / viewCoords[i].z };
+    }
+        
     //! DEBUG PANNEL
     ImGui::Begin("Debug info");
     {
@@ -496,8 +491,8 @@ void Renderer::setRenderMode(const RenderMode& _mode) { renderMode = _mode; }
 
 // --- Material and texture setters --- //
 
-void Renderer::setTexture (const TextureData& _textureData) { texture = _textureData; }
-void Renderer::setMaterial(const Material& _material)       { mat     = _material;    }
+void Renderer::setTexture (const TextureData& _textureData) { texture  = _textureData; }
+void Renderer::setMaterial(const Material& _material)       { material = _material;    }
 
 // ---------- Miscellaneous ---------- //
 
