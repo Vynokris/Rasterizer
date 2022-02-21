@@ -261,13 +261,13 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     }
 
     // Compute Phong lighting for each vertex.
-    Color lightIntensity[3] = { { 1, 1, 1, 1 }, { 1, 1, 1, 1 }, { 1, 1, 1, 1 }, };
-    for (Light it : lights)
+    Color lightIntensity[3] = { { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, };
+    for (Light light : lights)
     {
         for (int i = 0; i < 3; i++)
         {
             if (getRenderMode() == RenderMode::LIT)
-                lightIntensity[i] *= computePhong(it, mat, worldCoords[i].toVector3(), worldNormal, cameraPos);
+                lightIntensity[i] += computePhong(light, mat, worldCoords[i].toVector3(), worldNormal, cameraPos);
             else
                 lightIntensity[i] = WHITE;
         }
