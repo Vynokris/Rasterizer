@@ -8,11 +8,10 @@
 #include "Light.hpp"
 #include "Renderer.hpp"
 
-using namespace std;
 using namespace arithmetic;
 using namespace geometry3D;
 
-Renderer::Renderer(const unsigned int& _width, const unsigned int& _height, vector<Light>* _lights)
+Renderer::Renderer(const unsigned int& _width, const unsigned int& _height, const std::vector<Light>& _lights)
         : viewport(0, 0, _width, _height)
         , lights(_lights)
         , framebuffer(_width, _height)
@@ -20,10 +19,9 @@ Renderer::Renderer(const unsigned int& _width, const unsigned int& _height, vect
 
 // -- Setters for the three matrices -- //
 
-Mat4& Renderer::getModel()                                   { return modelMat.back();                             }
-void  Renderer::setModel(const Mat4& _modelMatrix)           { modelMat.clear(); modelMat.push_back(_modelMatrix); }
-void  Renderer::setView(const Mat4& _viewMatrix)             { viewMat = _viewMatrix;                              }
-void  Renderer::setProjection(const Mat4& _projectionMatrix) { projectionMat = _projectionMatrix;                  }
+void Renderer::setModel(const Mat4& _modelMatrix)           { modelMat.clear(); modelMat.push_back(_modelMatrix); }
+void Renderer::setView(const Mat4& _viewMatrix)             { viewMat = _viewMatrix;                              }
+void Renderer::setProjection(const Mat4& _projectionMatrix) { projectionMat = _projectionMatrix;                  }
 
 // ------- Model transformations ------ //
 
@@ -54,7 +52,7 @@ void Renderer::drawPixel(const unsigned int& _x, const unsigned int& _y, const f
 
 void Renderer::drawLine(const Vertex& _p0, const Vertex& _p1)
 {
-    // Get the distance between the two points.
+    // Get the distance between the two points
     int dx =  abs(_p1.pos.x - _p0.pos.x);
     int dy = -abs(_p1.pos.y - _p0.pos.y);
 
@@ -112,56 +110,96 @@ static int barycentricCoords(const Vector3& _a, const Vector3& _b, const Vector3
 }
 
 static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords, Vertex* _vertices)
-{    
+{
     // Get the triangle's sides and normals.
     Vector2 p0p1(Vector2{ _screenCoords[0].x, _screenCoords[0].y }, Vector2{ _screenCoords[1].x, _screenCoords[1].y });
     Vector2 p1p2(Vector2{ _screenCoords[1].x, _screenCoords[1].y }, Vector2{ _screenCoords[2].x, _screenCoords[2].y });
     Vector2 p2p0(Vector2{ _screenCoords[2].x, _screenCoords[2].y }, Vector2{ _screenCoords[0].x, _screenCoords[0].y });
-
     float angle0 = p0p1.getAngleWithVector2(p1p2.getNormal());
     float angle1 = p1p2.getAngleWithVector2(p2p0.getNormal());
     float angle2 = p2p0.getAngleWithVector2(p0p1.getNormal());
 
     // Check if the triangle is inside out.
-    int a = 0, b = 0;
-
-    if      (angle0 < PI/2) { a = 0; b = 1; }
-    else if (angle1 < PI/2) { a = 1; b = 2; }
-    else if (angle2 < PI/2) { a = 2; b = 0; }
-
-    // Swap position, depth and vertices.
-    Vector3 tempVec   = _screenCoords[a]; _screenCoords[a] = _screenCoords[b]; _screenCoords[b] = tempVec;
-    float tempDepth   = _viewCoords[a].z; _viewCoords[a].z = _viewCoords[b].z; _viewCoords[b].z = tempDepth;
-    Vertex tempVertex = _vertices[a];     _vertices[a]     = _vertices[b];     _vertices[b]     = tempVertex;
+    if (angle0 < PI/2)
+    {
+        // Switch position, depth and vertices.
+        Vector3 tempVec  = _screenCoords[0];
+        _screenCoords[0] = _screenCoords[1];
+        _screenCoords[1] = tempVec;
+        float tempDepth  = _viewCoords[0].z;
+        _viewCoords[0].z = _viewCoords[1].z;
+        _viewCoords[1].z = tempDepth;
+        Vertex tempVertex = _vertices[0];
+        _vertices[0] = _vertices[1];
+        _vertices[1] = tempVertex;
+    }
+    else if (angle1 < PI/2)
+    {
+        // Switch position, depth and vertices.
+        Vector3 tempVec  = _screenCoords[1];
+        _screenCoords[1] = _screenCoords[2];
+        _screenCoords[2] = tempVec;
+        float tempDepth  = _viewCoords[1].z;
+        _viewCoords[1].z = _viewCoords[2].z;
+        _viewCoords[2].z = tempDepth;
+        Vertex tempVertex = _vertices[1];
+        _vertices[1] = _vertices[2];
+        _vertices[2] = tempVertex;
+    }
+    else if (angle2 < PI/2)
+    {
+        // Switch position, depth and vertices.
+        Vector3 tempVec  = _screenCoords[2];
+        _screenCoords[2] = _screenCoords[0];
+        _screenCoords[0] = tempVec;
+        float tempDepth  = _viewCoords[2].z;
+        _viewCoords[2].z = _viewCoords[0].z;
+        _viewCoords[0].z = tempDepth;
+        Vertex tempVertex = _vertices[2];
+        _vertices[2] = _vertices[0];
+        _vertices[0] = tempVertex;
+    }
 }
 
 bool Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local, Vector4* _world, Vector4* _view, Vector4* _clip, Vector3* _ndc, Vector3* _screen, Vector3* _perspectiveUV)
 {
     for (int i = 0; i < _count; i++)
     {
-        _local[i] = _vertices[i].pos;                          // Store triangle vertices positions.
-        _world[i] = Vector4{ _local[i], 1 } * modelMat.back(); // Local space (3D) -> World space (3D).
-        _view[i]  = _world[i] * viewMat;                       // World space (3D) -> View space (3D).
-        _clip[i]  = _view[i] * projectionMat;                  // View space (3D) -> Clip space (4D).
+        // Store triangle vertices positions.
+        _local[i] = _vertices[i].pos;
+        
+        // Local space (3D) -> World space (3D).
+        _world[i] = Vector4{ _local[i], 1 } * modelMat.back();
+        
+        // World space (3D) -> View space (3D).
+        _view[i] = _world[i] * viewMat;
+        
+        // View space (3D) -> Clip space (4D).
+        _clip[i] = _view[i] * projectionMat;
 
         // TODO: fix clipping.
+
         //! Temporarily clip triangles by nuking them when one vertex is offscreen.
         if (!((-abs(_clip[i].w) <= _clip[i].x) && (_clip[i].x <= abs(_clip[i].w)) &&
               (-abs(_clip[i].w) <= _clip[i].y) && (_clip[i].y <= abs(_clip[i].w)) &&
               (-abs(_clip[i].w) <= _clip[i].z) && (_clip[i].z <= abs(_clip[i].w))))
             return false;
         
+        // Clip space (4D) -> NDC (3D).
+        _ndc[i] = _clip[i].toVector3(true);
         
-        _ndc[i]    = _clip[i].toVector3(true);             // Clip space (4D) -> NDC (3D).
-        _screen[i] = ndcToScreenCoords(_ndc[i], viewport); // NDC (3D) -> screen coords (2D).
+        // NDC (3D) -> screen coords (2D).
+        _screen[i] = ndcToScreenCoords(_ndc[i], viewport);
     }
     
     // Make sure the triangle vertices are in the right order to be drawn.
     swapTriangleVertices(_screen, _view, _vertices);
-    
-    // Bring uv coords to clip space.
+
     for (int i = 0; i < _count; i++)
+    {
+        // Bring uv coords to clip space.
         _perspectiveUV[i] = { _vertices[i].uv.x / _view[i].z, _vertices[i].uv.y / _view[i].z, 1 / _view[i].z };
+    }
 
     return true;
 }
@@ -171,9 +209,8 @@ static bool isTowardsCamera(const Vector3 _worldPos, const Vector3& _worldNormal
     return (_worldNormal & Vector3(_camPos, _worldPos)) <= 0;
 }
 
-void Renderer::drawTriangle(Triangle3 _triangle, TextureData* _texture)
+void Renderer::drawTriangle(Triangle3 _triangle)
 {
-    // Create all coordinates systems arrays.
     Vector3 localCoords  [3];
     Vector4 worldCoords  [3];
     Vector4 viewCoords   [3];
@@ -194,7 +231,6 @@ void Renderer::drawTriangle(Triangle3 _triangle, TextureData* _texture)
     Vector3 cameraPos = (Vector4(0, 0, 0, 1)
                       * viewMat.inv4()).toVector3();
 
-    //! DEBUG PANNEL
     ImGui::Begin("Debug info");
     ImGui::Text("Triangle position:  %.2f, %.2f, %.2f", trianglePos.x, trianglePos.y, trianglePos.z);
     ImGui::Text("Triangle normal:    %.2f, %.2f, %.2f", worldNormal.x, worldNormal.y, worldNormal.z);
@@ -226,18 +262,18 @@ void Renderer::drawTriangle(Triangle3 _triangle, TextureData* _texture)
 
     // Compute Phong lighting for each vertex.
     Color lightIntensity[3] = { { 1, 1, 1, 1 }, { 1, 1, 1, 1 }, { 1, 1, 1, 1 }, };
-    Material mat = { WHITE, WHITE, WHITE, 0, 0 };
-    for (Light it : *lights)
+    for (Light it : lights)
     {
         for (int i = 0; i < 3; i++)
         {
-            if (getRenderMode() == RenderMode::LIT) lightIntensity[i] *= computePhong(it, mat, worldCoords[i].toVector3(), worldNormal, cameraPos);
-            else                                    lightIntensity[i] = WHITE;
+            if (getRenderMode() == RenderMode::LIT)
+                lightIntensity[i] *= computePhong(it, mat, worldCoords[i].toVector3(), worldNormal, cameraPos);
+            else
+                lightIntensity[i] = WHITE;
         }
     }
     
-    
-    //! DEBUG PANNEL ======================================================
+    //! DEBUG PANNEL
     ImGui::Begin("Debug info");
     {
         for (int i = 0; i < 3; i++) ImGui::Text("Local  coords %d: (%.2f, %.2f, %.2f)%s",       i, localCoords[i].x,  localCoords[i].y,  localCoords[i].z,                    (i == 2 ? "\n " : ""));
@@ -248,7 +284,6 @@ void Renderer::drawTriangle(Triangle3 _triangle, TextureData* _texture)
         for (int i = 0; i < 3; i++) ImGui::Text("Screen coords %d: (%.0f, %.0f, %.3f)%s",       i, screenCoords[i].x, screenCoords[i].y, screenCoords[i].z,                   (i == 2 ? "\n " : ""));
     }
     ImGui::End();
-    //! DEBUG PANNEL ======================================================
 
     // Compute triangle bounding box.
     int minX = min(min(screenCoords[0].x, screenCoords[1].x), screenCoords[2].x);
@@ -302,7 +337,7 @@ void Renderer::drawTriangle(Triangle3 _triangle, TextureData* _texture)
             // Define the pixel color.
             Color pCol { 0, 0, 0, 0 };
 
-            if (_texture == nullptr || _texture->applyVertexColor)
+            if (texture.pixels == nullptr || texture.applyVertexColor)
             {
                 // Get the pixel color from barycentric coordinates.
                 pCol.r = _triangle.a.color.r * w0n + _triangle.b.color.r * w1n + _triangle.c.color.r * w2n; 
@@ -311,24 +346,22 @@ void Renderer::drawTriangle(Triangle3 _triangle, TextureData* _texture)
                 pCol.a = _triangle.a.color.a * w0n + _triangle.b.color.a * w1n + _triangle.c.color.a * w2n;
             }
 
-            if (_texture != nullptr)
+            if (texture.pixels != nullptr)
             {
                 // Compute the uv coordinates.
                 Vector2 uv = { clamp(depth * (perspectiveUV[0].x * w0n + perspectiveUV[1].x * w1n + perspectiveUV[2].x * w2n), 0, 1),
                                clamp(depth * (perspectiveUV[0].y * w0n + perspectiveUV[1].y * w1n + perspectiveUV[2].y * w2n), 0, 1) };
 
                 // Get the pixel color from the current texture.
-                Color texColor = _texture->getPixelColor(floorInt(clampAbove(lerp(uv.x, 0, abs(_texture->width )), 0)), 
-                                                       floorInt(clampAbove(lerp(uv.y, 0, abs(_texture->height)), 0)));
+                Color texColor = texture.getPixelColor(floorInt(clampAbove(lerp(uv.x, 0, abs(texture.width )), 0)), 
+                                                       floorInt(clampAbove(lerp(uv.y, 0, abs(texture.height)), 0)));
 
                 // Apply the texture color to the pixel color.
-                if (_texture->applyVertexColor)
-                {
+                if (texture.applyVertexColor) {
                     HSV pHSV = RGBtoHSV(texColor);
                     pCol = HSVtoRGB({ pCol.getHue(), pHSV.s, pHSV.v });
                 }
-                else
-                {
+                else {
                     pCol = texColor;
                 }
             }
@@ -366,13 +399,11 @@ void Renderer::drawTriangle(Triangle3 _triangle, TextureData* _texture)
     }
 }
 
-void Renderer::drawTriangles(Triangle3* _triangles, const unsigned int& _count, TextureData* _texture)
+void Renderer::drawTriangles(Triangle3* _triangles, const unsigned int& _count)
 {
-    for (int i = 0; i < (int)_count; i++) drawTriangle(_triangles[i], _texture);
+    for (int i = 0; i < (int)_count; i++) drawTriangle(_triangles[i]);
 }
 
-//! Using meshes instead.
-/*
 void Renderer::drawDividedQuad(const Color& _color, const float& _size, const bool& _negateNormals)
 {
     // Get the quad's normal.
@@ -457,12 +488,16 @@ void Renderer::drawSphere(const float& _r, const int& _lon, const int& _lat, con
         }
     }
 }
-*/
 
-// ----- Render getters / setters ----- //
+// --- View mode getters / setters --- //
 
 RenderMode Renderer::getRenderMode() const            { return renderMode; }
 void Renderer::setRenderMode(const RenderMode& _mode) { renderMode = _mode; }
+
+// --- Material and texture setters --- //
+
+void Renderer::setTexture (const TextureData& _textureData) { texture = _textureData; }
+void Renderer::setMaterial(const Material& _material)       { mat     = _material;    }
 
 // ---------- Miscellaneous ---------- //
 
@@ -476,6 +511,7 @@ void Renderer::showImGuiControls()
     ImGui::ColorEdit4("BG Color", &framebuffer.clearColor.r);
     ImGui::Combo("Render Mode", &curItem, items, IM_ARRAYSIZE(items));
     setRenderMode((RenderMode)curItem);
+    ImGui::Checkbox("Apply vertex colors to texture", &texture.applyVertexColor);
     ImGui::Text("\nMatrices:");
     ImGui::Text("Model:\n%s",      modelMat.back().printStr(false).c_str());
     ImGui::Text("View:\n%s",       viewMat.printStr        (false).c_str());
