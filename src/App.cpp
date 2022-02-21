@@ -94,7 +94,12 @@ void App::update()
 {
     // Initialize app objects.
     Scene scene;
+
+    Material emerald = { WHITE, WHITE, 0.2, 1 };
+
     Renderer renderer(800, 800, scene.getLights());
+    renderer.setMaterial(emerald);
+
     CameraInputs inputs;
     Camera camera(renderer.framebuffer.getWidth(), renderer.framebuffer.getHeight(), 90.f, 0.001f, 1000.f, 2.5f);
 
