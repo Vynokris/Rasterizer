@@ -627,26 +627,25 @@ matrix::Matrix<4, 4> geometry3D::getZRotationMatrix(float angle)
                                0,           0,            0, 1 );
 }
 
-matrix::Matrix<4, 4> geometry3D::getTransformMatrix(const Vector3& pos, const Vector3& rot,
-                                                    const Vector3& scale, const bool& reverse)
+matrix::Matrix<4, 4> geometry3D::getTransformMatrix(const Vector3& position, const Vector3& rotation, const Vector3& scale, const bool& reverse)
 {
     // For cameras.
     if (reverse)
     {
-        return getTranslationMatrix(pos)   *
-               getYRotationMatrix  (rot.y) *
-               getXRotationMatrix  (rot.x) * 
-               getZRotationMatrix  (rot.z) *
+        return getTranslationMatrix(position)   *
+               getYRotationMatrix  (rotation.y) *
+               getXRotationMatrix  (rotation.x) * 
+               getZRotationMatrix  (rotation.z) *
                getScaleMatrix      (scale);
     }
     // For world coordinates.
     else         
     {
-        return getScaleMatrix      (scale) *
-               getZRotationMatrix  (rot.z) *
-               getXRotationMatrix  (rot.x) * 
-               getYRotationMatrix  (rot.y) *
-               getTranslationMatrix(pos);
+        return getScaleMatrix      (scale)      *
+               getZRotationMatrix  (rotation.z) *
+               getXRotationMatrix  (rotation.x) * 
+               getYRotationMatrix  (rotation.y) *
+               getTranslationMatrix(position);
     }
 }
 
