@@ -393,8 +393,6 @@ namespace geometry3D
     class Segment3;
     class Triangle3;
     class Plane3;
-
-    struct Transform;
     struct Vertex;
     struct Plane;
 
@@ -409,8 +407,7 @@ namespace geometry3D
     matrix::Matrix<4, 4> getXRotationMatrix  (float angle);
     matrix::Matrix<4, 4> getYRotationMatrix  (float angle);
     matrix::Matrix<4, 4> getZRotationMatrix  (float angle);
-    matrix::Matrix<4, 4> getTransformMatrix  (const Vector3& pos,   const Vector3& rot,
-                                              const Vector3& scale, const bool& reverse = false);
+    matrix::Matrix<4, 4> getTransformMatrix  (const geometry3D::Vector3& position, const geometry3D::Vector3& rotation, const geometry3D::Vector3& scale, const bool& reverse = false);
 
     // Vector class that holds values for x, y and z (3 dimensions).
     class Vector3
@@ -598,7 +595,7 @@ namespace geometry3D
 
     struct Vertex
     {
-        Vector3 pos;            // Position
+        Vector3 pos;            // Pos
         Vector3 normal;         // Normal
         Color   color;          // Color
         geometry2D::Vector2 uv; // Texture coordinates
@@ -650,7 +647,7 @@ namespace geometry3D
             Vertex a, b, c;
 
             // Constructor.
-            Triangle3();                                                     // Null triangle.
+            Triangle3();                                                                 // Null triangle.
             Triangle3(const Vertex& _a, const Vertex& _b, const Vertex& _c); // Triangle3 from points.
 
             // Destructor.
