@@ -95,7 +95,7 @@ void App::update()
     // Initialize app objects.
     Scene scene;
 
-    Material emerald = { WHITE, WHITE, 0.2, 1 };
+    Material emerald = { 1, 1, 0.2, 1 };
 
     Renderer renderer(800, 800, scene.getLights());
     renderer.setMaterial(emerald);

@@ -110,6 +110,9 @@ namespace arithmetic
     // Linear interpolation between two given colors.
     Color colorLerp(const float& val, const Color& start, const Color& end);
 
+    // Blend between two HSV colors.
+    HSV blendHSV(const HSV& col0, const HSV& col1);
+
     // Convert an RGB color (0 <= rgba <= 1) to HSV.
     HSV   RGBtoHSV(const Color& color);
 
