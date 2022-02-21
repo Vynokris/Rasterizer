@@ -14,7 +14,7 @@ Color computePhong(const vector<Light>& _lights, const Material& _mat, Vector3 _
     {
         // Create vectors.
         Vector3 camToPixel     = Vector3(_pixel, _view).getNormalized();
-        Vector3 lightToPixel   = Vector3(_pixel, light.params.pos).getNormalized();
+        Vector3 lightToPixel   = Vector3(_pixel, light.pos).getNormalized();
         Vector3 lightReflexion = (_normal * 2 * (lightToPixel & _normal) - lightToPixel).getNormalized();
 
         // Compute the intensity of diffuse and specular light.
@@ -25,13 +25,13 @@ Color computePhong(const vector<Light>& _lights, const Material& _mat, Vector3 _
             specularFactor = pow(reflectionDot, _mat.shiness * 64);
 
         // Compute the colors of diffuse and specular light.
-        Color diffuse  = _mat.diffuse  * diffuseFactor;
-        Color specular = _mat.specular * specularFactor;
+        float diffuse  = _mat.diffuse  * diffuseFactor;
+        float specular = _mat.specular * specularFactor;
 
         //! Debug pannel.
         ImGui::Begin("Lighting rendering info");
         {
-            ImGui::Text("Light position: %.2f, %.2f, %.2f\n", light.params.pos.x, light.params.pos.y, light.params.pos.z);
+            ImGui::Text("Light position: %.2f, %.2f, %.2f\n", light.pos.x, light.pos.y, light.pos.z);
             ImGui::Text("Pixel position (relative to world): %.2f, %.2f, %.2f\n", _pixel.x, _pixel.y, _pixel.z);
             ImGui::Text("Light direction (normalized): %.2f, %.2f, %.2f\n", lightToPixel.x, lightToPixel.y, lightToPixel.z);
             ImGui::Text("Light diffuse: %.2f", diffuseFactor);
@@ -40,8 +40,13 @@ Color computePhong(const vector<Light>& _lights, const Material& _mat, Vector3 _
         ImGui::End();
 
         // Compute the output color.
-        lightIntensity += diffuse + specular;
+        lightIntensity += light.color * (diffuse + specular);
     }
+    lightIntensity.a = 1;
+
+    ImGui::Begin("Lighting rendering info");
+    ImGui::Text("Light color: %2.f, %.2f, %.2f", lightIntensity.r, lightIntensity.g, lightIntensity.b);
+    ImGui::End();
 
     return lightIntensity;
 }

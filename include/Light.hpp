@@ -2,25 +2,12 @@
 
 #include "my_math.hpp"
 
-struct Material
-{
-    Color diffuse;
-    Color specular;
-    float shiness;
-    float attenuation;
-};
-
-struct LightParams
-{
-    Vector3 pos;
-    Vector3 dir;
-};
+struct Material { float diffuse, specular, shiness, attenuation; };
 
 struct Light
 {
-    LightParams params;
-
-    Light(const LightParams& _p) : params(_p) {}
+    Vector3 pos, dir;
+    Color color;
 };
 
 Color computePhong(const std::vector<Light>& _light,
