@@ -23,7 +23,7 @@ Scene::Scene()
                           { {  0.5f, 0.5f, 0.0f }, { 0.0f, 0.0f,-1.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, {  1.0f, 1.0f } } });
     
     // LIGHT 1
-    lights.push_back((LightParams){ { 2, 2, 2 }, Vector3(), ColorToVec3(WHITE), ColorToVec3(WHITE), ColorToVec3(WHITE) });
+    lights.push_back((LightParams){ { 2, 2, 2 }, Vector3(), ColorToVec3(WHITE), ColorToVec3(WHITE), { 0.5, 0.5, 0.5 } });
 }
 
 Scene::~Scene()
@@ -61,23 +61,22 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     // _renderer.modelPopMat();
 
     // Draw cube.
-    // Material mat = { { 0.0215, 0.1745, 0.0215 }, { 0.07568, 0.61424, 0.07568 },	{ 0.633, 0.727811, 0.633 },	0.6, 1 };
-    _renderer.modelPushMat();
-    _renderer.modelTranslate(-0.5, 0, 2);
-    _renderer.modelRotateX(fmod(time/2, 2*PI));
-    _renderer.modelRotateY(fmod(time/2, 2*PI));
-    _renderer.modelRotateZ(fmod(time/2, 2*PI));
-    _renderer.drawCube(MAGENTA);
-    _renderer.modelPopMat();
-
-    // Draw sphere.
     // _renderer.modelPushMat();
-    // _renderer.modelTranslate(0.5, 0, 2);
+    // _renderer.modelTranslate(-0.5, 0, 2);
     // _renderer.modelRotateX(fmod(time/2, 2*PI));
     // _renderer.modelRotateY(fmod(time/2, 2*PI));
     // _renderer.modelRotateZ(fmod(time/2, 2*PI));
-    // _renderer.drawSphere(1, 10, 10, CYAN);
+    // _renderer.drawCube(MAGENTA);
     // _renderer.modelPopMat();
+
+    // Draw sphere.
+    _renderer.modelPushMat();
+    _renderer.modelTranslate(0.5, 0, 2);
+    // _renderer.modelRotateX(fmod(time/2, 2*PI));
+    // _renderer.modelRotateY(fmod(time/2, 2*PI));
+    // _renderer.modelRotateZ(fmod(time/2, 2*PI));
+    _renderer.drawSphere(1, 20, 20, CYAN);
+    _renderer.modelPopMat();
     
     
     deltaTime = _deltaTime;
