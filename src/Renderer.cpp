@@ -324,9 +324,9 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                 
             // Interpolate pixel lighting.
             Color pLight { 
-                w0n * lightIntensity[0].r + w1n * lightIntensity[0].g + w2n * lightIntensity[0].b,
-                w0n * lightIntensity[1].r + w1n * lightIntensity[1].g + w2n * lightIntensity[1].b,
-                w0n * lightIntensity[2].r + w1n * lightIntensity[2].g + w2n * lightIntensity[2].b,
+                w0n * lightIntensity[0].r + w1n * lightIntensity[1].r + w2n * lightIntensity[2].r,
+                w0n * lightIntensity[0].g + w1n * lightIntensity[1].g + w2n * lightIntensity[2].g,
+                w0n * lightIntensity[0].b + w1n * lightIntensity[1].b + w2n * lightIntensity[2].b,
             };
 
             // Define the pixel color.
@@ -362,9 +362,8 @@ void Renderer::drawTriangle(Triangle3 _triangle)
             }
 
             // Apply the pixel lighting to the pixel color.
-            pCol.r *= pLight.r;
-            pCol.g *= pLight.g;
-            pCol.b *= pLight.b;
+            // TODO: fix blending between model color and light color.
+            pCol *= pLight;
 
             // If p is on or inside all edges, render pixel.
             if ((w0 | w1 | w2) >= 0) drawPixel(p.x, p.y, depth, pCol);

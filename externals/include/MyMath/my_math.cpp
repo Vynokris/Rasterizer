@@ -114,6 +114,17 @@ Color arithmetic::colorLerp(const float& val, const Color& start, const Color& e
     };
 }
 
+// Blend between two HSV colors.
+HSV arithmetic::blendHSV(const HSV& col0, const HSV& col1)
+{
+    Vector2 totalVec = Vector2(col0.h, 1, true) + Vector2(col1.h, 1, true);
+    float avgHue = totalVec.getAngle();
+    float avgSat = (col0.s + col1.s) / 2;
+    float avgVal = (col0.v + col1.v) / 2;
+    return HSV{ avgHue, avgSat, avgVal };
+}
+
+// Convert an RGB color (0 <= rgba <= 1) to HSV.
 HSV arithmetic::RGBtoHSV(const Color& color)
 {
     HSV hsv;
@@ -154,6 +165,7 @@ HSV arithmetic::RGBtoHSV(const Color& color)
     return hsv;
 }
 
+// Convert an HSV color to RGB.
 Color arithmetic::HSVtoRGB(const HSV& hsv)
 {
     Color color = { 0, 0, 0, 1 };
@@ -188,25 +200,6 @@ Color arithmetic::HSVtoRGB(const HSV& hsv)
 // Shifts the hue of the given color.
 Color arithmetic::colorShift(const Color& color, const float& hue)
 {
-    /*
-    float cosH   = cos(hue);
-    float thirdH = (1-cosH)/3;
-    float sqrtH  = sqrt(1/3)*sin(hue);
-
-    matrix::Mat3 rot = matrix::Mat3(
-        cosH+thirdH,  thirdH-sqrtH, thirdH+sqrtH,
-        thirdH+sqrtH, cosH+thirdH,  thirdH-sqrtH,
-        thirdH-sqrtH, thirdH+sqrtH, cosH+thirdH
-    );
-
-    Color out = {
-        clamp(color.r * rot[0][0] + color.g * rot[0][1] + color.b * rot[0][2], 0, 1),
-        clamp(color.r * rot[1][0] + color.g * rot[1][1] + color.b * rot[1][2], 0, 1),
-        clamp(color.r * rot[2][0] + color.g * rot[2][1] + color.b * rot[2][2], 0, 1),
-        1
-    };
-    */
-
     HSV hsv = RGBtoHSV(color);
     hsv.h += hue;
     if (hsv.h >= 2*PI)

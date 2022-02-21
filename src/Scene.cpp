@@ -23,7 +23,9 @@ Scene::Scene()
                           { {  0.5f, 0.5f, 0.0f }, { 0.0f, 0.0f,-1.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, {  1.0f, 1.0f } } });
     
     // LIGHT 1
-    lights.push_back((LightParams){ { 2, 2, 2 }, Vector3() });
+    lights.push_back({ {  2,  2,  2 }, Vector3(), RED   });
+    lights.push_back({ { 2, -2, -2 }, Vector3(), GREEN });
+    lights.push_back({ { -2, 2, -2 },  Vector3(), BLUE  });
 }
 
 Scene::~Scene()
@@ -75,7 +77,7 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     _renderer.modelRotateX(fmod(time/2, 2*PI));
     _renderer.modelRotateY(fmod(time/2, 2*PI));
     _renderer.modelRotateZ(fmod(time/2, 2*PI));
-    _renderer.drawSphere(1, 128, 128, CYAN);
+    _renderer.drawSphere(1, 64, 64, WHITE);
     _renderer.modelPopMat();
     
     
