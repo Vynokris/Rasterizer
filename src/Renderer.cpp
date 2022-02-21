@@ -159,7 +159,7 @@ static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords)
     }
 }
 
-bool Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local, Vector4* _world, Vector4* _view, Vector4* _clip, Vector3* _ndc, Vector3* _screen)
+bool Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local, Vector4* _world, Vector4* _view, Vector4* _clip, Vector3* _ndc, Vector3* _screen, Vector3* _perspectiveUV)
 {
     for (int i = 0; i < _count; i++)
     {
@@ -188,6 +188,15 @@ bool Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local,
         
         // NDC (3D) -> screen coords (2D).
         _screen[i] = ndcToScreenCoords(_ndc[i], viewport);
+    }
+    
+    // Make sure the triangle vertices are in the right order to be drawn.
+    swapTriangleVertices(_screen, _view);
+
+    for (int i = 0; i < 3; i++)
+    {
+        // Bring uv coords to clip space.
+        _perspectiveUV[i] = { _vertices[i].uv.x / _view[i].z, _vertices[i].uv.y / _view[i].z, 1 / _view[i].z };
     }
 
     return true;
@@ -234,7 +243,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
         return;
 
     // Transform the triangle's vertices through the renderer's matrices.
-    if (!transformVertices(3, &_triangle.a, localCoords, worldCoords, viewCoords, clipCoords, ndcCoords, screenCoords))
+    if (!transformVertices(3, &_triangle.a, localCoords, worldCoords, viewCoords, clipCoords, ndcCoords, screenCoords, perspectiveUV))
         return;
 
     // Draw triangle wireframe
@@ -257,15 +266,6 @@ void Renderer::drawTriangle(Triangle3 _triangle)
             lightIntensity[i] = computePhong(lights, material, worldCoords[i].toVector3(), worldNormal, cameraPos);
         else 
             lightIntensity[i] = WHITE;
-    }
-    
-    // Make sure the triangle vertices are in the right order to be drawn.
-    swapTriangleVertices(screenCoords, viewCoords);
-
-    for (int i = 0; i < 3; i++)
-    {
-        // Bring uv coords to clip space.
-        perspectiveUV[i] = { ((&_triangle.a)+i)->uv.x / viewCoords[i].z, ((&_triangle.a)+i)->uv.y / viewCoords[i].z, 1 / viewCoords[i].z };
     }
         
     //! DEBUG PANNEL
