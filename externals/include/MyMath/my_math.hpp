@@ -39,14 +39,22 @@ class Color //? NOTE: [0, 1]
 public:
     float r, g, b, a = 1.f;
     
-    Color operator+(const Color& c)  { return { r + c.r, g + c.g, b + c.b, a + c.a };     }
-    Color operator-(const Color& c)  { return { r - c.r, g - c.g, b - c.b, a - c.a };     }
-    Color operator*(const Color& c)  { return { r * c.r, g * c.g, b * c.b, a * c.a };     }
-    Color operator/(const Color& c)  { return { r / c.r, g / c.g, b / c.b, a / c.a };     }
-    Color operator+=(const Color& c) { return { r += c.r, g += c.g, b += c.b, a += c.a }; }
-    Color operator-=(const Color& c) { return { r -= c.r, g -= c.g, b -= c.b, a -= c.a }; }
-    Color operator*=(const Color& c) { return { r *= c.r, g *= c.g, b *= c.b, a *= c.a }; }
-    Color operator/=(const Color& c) { return { r /= c.r, g /= c.g, b /= c.b, a /= c.a }; }
+    Color operator+ (const Color& c) const { return { r + c.r,  g + c.g , b + c.b,  a + c.a  }; }
+    Color operator+ (const float& v) const { return { r + v  ,  g + v   , b + v  ,  a + v    }; }
+    Color operator- (const Color& c) const { return { r - c.r,  g - c.g , b - c.b,  a - c.a  }; }
+    Color operator- (const float& v) const { return { r - v  ,  g - v   , b - v  ,  a - v    }; }
+    Color operator* (const Color& c) const { return { r * c.r,  g * c.g , b * c.b,  a * c.a  }; }
+    Color operator* (const float& v) const { return { r * v  ,  g * v   , b * v  ,  a * v    }; }
+    Color operator/ (const Color& c) const { return { r / c.r,  g / c.g , b / c.b,  a / c.a  }; }
+    Color operator/ (const float& v) const { return { r / v  ,  g / v   , b / v  ,  a / v    }; }
+    void  operator+=(const Color& c)       {          r += c.r; g += c.g; b += c.b; a += c.a;   }
+    void  operator+=(const float& v)       {          r += v  ; g += v  ; b += v  ; a += v  ;   }
+    void  operator-=(const Color& c)       {          r -= c.r; g -= c.g; b -= c.b; a -= c.a;   }
+    void  operator-=(const float& v)       {          r -= v  ; g -= v  ; b -= v  ; a -= v  ;   }
+    void  operator*=(const Color& c)       {          r *= c.r; g *= c.g; b *= c.b; a *= c.a;   }
+    void  operator*=(const float& v)       {          r *= v  ; g *= v  ; b *= v  ; a *= v  ;   }
+    void  operator/=(const Color& c)       {          r /= c.r; g /= c.g; b /= c.b; a /= c.a;   }
+    void  operator/=(const float& v)       {          r /= v  ; g /= v  ; b /= v  ; a /= v  ;   }
 
     // Returns the hue of an RGB color (0 <= rgba <= 1).
     float getHue();

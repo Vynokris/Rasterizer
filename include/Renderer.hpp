@@ -26,7 +26,7 @@ class Renderer
 private:
     // TODO: Make object class and apply texture and material.
     TextureData texture;
-    Material    mat; 
+    Material    material; 
     Viewport    viewport;
 
     std::vector<Mat4> modelMat;
@@ -36,8 +36,8 @@ private:
     // Scene components copied datas.
     std::vector<Light> lights;
 
-    RenderMode   renderMode   = RenderMode::LIT;
-    LightingMode lightingMode = LightingMode::PHONG;
+    RenderMode   renderMode;
+    LightingMode lightingMode;
 
 public:
     Framebuffer framebuffer;
@@ -64,7 +64,7 @@ public:
 
     void drawPixel        (const unsigned int& _x, const unsigned int& _y, const float& _depth, const Color& _color);
     void drawLine         (const geometry3D::Vertex& _p0, const geometry3D::Vertex& _p1);
-    bool transformVertices(int _count, Vertex* _vertices, Vector3* _local, Vector4* _world, Vector4* _view, Vector4* _clip, Vector3* _ndc, Vector3* _screen, Vector3* _perspectiveUV);
+    bool transformVertices(int _count, Vertex* _vertices, Vector3* _local, Vector4* _world, Vector4* _view, Vector4* _clip, Vector3* _ndc, Vector3* _screen);
     void drawTriangles    (geometry3D::Triangle3* _triangles, const unsigned int& _count);
     void drawDividedQuad  (const Color& _color, const float& _size = 1.f, const bool& _negateNormals = false);
     void drawCube         (const Color& _color, const float& _size = 1.f);

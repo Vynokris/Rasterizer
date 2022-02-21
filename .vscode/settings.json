@@ -73,7 +73,10 @@
         "*.ipp": "cpp",
         "xstring": "cpp",
         "xlocnum": "cpp",
-        "xlocale": "cpp"
+        "xlocale": "cpp",
+        "ios": "cpp",
+        "xfacet": "cpp",
+        "xlocinfo": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
