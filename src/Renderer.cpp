@@ -122,7 +122,7 @@ static int barycentricCoords(const Vector3& _a, const Vector3& _b, const Vector3
     return (_b.x - _a.x) * (_c.y - _a.y) - (_b.y - _a.y) * (_c.x - _a.x);
 }
 
-static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords)
+static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords, Vertex* _vertices)
 {
     // Get the triangle's sides and normals.
     Vector2 p0p1(Vector2{ _screenCoords[0].x, _screenCoords[0].y }, Vector2{ _screenCoords[1].x, _screenCoords[1].y });
@@ -144,6 +144,10 @@ static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords)
         float tempDepth  = _viewCoords[0].z;
         _viewCoords[0].z = _viewCoords[1].z;
         _viewCoords[1].z = tempDepth;
+        
+        Vertex tempVertex = _vertices[0];
+        _vertices[0]      = _vertices[1];
+        _vertices[1]      = tempVertex;
     }
     else if (angle1 < PI/2)
     {
@@ -155,6 +159,10 @@ static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords)
         float tempDepth  = _viewCoords[1].z;
         _viewCoords[1].z = _viewCoords[2].z;
         _viewCoords[2].z = tempDepth;
+        
+        Vertex tempVertex = _vertices[1];
+        _vertices[1]      = _vertices[2];
+        _vertices[2]      = tempVertex;
     }
     else if (angle2 < PI/2)
     {
@@ -166,6 +174,10 @@ static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords)
         float tempDepth  = _viewCoords[2].z;
         _viewCoords[2].z = _viewCoords[0].z;
         _viewCoords[0].z = tempDepth;
+        
+        Vertex tempVertex = _vertices[2];
+        _vertices[2]      = _vertices[0];
+        _vertices[0]      = tempVertex;
     }
 }
 
@@ -201,7 +213,7 @@ bool Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local,
     }
     
     // Make sure the triangle vertices are in the right order to be drawn.
-    swapTriangleVertices(_screen, _view);
+    swapTriangleVertices(_screen, _view, _vertices);
 
     for (int i = 0; i < 3; i++)
     {
@@ -357,7 +369,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                 }
 
                 // Define the pixel color.
-                Color pCol { 0, 0, 0, 0 };
+                Color pCol { 0, 0, 0, 1 };
 
                 if (texture.pixels == nullptr || texture.applyVertexColor)
                 {
