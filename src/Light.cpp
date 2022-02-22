@@ -29,7 +29,7 @@ Color computePhong(const vector<Light>& _lights, const Material& _mat, Vector3 _
         float specular = _mat.specular * specularFactor;
 
         //! Debug pannel.
-        ImGui::Begin("Lighting rendering info");
+        if (ImGui::Begin("Lighting rendering info"))
         {
             ImGui::Text("Light position: %.2f, %.2f, %.2f\n", light.pos.x, light.pos.y, light.pos.z);
             ImGui::Text("Pixel position (relative to world): %.2f, %.2f, %.2f\n", _pixel.x, _pixel.y, _pixel.z);
@@ -44,8 +44,8 @@ Color computePhong(const vector<Light>& _lights, const Material& _mat, Vector3 _
     }
     lightIntensity.a = 1;
 
-    ImGui::Begin("Lighting rendering info");
-    ImGui::Text("Light color: %2.f, %.2f, %.2f", lightIntensity.r, lightIntensity.g, lightIntensity.b);
+    if (ImGui::Begin("Lighting rendering info"))
+        ImGui::Text("Light color: %2.f, %.2f, %.2f", lightIntensity.r, lightIntensity.g, lightIntensity.b);
     ImGui::End();
 
     return lightIntensity;

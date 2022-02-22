@@ -195,7 +195,7 @@ void App::update()
         ImGui::End();
         
         // Display the rasterizer's output.
-        ImGui::Begin("Render");
+        if (ImGui::Begin("Render"))
         {
             if (mouseCaptured == false) ImGui::Text("(Hold RMB to capture mouse)");
             else                        ImGui::Text("(Release RMB to leave mouse capture mode)");
