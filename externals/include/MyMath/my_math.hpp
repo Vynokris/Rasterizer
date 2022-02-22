@@ -117,7 +117,7 @@ namespace arithmetic
     HSV   RGBtoHSV(const Color& color);
 
     // Convert an HSV color to RGB.
-    Color HSVtoRGB(const HSV& hsv);
+    Color HSVtoRGB(const HSV& hsv, const float& alpha = 1);
 
     // Shifts the hue of the given color.
     Color colorShift(const Color& color, const float& hue);

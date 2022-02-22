@@ -4,7 +4,7 @@
 using namespace arithmetic;
 #include <imgui.h>
 
-Color TextureData::getPixelColor(const int& x, const int& y)
+Color TextureData::getPixelColor(const int& x, const int& y, const float& alpha)
 {
     // Idk why sometimes x and y go to -infinity so I just obliterate the pixel.
     if (x <= -2147483648 || y <= -2147483648)
@@ -18,7 +18,7 @@ Color TextureData::getPixelColor(const int& x, const int& y)
         pixels[index+2] / 255.f,
         pixels[index+1] / 255.f,
         pixels[index]   / 255.f,
-        1
+        alpha
     };
 }
 

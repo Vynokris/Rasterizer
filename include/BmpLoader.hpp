@@ -36,7 +36,7 @@ public:
     TextureData() : pixels(0), width(0), height(0), padding(0) {}
     ~TextureData() {  }
 
-    Color getPixelColor(const int& _x, const int& _y);
+    Color getPixelColor(const int& _x, const int& _y, const float& alpha = 1);
 };
 
 TextureData loadBmpData(const char* _filename);
