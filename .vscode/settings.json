@@ -76,7 +76,8 @@
         "xlocale": "cpp",
         "ios": "cpp",
         "xfacet": "cpp",
-        "xlocinfo": "cpp"
+        "xlocinfo": "cpp",
+        "*.rh": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

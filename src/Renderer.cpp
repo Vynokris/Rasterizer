@@ -47,7 +47,7 @@ void Renderer::drawPixel(const unsigned int& _x, const unsigned int& _y, const f
     if (_color.a < 1 || framebuffer.colorBuffer[index].a < 1)
     {
         blendAlpha = true;
-        float alpha = (_depth <= framebuffer.depthBuffer[index] ? _color.a : (1-framebuffer.colorBuffer[index].a));
+        float alpha = (_depth <= framebuffer.depthBuffer[index] ? _color.a : (1 - framebuffer.colorBuffer[index].a));
         _color = _color * alpha + framebuffer.colorBuffer[index] * (1 - alpha);
     }
 
@@ -243,17 +243,6 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     Vector3 cameraPos = (Vector4(0, 0, 0, 1)
                       * viewMat.inv4()).toVector3();
 
-    if (ImGui::Begin("Debug info"))
-    {
-        ImGui::Text("Triangle position:  %.2f, %.2f, %.2f", trianglePos.x, trianglePos.y, trianglePos.z);
-        ImGui::Text("Triangle normal:    %.2f, %.2f, %.2f", worldNormal.x, worldNormal.y, worldNormal.z);
-        ImGui::Text("Vector to triangle: %.2f, %.2f, %.2f", Vector3(cameraPos, trianglePos).x, Vector3(cameraPos, trianglePos).y, Vector3(cameraPos, trianglePos).z);
-        ImGui::Text("Camera position:    %.2f, %.2f, %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
-        ImGui::Text("Dot product:        %.2f",             worldNormal & Vector3(cameraPos, trianglePos));
-        ImGui::Text("\n");
-    }
-    ImGui::End();
-
     // Back face culling.
     if (!isTowardsCamera(trianglePos, worldNormal, cameraPos))
         return;
@@ -274,7 +263,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
         return;
     }
 
-    // Compute Blin-Phong lighting for each vertex / light.
+    // Compute Blinn-Phong lighting for each vertex / light.
     Color lightIntensity[3] = { { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, };
     if (lightingMode == LightingMode::PHONG)
     {
@@ -286,18 +275,6 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                 lightIntensity[i] = WHITE;
         }
     }
-        
-    //! DEBUG PANNEL.
-    if (ImGui::Begin("Debug info"))
-    {
-        for (int i = 0; i < 3; i++) ImGui::Text("Local  coords %d: (%.2f, %.2f, %.2f)%s",       i, localCoords[i].x,  localCoords[i].y,  localCoords[i].z,                    (i == 2 ? "\n " : ""));
-        for (int i = 0; i < 3; i++) ImGui::Text("World  coords %d: (%.2f, %.2f, %.2f, %.2f)%s", i, worldCoords[i].x,  worldCoords[i].y,  worldCoords[i].z,  worldCoords[i].w, (i == 2 ? "\n " : ""));
-        for (int i = 0; i < 3; i++) ImGui::Text("View   coords %d: (%.2f, %.2f, %.2f, %.2f)%s", i, viewCoords[i].x,   viewCoords[i].y,   viewCoords[i].z,   viewCoords[i].w,  (i == 2 ? "\n " : ""));
-        for (int i = 0; i < 3; i++) ImGui::Text("Clip   coords %d: (%.2f, %.2f, %.2f, %.2f)%s", i, clipCoords[i].x,   clipCoords[i].y,   clipCoords[i].z,   clipCoords[i].w,  (i == 2 ? "\n " : ""));
-        for (int i = 0; i < 3; i++) ImGui::Text("NDC    coords %d: (%.2f, %.2f, %.2f)%s",       i, ndcCoords[i].x,    ndcCoords[i].y,    ndcCoords[i].z,                      (i == 2 ? "\n " : ""));
-        for (int i = 0; i < 3; i++) ImGui::Text("Screen coords %d: (%.0f, %.0f, %.3f)%s",       i, screenCoords[i].x, screenCoords[i].y, screenCoords[i].z,                   (i == 2 ? "\n " : ""));
-    }
-    ImGui::End();
 
     // Compute triangle bounding box.
     int minX = min(min(screenCoords[0].x, screenCoords[1].x), screenCoords[2].x);
@@ -342,22 +319,26 @@ void Renderer::drawTriangle(Triangle3 _triangle)
 
                 // Compute the pixel depth.
                 float depth = abs(perspectiveUV[0].z * w0n + perspectiveUV[1].z * w1n + perspectiveUV[2].z * w2n);
-                    depth = 1 / depth;
+                      depth = 1 / depth;
                 
                 // Interpolate pixel lighting.
-                Color pLight;
-                if (lightingMode == LightingMode::PHONG)
+                Color pLight = WHITE;
+                if (renderMode == RenderMode::LIT)
                 {
-                    pLight = { 
-                        w0n * lightIntensity[0].r + w1n * lightIntensity[1].r + w2n * lightIntensity[2].r,
-                        w0n * lightIntensity[0].g + w1n * lightIntensity[1].g + w2n * lightIntensity[2].g,
-                        w0n * lightIntensity[0].b + w1n * lightIntensity[1].b + w2n * lightIntensity[2].b,
-                    };
-                }
-                else if (lightingMode == LightingMode::BLINN)
-                {
-                    Vector3 pixelPos = (worldCoords[0] * w0n + worldCoords[1] * w1n + worldCoords[2] * w2n).toVector3();
-                    pLight           = computePhong(lights, material, pixelPos, worldNormal, cameraPos);
+                    if (lightingMode == LightingMode::PHONG)
+                    {
+                        pLight =
+                        { 
+                            w0n * lightIntensity[0].r + w1n * lightIntensity[1].r + w2n * lightIntensity[2].r,
+                            w0n * lightIntensity[0].g + w1n * lightIntensity[1].g + w2n * lightIntensity[2].g,
+                            w0n * lightIntensity[0].b + w1n * lightIntensity[1].b + w2n * lightIntensity[2].b,
+                        };
+                    }
+                    else if (lightingMode == LightingMode::BLINN)
+                    {
+                        Vector3 pixelPos = (worldCoords[0] * w0n + worldCoords[1] * w1n + worldCoords[2] * w2n).toVector3();
+                        pLight           = computePhong(lights, material, pixelPos, worldNormal, cameraPos);
+                    }
                 }
 
                 // Define the pixel color.
@@ -376,7 +357,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                 {
                     // Compute the uv coordinates.
                     Vector2 uv = { clamp(depth * (perspectiveUV[0].x * w0n + perspectiveUV[1].x * w1n + perspectiveUV[2].x * w2n), 0, 1),
-                                clamp(depth * (perspectiveUV[0].y * w0n + perspectiveUV[1].y * w1n + perspectiveUV[2].y * w2n), 0, 1) };
+                                   clamp(depth * (perspectiveUV[0].y * w0n + perspectiveUV[1].y * w1n + perspectiveUV[2].y * w2n), 0, 1) };
 
                     // Get the pixel color from the current texture.
                     Color texColor = texture.getPixelColor(floorInt(clampAbove(lerp(uv.x, 0, abs(texture.width )), 0)), 
@@ -384,35 +365,22 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                                                         pCol.a);
 
                     // Apply the texture color to the pixel color.
-                    if (texture.applyVertexColor) {
+                    if (texture.applyVertexColor)
+                    {
                         HSV pHSV = RGBtoHSV(texColor);
                         pCol = HSVtoRGB({ pCol.getHue(), pHSV.s, pHSV.v }, pCol.a);
                     }
-                    else {
+                    else
+                    {
                         pCol = texColor;
                     }
                 }
 
                 // Apply the pixel lighting to the pixel color.
-                // TODO: fix blending between model color and light color.
                 pCol *= pLight;
 
                 // Draw the pixel.
                 drawPixel(p.x, p.y, depth, pCol);
-
-                //! Show debug info on the last pixel.
-                if (p.x > maxX-1 && p.y > maxY-1)
-                {
-                    if (ImGui::Begin("Debug info"))
-                    {
-                        ImGui::Text("Pixel depth: %f", depth);
-                        ImGui::Text("Pixel uv:    %f, %f", _triangle.a.uv.x * w0n + _triangle.b.uv.x * w1n + _triangle.c.uv.x * w2n, _triangle.a.uv.y * w0n + _triangle.b.uv.y * w1n + _triangle.c.uv.y * w2n);
-                        ImGui::Text("Pixel color: %.2f, %.2f, %.2f", pCol.r, pCol.g, pCol.b);
-                        ImGui::Text("Pixel hue:   %.2f", pCol.getHue());
-                        ImGui::Text("\n\n\n");
-                    }
-                    ImGui::End();
-                }
             }
 
             // One step to the right.
@@ -627,8 +595,4 @@ void Renderer::showImGuiControls()
     lightingMode = (LightingMode)lModeCur;
 
     ImGui::Checkbox("Apply vertex colors to texture", &texture.applyVertexColor);
-    ImGui::Text("\nMatrices:");
-    ImGui::Text("Model:\n%s",      modelMat.back().printStr(false).c_str());
-    ImGui::Text("View:\n%s",       viewMat.printStr        (false).c_str());
-    ImGui::Text("Projection:\n%s", projectionMat.printStr  (false).c_str());
 }
