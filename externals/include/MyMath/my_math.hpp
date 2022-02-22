@@ -650,7 +650,7 @@ namespace geometry3D
             void move(const Vector3& vec);
     };
 
-    // Triangle3 structure that holds values for 3 points.
+    // Triangle3 structure that holds values for 3 vertices.
     class Triangle3
     {
         public:
@@ -658,8 +658,8 @@ namespace geometry3D
             Vertex a, b, c;
 
             // Constructor.
-            Triangle3();                                                                 // Null triangle.
-            Triangle3(const Vertex& _a, const Vertex& _b, const Vertex& _c); // Triangle3 from points.
+            Triangle3();                                                     // Null triangle.
+            Triangle3(const Vertex& _a, const Vertex& _b, const Vertex& _c); // Triangle3 from vertices.
 
             // Destructor.
             ~Triangle3() {}
