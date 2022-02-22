@@ -65,21 +65,22 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
 
     // Draw cube.
     _renderer.modelPushMat();
-    _renderer.modelTranslate(-0.5, 0, 2);
+    _renderer.modelTranslate(0, 0, 2);
     _renderer.modelRotateX(fmod(time/2, 2*PI));
     _renderer.modelRotateY(fmod(time/2, 2*PI));
     _renderer.modelRotateZ(fmod(time/2, 2*PI));
-    _renderer.drawCube({ 1, 1, 1, 1 });
+    // _renderer.drawCube({ 1, 1, 1, 1 });
+    _renderer.drawDividedCube({ 1, 1, 1, 0.5 }, 1, 10);
     _renderer.modelPopMat();
 
     // Draw sphere.
-    // _renderer.modelPushMat();
-    // _renderer.modelTranslate(0.5, 0, 2);
-    // _renderer.modelRotateX(fmod(time/2, 2*PI));
-    // _renderer.modelRotateY(fmod(time/2, 2*PI));
-    // _renderer.modelRotateZ(fmod(time/2, 2*PI));
-    // _renderer.drawSphere(1, 64, 74, { 1, 1, 1, 1 });
-    // _renderer.modelPopMat();
+    _renderer.modelPushMat();
+    _renderer.modelTranslate(0, 0, 2);
+    _renderer.modelRotateX(-fmod(time/2, 2*PI));
+    _renderer.modelRotateY(-fmod(time/2, 2*PI));
+    _renderer.modelRotateZ(-fmod(time/2, 2*PI));
+    _renderer.drawSphere({ 1, 1, 1, 1 }, 0.7, 6, 6);
+    _renderer.modelPopMat();
     
     
     deltaTime = _deltaTime;
