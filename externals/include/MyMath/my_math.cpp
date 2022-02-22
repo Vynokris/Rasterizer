@@ -166,9 +166,9 @@ HSV arithmetic::RGBtoHSV(const Color& color)
 }
 
 // Convert an HSV color to RGB.
-Color arithmetic::HSVtoRGB(const HSV& hsv)
+Color arithmetic::HSVtoRGB(const HSV& hsv, const float& alpha)
 {
-    Color color = { 0, 0, 0, 1 };
+    Color color = { 0, 0, 0, alpha };
 
     // Red channel
     float k = fmodf((5.0f + hsv.h), 6);
