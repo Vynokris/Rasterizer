@@ -17,7 +17,7 @@ struct Viewport
     unsigned int width, height;
 };
 
-enum class RenderMode : int   { UNLIT, LIT, WIREFRAME, ZBUFFER };
+enum class RenderMode   : int { UNLIT, LIT, WIREFRAME, ZBUFFER };
 
 enum class LightingMode : int { PHONG, BLINN };   
 
@@ -69,11 +69,6 @@ public:
     void drawDividedQuad  (const Color& _color, const float& _size = 1.f, const bool& _negateNormals = false);
     void drawCube         (const Color& _color, const float& _size = 1.f);
     void drawSphere       (const float& _r, const int& _lon, const int& _lat, const Color& _color);
-
-    // --- View mode getters / setters --- //
-
-    RenderMode getRenderMode() const;
-    void       setRenderMode(const RenderMode& _mode);
 
     // --- Material and texture setters --- //
 
