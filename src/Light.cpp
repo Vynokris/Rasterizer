@@ -28,25 +28,10 @@ Color computePhong(const vector<Light>& _lights, const Material& _mat, Vector3 _
         float diffuse  = _mat.diffuse  * diffuseFactor;
         float specular = _mat.specular * specularFactor;
 
-        //! Debug pannel.
-        if (ImGui::Begin("Lighting rendering info"))
-        {
-            ImGui::Text("Light position: %.2f, %.2f, %.2f\n", light.pos.x, light.pos.y, light.pos.z);
-            ImGui::Text("Pixel position (relative to world): %.2f, %.2f, %.2f\n", _pixel.x, _pixel.y, _pixel.z);
-            ImGui::Text("Light direction (normalized): %.2f, %.2f, %.2f\n", lightToPixel.x, lightToPixel.y, lightToPixel.z);
-            ImGui::Text("Light diffuse: %.2f", diffuseFactor);
-            ImGui::Text("Light specular: %.2f\n\n", specularFactor);
-        }
-        ImGui::End();
-
         // Compute the output color.
         lightIntensity += light.color * (diffuse + specular);
     }
     lightIntensity.a = 1;
-
-    if (ImGui::Begin("Lighting rendering info"))
-        ImGui::Text("Light color: %2.f, %.2f, %.2f", lightIntensity.r, lightIntensity.g, lightIntensity.b);
-    ImGui::End();
 
     return lightIntensity;
 }

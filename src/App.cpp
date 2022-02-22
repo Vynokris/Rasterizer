@@ -95,10 +95,10 @@ void App::update()
     // Initialize app objects.
     Scene scene;
 
-    Material emerald = { 1, 1, 0.2, 1 };
+    Material material = { 1, 1, 0.2, 1 };
 
-    Renderer renderer(800, 800, scene.getLights());
-    renderer.setMaterial(emerald);
+    Renderer renderer(1500, 950, scene.getLights());
+    renderer.setMaterial(material);
 
     CameraInputs inputs;
     Camera camera(renderer.framebuffer.getWidth(), renderer.framebuffer.getHeight(), 90.f, 0.001f, 1000.f, 2.5f);
@@ -155,50 +155,35 @@ void App::update()
         // Update texture
         renderer.framebuffer.updateTexture();
 
-        // Display info.
-        if (ImGui::Begin("Info"))
-        {
-            // Compute smooth FPS.
-            static int counter = 0;
-            static float deltaTimes = 0, fps = 0;
-            counter++;
-            deltaTimes += ImGui::GetIO().DeltaTime;
-            if (counter >= 10)
-            {
-                counter = 0;
-                fps = 1 / (deltaTimes / 10);
-                deltaTimes = 0;
-            }
-
-            // Show FPS and frame duration.
-            ImGui::Text("FPS: %.f", fps);
-            ImGui::Text("Frame duration: %f seconds.", ImGui::GetIO().DeltaTime);
-        }
-        ImGui::End();
-
         // Display debug controls.
         if (ImGui::Begin("Config"))
         {
-            if (ImGui::CollapsingHeader("Renderer", ImGuiTreeNodeFlags_DefaultOpen))
-            {
-                renderer.showImGuiControls();
-            }
-            if (ImGui::CollapsingHeader("Objects", ImGuiTreeNodeFlags_DefaultOpen))
-            {
-                scene.showImGuiControls();
-            }
-            if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
-            {
-                camera.showImGuiControls();
-            }
+            if (ImGui::CollapsingHeader("Renderer", ImGuiTreeNodeFlags_DefaultOpen)) renderer.showImGuiControls();
+            if (ImGui::CollapsingHeader("Camera",   ImGuiTreeNodeFlags_DefaultOpen)) camera.showImGuiControls();
+            scene.showImGuiControls();
         }
         ImGui::End();
         
-        // Display the rasterizer's output.
-        if (ImGui::Begin("Render"))
+        
+        // Compute smooth FPS.
+        static int counter = 0;
+        static float deltaTimes = 0, fps = 0;
+        counter++;
+        deltaTimes += ImGui::GetIO().DeltaTime;
+        if (counter >= 10)
         {
-            if (mouseCaptured == false) ImGui::Text("(Hold RMB to capture mouse)");
-            else                        ImGui::Text("(Release RMB to leave mouse capture mode)");
+            counter = 0;
+            fps = 1 / (deltaTimes / 10);
+            deltaTimes = 0;
+        }
+
+        // Display the rasterizer's output.
+        bool is_open = false;
+
+        if (ImGui::Begin("Render", &is_open, ImGuiWindowFlags_NoTitleBar))
+        {
+            if (mouseCaptured == false) ImGui::Text("FPS: %.f | Delay: %.2f ms (Hold RMB / press WASD to look / move around) ", fps, roundf(ImGui::GetIO().DeltaTime * 100));
+            else                        ImGui::Text("FPS: %.f | Delay: %.2f ms", fps, roundf(ImGui::GetIO().DeltaTime * 100));
 
             ImGui::Image((ImTextureID)(size_t)renderer.framebuffer.getColorTexture(), { (float)renderer.framebuffer.getWidth(), (float)renderer.framebuffer.getHeight() });
             if (ImGui::IsItemHovered() && ImGui::IsMouseDown(ImGuiMouseButton_Right))
@@ -217,7 +202,6 @@ void App::update()
         endFrame();
     }
 
-    //! Temporary.
     delete[] baseTexture.pixels;
 }
 

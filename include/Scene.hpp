@@ -6,6 +6,8 @@
 #include <Camera.hpp>
 #include <Renderer.hpp>
 
+class Renderer;
+
 class Scene
 {
 private:
