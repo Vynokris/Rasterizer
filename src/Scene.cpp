@@ -24,8 +24,9 @@ Scene::Scene()
     
     // LIGHT 1
     lights.push_back({ {  2,  2,  2 }, Vector3(), RED   });
-    lights.push_back({ { 2, -2, -2 }, Vector3(), GREEN });
-    lights.push_back({ { -2, 2, -2 },  Vector3(), BLUE  });
+    lights.push_back({ {  2, -2, -2 }, Vector3(), GREEN });
+    lights.push_back({ { -2,  2, -2 }, Vector3(), BLUE  });
+    lights.push_back({ {  0, -1,  4 }, Vector3(), WHITE });
 }
 
 Scene::~Scene()
@@ -63,13 +64,13 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     // _renderer.modelPopMat();
 
     // Draw cube.
-    //_renderer.modelPushMat();
-    //_renderer.modelTranslate(-0.5, 0, 2);
-    //_renderer.modelRotateX(fmod(time/2, 2*PI));
-    //_renderer.modelRotateY(fmod(time/2, 2*PI));
-    //_renderer.modelRotateZ(fmod(time/2, 2*PI));
-    //_renderer.drawCube(MAGENTA);
-    //_renderer.modelPopMat();
+    _renderer.modelPushMat();
+    _renderer.modelTranslate(-0.5, 0, 2);
+    _renderer.modelRotateX(fmod(time/2, 2*PI));
+    _renderer.modelRotateY(fmod(time/2, 2*PI));
+    _renderer.modelRotateZ(fmod(time/2, 2*PI));
+    _renderer.drawCube({ 1, 1, 1, 0.5 });
+    _renderer.modelPopMat();
 
     // Draw sphere.
     _renderer.modelPushMat();
@@ -77,7 +78,7 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     _renderer.modelRotateX(fmod(time/2, 2*PI));
     _renderer.modelRotateY(fmod(time/2, 2*PI));
     _renderer.modelRotateZ(fmod(time/2, 2*PI));
-    _renderer.drawSphere(1, 64, 64, WHITE);
+    _renderer.drawSphere(1, 64, 64, { 1, 1, 1, 1 });
     _renderer.modelPopMat();
     
     
