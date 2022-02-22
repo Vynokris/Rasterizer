@@ -55,7 +55,7 @@ void Renderer::drawPixel(const unsigned int& _x, const unsigned int& _y, const f
     if (_depth <= framebuffer.depthBuffer[index] || blendAlpha)
     {
         framebuffer.depthBuffer[index] = _depth;
-        switch (getRenderMode())
+        switch (renderMode)
         {
         case RenderMode::ZBUFFER:   framebuffer.colorBuffer[index] = { _depth, _depth, _depth, 1 }; break;
         default:                    framebuffer.colorBuffer[index] = _color;                        break;
@@ -259,7 +259,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
         return;
 
     // Draw triangle wireframe
-    if (getRenderMode() == RenderMode::WIREFRAME)
+    if (renderMode == RenderMode::WIREFRAME)
     {
         drawLine({ screenCoords[0], _triangle.a.normal, _triangle.a.color, _triangle.a.uv }, 
                  { screenCoords[1], _triangle.b.normal, _triangle.b.color, _triangle.b.uv });
@@ -270,14 +270,17 @@ void Renderer::drawTriangle(Triangle3 _triangle)
         return;
     }
 
-    // Compute Phong lighting for each vertex / light.
+    // Compute Blin-Phong lighting for each vertex / light.
     Color lightIntensity[3] = { { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, };
-    for (int i = 0; i < 3; i++)
+    if (lightingMode == LightingMode::PHONG)
     {
-        if (renderMode == RenderMode::LIT)
-            lightIntensity[i] = computePhong(lights, material, worldCoords[i].toVector3(), worldNormal, cameraPos);
-        else 
-            lightIntensity[i] = WHITE;
+        for (int i = 0; i < 3; i++)
+        {
+            if (renderMode == RenderMode::LIT)
+                lightIntensity[i] = computePhong(lights, material, worldCoords[i].toVector3(), worldNormal, cameraPos);
+            else 
+                lightIntensity[i] = WHITE;
+        }
     }
         
     //! DEBUG PANNEL.
@@ -336,13 +339,22 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                 // Compute the pixel depth.
                 float depth = abs(perspectiveUV[0].z * w0n + perspectiveUV[1].z * w1n + perspectiveUV[2].z * w2n);
                     depth = 1 / depth;
-                    
+                
                 // Interpolate pixel lighting.
-                Color pLight { 
-                    w0n * lightIntensity[0].r + w1n * lightIntensity[1].r + w2n * lightIntensity[2].r,
-                    w0n * lightIntensity[0].g + w1n * lightIntensity[1].g + w2n * lightIntensity[2].g,
-                    w0n * lightIntensity[0].b + w1n * lightIntensity[1].b + w2n * lightIntensity[2].b,
-                };
+                Color pLight;
+                if (lightingMode == LightingMode::PHONG)
+                {
+                    pLight = { 
+                        w0n * lightIntensity[0].r + w1n * lightIntensity[1].r + w2n * lightIntensity[2].r,
+                        w0n * lightIntensity[0].g + w1n * lightIntensity[1].g + w2n * lightIntensity[2].g,
+                        w0n * lightIntensity[0].b + w1n * lightIntensity[1].b + w2n * lightIntensity[2].b,
+                    };
+                }
+                else if (lightingMode == LightingMode::BLINN)
+                {
+                    Vector3 pixelPos = (worldCoords[0] * w0n + worldCoords[1] * w1n + worldCoords[2] * w2n).toVector3();
+                    pLight           = computePhong(lights, material, pixelPos, worldNormal, cameraPos);
+                }
 
                 // Define the pixel color.
                 Color pCol { 0, 0, 0, 0 };
@@ -502,11 +514,6 @@ void Renderer::drawSphere(const float& _r, const int& _lon, const int& _lat, con
     }
 }
 
-// --- View mode getters / setters --- //
-
-RenderMode Renderer::getRenderMode() const            { return renderMode; }
-void Renderer::setRenderMode(const RenderMode& _mode) { renderMode = _mode; }
-
 // --- Material and texture setters --- //
 
 void Renderer::setTexture (const TextureData& _textureData) { texture  = _textureData; }
@@ -516,14 +523,23 @@ void Renderer::setMaterial(const Material& _material)       { material = _materi
 
 void Renderer::showImGuiControls()
 {
-    // Static variables.
-    static const char* items[]{"Unlit", "Lit", "Wireframe", "Z-Buffer"};
-    static int curItem = 1;
+    // Render mode static.
+    static const char* rModeItems[]{ "Unlit", "Lit", "Wireframe", "Z-Buffer" };
+    static int rModeCur = 1;
+
+    // Lighting mode static.
+    static const char* lModeItems[]{ "Phong", "Blinn" };
+    static int lModeCur = 0;
     
     // Displaying components.
     ImGui::ColorEdit4("BG Color", &framebuffer.clearColor.r);
-    ImGui::Combo("Render Mode", &curItem, items, IM_ARRAYSIZE(items));
-    setRenderMode((RenderMode)curItem);
+
+    ImGui::Combo("Render Mode", &rModeCur, rModeItems, IM_ARRAYSIZE(rModeItems));
+    renderMode = (RenderMode)rModeCur;
+
+    ImGui::Combo("Lighting Mode", &lModeCur, lModeItems, IM_ARRAYSIZE(lModeItems));
+    lightingMode = (LightingMode)lModeCur;
+
     ImGui::Checkbox("Apply vertex colors to texture", &texture.applyVertexColor);
     ImGui::Text("\nMatrices:");
     ImGui::Text("Model:\n%s",      modelMat.back().printStr(false).c_str());
