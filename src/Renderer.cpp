@@ -239,13 +239,15 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     Vector3 cameraPos = (Vector4(0, 0, 0, 1)
                       * viewMat.inv4()).toVector3();
 
-    ImGui::Begin("Debug info");
-    ImGui::Text("Triangle position:  %.2f, %.2f, %.2f", trianglePos.x, trianglePos.y, trianglePos.z);
-    ImGui::Text("Triangle normal:    %.2f, %.2f, %.2f", worldNormal.x, worldNormal.y, worldNormal.z);
-    ImGui::Text("Vector to triangle: %.2f, %.2f, %.2f", Vector3(cameraPos, trianglePos).x, Vector3(cameraPos, trianglePos).y, Vector3(cameraPos, trianglePos).z);
-    ImGui::Text("Camera position:    %.2f, %.2f, %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
-    ImGui::Text("Dot product:        %.2f",             worldNormal & Vector3(cameraPos, trianglePos));
-    ImGui::Text("\n");
+    if (ImGui::Begin("Debug info"))
+    {
+        ImGui::Text("Triangle position:  %.2f, %.2f, %.2f", trianglePos.x, trianglePos.y, trianglePos.z);
+        ImGui::Text("Triangle normal:    %.2f, %.2f, %.2f", worldNormal.x, worldNormal.y, worldNormal.z);
+        ImGui::Text("Vector to triangle: %.2f, %.2f, %.2f", Vector3(cameraPos, trianglePos).x, Vector3(cameraPos, trianglePos).y, Vector3(cameraPos, trianglePos).z);
+        ImGui::Text("Camera position:    %.2f, %.2f, %.2f", cameraPos.x, cameraPos.y, cameraPos.z);
+        ImGui::Text("Dot product:        %.2f",             worldNormal & Vector3(cameraPos, trianglePos));
+        ImGui::Text("\n");
+    }
     ImGui::End();
 
     // Back face culling.
@@ -278,8 +280,8 @@ void Renderer::drawTriangle(Triangle3 _triangle)
             lightIntensity[i] = WHITE;
     }
         
-    //! DEBUG PANNEL
-    ImGui::Begin("Debug info");
+    //! DEBUG PANNEL.
+    if (ImGui::Begin("Debug info"))
     {
         for (int i = 0; i < 3; i++) ImGui::Text("Local  coords %d: (%.2f, %.2f, %.2f)%s",       i, localCoords[i].x,  localCoords[i].y,  localCoords[i].z,                    (i == 2 ? "\n " : ""));
         for (int i = 0; i < 3; i++) ImGui::Text("World  coords %d: (%.2f, %.2f, %.2f, %.2f)%s", i, worldCoords[i].x,  worldCoords[i].y,  worldCoords[i].z,  worldCoords[i].w, (i == 2 ? "\n " : ""));
@@ -323,72 +325,78 @@ void Renderer::drawTriangle(Triangle3 _triangle)
 
         for (p.x = minX; p.x <= maxX; p.x++) 
         {
-            // Make the barycentric coordinates percentages.
-            float w0n = w0 / (float)(w0 + w1 + w2);
-            float w1n = w1 / (float)(w0 + w1 + w2);
-            float w2n = w2 / (float)(w0 + w1 + w2);
-
-            // Compute the pixel depth.
-            float depth = abs(perspectiveUV[0].z * w0n + perspectiveUV[1].z * w1n + perspectiveUV[2].z * w2n);
-                  depth = 1 / depth;
-                
-            // Interpolate pixel lighting.
-            Color pLight { 
-                w0n * lightIntensity[0].r + w1n * lightIntensity[1].r + w2n * lightIntensity[2].r,
-                w0n * lightIntensity[0].g + w1n * lightIntensity[1].g + w2n * lightIntensity[2].g,
-                w0n * lightIntensity[0].b + w1n * lightIntensity[1].b + w2n * lightIntensity[2].b,
-            };
-
-            // Define the pixel color.
-            Color pCol { 0, 0, 0, 0 };
-
-            if (texture.pixels == nullptr || texture.applyVertexColor)
-            {
-                // Get the pixel color from barycentric coordinates.
-                pCol.r = _triangle.a.color.r * w0n + _triangle.b.color.r * w1n + _triangle.c.color.r * w2n; 
-                pCol.g = _triangle.a.color.g * w0n + _triangle.b.color.g * w1n + _triangle.c.color.g * w2n; 
-                pCol.b = _triangle.a.color.b * w0n + _triangle.b.color.b * w1n + _triangle.c.color.b * w2n; 
-                pCol.a = _triangle.a.color.a * w0n + _triangle.b.color.a * w1n + _triangle.c.color.a * w2n;
-            }
-
-            if (texture.pixels != nullptr)
-            {
-                // Compute the uv coordinates.
-                Vector2 uv = { clamp(depth * (perspectiveUV[0].x * w0n + perspectiveUV[1].x * w1n + perspectiveUV[2].x * w2n), 0, 1),
-                               clamp(depth * (perspectiveUV[0].y * w0n + perspectiveUV[1].y * w1n + perspectiveUV[2].y * w2n), 0, 1) };
-
-                // Get the pixel color from the current texture.
-                Color texColor = texture.getPixelColor(floorInt(clampAbove(lerp(uv.x, 0, abs(texture.width )), 0)), 
-                                                       floorInt(clampAbove(lerp(uv.y, 0, abs(texture.height)), 0)),
-                                                       pCol.a);
-
-                // Apply the texture color to the pixel color.
-                if (texture.applyVertexColor) {
-                    HSV pHSV = RGBtoHSV(texColor);
-                    pCol = HSVtoRGB({ pCol.getHue(), pHSV.s, pHSV.v }, pCol.a);
-                }
-                else {
-                    pCol = texColor;
-                }
-            }
-
-            // Apply the pixel lighting to the pixel color.
-            // TODO: fix blending between model color and light color.
-            pCol *= pLight;
-
             // If p is on or inside all edges, render pixel.
-            if ((w0 | w1 | w2) >= 0) drawPixel(p.x, p.y, depth, pCol);
-
-            //! Show debug info on the last pixel.
-            if (p.x > maxX-1 && p.y > maxY-1)
+            if ((w0 | w1 | w2) >= 0) 
             {
-                ImGui::Begin("Debug info");
-                ImGui::Text("Pixel depth: %f", depth);
-                ImGui::Text("Pixel uv:    %f, %f", _triangle.a.uv.x * w0n + _triangle.b.uv.x * w1n + _triangle.c.uv.x * w2n, _triangle.a.uv.y * w0n + _triangle.b.uv.y * w1n + _triangle.c.uv.y * w2n);
-                ImGui::Text("Pixel color: %.2f, %.2f, %.2f", pCol.r, pCol.g, pCol.b);
-                ImGui::Text("Pixel hue:   %.2f", pCol.getHue());
-                ImGui::Text("\n\n\n");
-                ImGui::End();
+                // Make the barycentric coordinates percentages.
+                float w0n = w0 / (float)(w0 + w1 + w2);
+                float w1n = w1 / (float)(w0 + w1 + w2);
+                float w2n = w2 / (float)(w0 + w1 + w2);
+
+                // Compute the pixel depth.
+                float depth = abs(perspectiveUV[0].z * w0n + perspectiveUV[1].z * w1n + perspectiveUV[2].z * w2n);
+                    depth = 1 / depth;
+                    
+                // Interpolate pixel lighting.
+                Color pLight { 
+                    w0n * lightIntensity[0].r + w1n * lightIntensity[1].r + w2n * lightIntensity[2].r,
+                    w0n * lightIntensity[0].g + w1n * lightIntensity[1].g + w2n * lightIntensity[2].g,
+                    w0n * lightIntensity[0].b + w1n * lightIntensity[1].b + w2n * lightIntensity[2].b,
+                };
+
+                // Define the pixel color.
+                Color pCol { 0, 0, 0, 0 };
+
+                if (texture.pixels == nullptr || texture.applyVertexColor)
+                {
+                    // Get the pixel color from barycentric coordinates.
+                    pCol.r = _triangle.a.color.r * w0n + _triangle.b.color.r * w1n + _triangle.c.color.r * w2n; 
+                    pCol.g = _triangle.a.color.g * w0n + _triangle.b.color.g * w1n + _triangle.c.color.g * w2n; 
+                    pCol.b = _triangle.a.color.b * w0n + _triangle.b.color.b * w1n + _triangle.c.color.b * w2n; 
+                    pCol.a = _triangle.a.color.a * w0n + _triangle.b.color.a * w1n + _triangle.c.color.a * w2n;
+                }
+
+                if (texture.pixels != nullptr)
+                {
+                    // Compute the uv coordinates.
+                    Vector2 uv = { clamp(depth * (perspectiveUV[0].x * w0n + perspectiveUV[1].x * w1n + perspectiveUV[2].x * w2n), 0, 1),
+                                clamp(depth * (perspectiveUV[0].y * w0n + perspectiveUV[1].y * w1n + perspectiveUV[2].y * w2n), 0, 1) };
+
+                    // Get the pixel color from the current texture.
+                    Color texColor = texture.getPixelColor(floorInt(clampAbove(lerp(uv.x, 0, abs(texture.width )), 0)), 
+                                                        floorInt(clampAbove(lerp(uv.y, 0, abs(texture.height)), 0)),
+                                                        pCol.a);
+
+                    // Apply the texture color to the pixel color.
+                    if (texture.applyVertexColor) {
+                        HSV pHSV = RGBtoHSV(texColor);
+                        pCol = HSVtoRGB({ pCol.getHue(), pHSV.s, pHSV.v }, pCol.a);
+                    }
+                    else {
+                        pCol = texColor;
+                    }
+                }
+
+                // Apply the pixel lighting to the pixel color.
+                // TODO: fix blending between model color and light color.
+                pCol *= pLight;
+
+                // Draw the pixel.
+                drawPixel(p.x, p.y, depth, pCol);
+
+                //! Show debug info on the last pixel.
+                if (p.x > maxX-1 && p.y > maxY-1)
+                {
+                    if (ImGui::Begin("Debug info"))
+                    {
+                        ImGui::Text("Pixel depth: %f", depth);
+                        ImGui::Text("Pixel uv:    %f, %f", _triangle.a.uv.x * w0n + _triangle.b.uv.x * w1n + _triangle.c.uv.x * w2n, _triangle.a.uv.y * w0n + _triangle.b.uv.y * w1n + _triangle.c.uv.y * w2n);
+                        ImGui::Text("Pixel color: %.2f, %.2f, %.2f", pCol.r, pCol.g, pCol.b);
+                        ImGui::Text("Pixel hue:   %.2f", pCol.getHue());
+                        ImGui::Text("\n\n\n");
+                    }
+                    ImGui::End();
+                }
             }
 
             // One step to the right.
