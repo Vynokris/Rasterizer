@@ -68,7 +68,8 @@ public:
     void drawTriangles    (geometry3D::Triangle3* _triangles, const unsigned int& _count);
     void drawDividedQuad  (const Color& _color, const float& _size = 1.f, const bool& _negateNormals = false);
     void drawCube         (const Color& _color, const float& _size = 1.f);
-    void drawSphere       (const float& _r, const int& _lon, const int& _lat, const Color& _color);
+    void drawDividedCube  (const Color& _color, const float& _size = 1.f, const float& _res = 1.f);
+    void drawSphere       (const Color& _color, const float& _r, const int& _lon, const int& _lat);
 
     // --- Material and texture setters --- //
 

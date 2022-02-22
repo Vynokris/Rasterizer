@@ -632,7 +632,7 @@ matrix::Matrix<4, 4> geometry3D::getTransformMatrix(const Vector3& position, con
                getScaleMatrix      (scale);
     }
     // For world coordinates.
-    else         
+    else
     {
         return getScaleMatrix      (scale)      *
                getZRotationMatrix  (rotation.z) *

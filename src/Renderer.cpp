@@ -122,7 +122,7 @@ static int barycentricCoords(const Vector3& _a, const Vector3& _b, const Vector3
     return (_b.x - _a.x) * (_c.y - _a.y) - (_b.y - _a.y) * (_c.x - _a.x);
 }
 
-static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords, Vertex* _vertices)
+static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _worldCoords, Vector4* _viewCoords, Vertex* _vertices)
 {
     // Get the triangle's sides and normals.
     Vector2 p0p1(Vector2{ _screenCoords[0].x, _screenCoords[0].y }, Vector2{ _screenCoords[1].x, _screenCoords[1].y });
@@ -130,9 +130,8 @@ static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords, V
     Vector2 p2p0(Vector2{ _screenCoords[2].x, _screenCoords[2].y }, Vector2{ _screenCoords[0].x, _screenCoords[0].y });
     
     float angle0 = p0p1.getAngleWithVector2(p1p2.getNormal());
-    float angle1 = p1p2.getAngleWithVector2(p2p0.getNormal());
-    float angle2 = p2p0.getAngleWithVector2(p0p1.getNormal());
-
+    float angle1 = p2p0.getAngleWithVector2(p0p1.getNormal());
+    
     // Check if the triangle is inside out.
     if (angle0 < PI/2)
     {
@@ -140,6 +139,10 @@ static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords, V
         Vector3 tempVec  = _screenCoords[0];
         _screenCoords[0] = _screenCoords[1];
         _screenCoords[1] = tempVec;
+
+        Vector4 tempWorld = _worldCoords[0];
+        _worldCoords[0]   = _worldCoords[1];
+        _worldCoords[1]   = tempWorld;
         
         float tempDepth  = _viewCoords[0].z;
         _viewCoords[0].z = _viewCoords[1].z;
@@ -152,24 +155,13 @@ static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _viewCoords, V
     else if (angle1 < PI/2)
     {
         // Switch position, depth and vertices.
-        Vector3 tempVec  = _screenCoords[1];
-        _screenCoords[1] = _screenCoords[2];
-        _screenCoords[2] = tempVec;
-
-        float tempDepth  = _viewCoords[1].z;
-        _viewCoords[1].z = _viewCoords[2].z;
-        _viewCoords[2].z = tempDepth;
-        
-        Vertex tempVertex = _vertices[1];
-        _vertices[1]      = _vertices[2];
-        _vertices[2]      = tempVertex;
-    }
-    else if (angle2 < PI/2)
-    {
-        // Switch position, depth and vertices.
         Vector3 tempVec  = _screenCoords[2];
         _screenCoords[2] = _screenCoords[0];
         _screenCoords[0] = tempVec;
+
+        Vector4 tempWorld = _worldCoords[2];
+        _worldCoords[2]   = _worldCoords[0];
+        _worldCoords[0]   = tempWorld;
 
         float tempDepth  = _viewCoords[2].z;
         _viewCoords[2].z = _viewCoords[0].z;
@@ -213,7 +205,7 @@ bool Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local,
     }
     
     // Make sure the triangle vertices are in the right order to be drawn.
-    swapTriangleVertices(_screen, _view, _vertices);
+    swapTriangleVertices(_screen, _world, _view, _vertices);
 
     for (int i = 0; i < 3; i++)
     {
@@ -482,7 +474,89 @@ void Renderer::drawCube(const Color& _color, const float& _size)
     modelPopMat();
 }
 
-void Renderer::drawSphere(const float& _r, const int& _lon, const int& _lat, const Color& _color)
+void Renderer::drawDividedCube(const Color& _color, const float& _size, const float& _res)
+{
+    for (int x = 0; x < _res + 1; x++)
+    {
+        for (int y = 0; y < _res + 1; y++)
+        {
+            for (int z = 0; z < _res + 1; z++)
+            {
+                Vector3 curCoords = { - _size / 2 + (_size / _res) * x, 
+                                      - _size / 2 + (_size / _res) * y, 
+                                      - _size / 2 + (_size / _res) * z };
+
+                // Left and right faces.
+                if ((x == 0 || x == _res) && y < _res && z < _res)
+                {
+                    float xPos = (x == 0 ? -_size / 2 : _size / 2);
+
+                    Triangle3 triangles[] = 
+                    {
+                        {
+                            { { xPos, curCoords.y,                  curCoords.z                  }, { (xPos > 0 ? 1.f : -1.f), 0, 0 }, _color, { (xPos>0 ? (float)(z  ) / _res : 1-(float)(z  ) / _res), (float)(y  ) / _res } },
+                            { { xPos, curCoords.y + (_size / _res), curCoords.z + (_size / _res) }, { (xPos > 0 ? 1.f : -1.f), 0, 0 }, _color, { (xPos>0 ? (float)(z+1) / _res : 1-(float)(z+1) / _res), (float)(y+1) / _res } },
+                            { { xPos, curCoords.y + (_size / _res), curCoords.z                  }, { (xPos > 0 ? 1.f : -1.f), 0, 0 }, _color, { (xPos>0 ? (float)(z  ) / _res : 1-(float)(z  ) / _res), (float)(y+1) / _res } },
+                        },
+                        {
+                            { { xPos, curCoords.y,                  curCoords.z                  }, { (xPos > 0 ? 1.f : -1.f), 0, 0 }, _color, { (xPos>0 ? (float)(z  ) / _res : 1-(float)(z  ) / _res), (float)(y  ) / _res } },
+                            { { xPos, curCoords.y,                  curCoords.z + (_size / _res) }, { (xPos > 0 ? 1.f : -1.f), 0, 0 }, _color, { (xPos>0 ? (float)(z+1) / _res : 1-(float)(z+1) / _res), (float)(y  ) / _res } },
+                            { { xPos, curCoords.y + (_size / _res), curCoords.z + (_size / _res) }, { (xPos > 0 ? 1.f : -1.f), 0, 0 }, _color, { (xPos>0 ? (float)(z+1) / _res : 1-(float)(z+1) / _res), (float)(y+1) / _res } },
+                        },
+                    };
+
+                    drawTriangles(triangles, 2);
+                }
+
+                // Up and down faces.
+                if ((y == 0 || y == _res) && x < _res && z < _res)
+                {
+                    float yPos = (y == 0 ? -_size / 2 : _size / 2);
+
+                    Triangle3 triangles[] = 
+                    {
+                        {
+                            { { curCoords.x,                  yPos, curCoords.z                  }, { 0, (yPos > 0 ? 1.f : -1.f), 0 }, _color, { (yPos<0 ? (float)(z  ) / _res : 1-(float)(z  ) / _res), (float)(x  ) / _res } },
+                            { { curCoords.x + (_size / _res), yPos, curCoords.z + (_size / _res) }, { 0, (yPos > 0 ? 1.f : -1.f), 0 }, _color, { (yPos<0 ? (float)(z+1) / _res : 1-(float)(z+1) / _res), (float)(x+1) / _res } },
+                            { { curCoords.x + (_size / _res), yPos, curCoords.z                  }, { 0, (yPos > 0 ? 1.f : -1.f), 0 }, _color, { (yPos<0 ? (float)(z  ) / _res : 1-(float)(z  ) / _res), (float)(x+1) / _res } },
+                        },
+                        {
+                            { { curCoords.x,                  yPos, curCoords.z                  }, { 0, (yPos > 0 ? 1.f : -1.f), 0 }, _color, { (yPos<0 ? (float)(z  ) / _res : 1-(float)(z  ) / _res), (float)(x  ) / _res } },
+                            { { curCoords.x,                  yPos, curCoords.z + (_size / _res) }, { 0, (yPos > 0 ? 1.f : -1.f), 0 }, _color, { (yPos<0 ? (float)(z+1) / _res : 1-(float)(z+1) / _res), (float)(x  ) / _res } },
+                            { { curCoords.x + (_size / _res), yPos, curCoords.z + (_size / _res) }, { 0, (yPos > 0 ? 1.f : -1.f), 0 }, _color, { (yPos<0 ? (float)(z+1) / _res : 1-(float)(z+1) / _res), (float)(x+1) / _res } },
+                        },
+                    };
+
+                    drawTriangles(triangles, 2);
+                }
+
+                // Front and back faces.
+                if ((z == 0 || z == _res) && x < _res && y < _res)
+                {
+                    float zPos = (z == 0 ? -_size / 2 : _size / 2);
+
+                    Triangle3 triangles[] = 
+                    {
+                        {
+                            { { curCoords.x,                  curCoords.y,                  zPos }, { 0, 0, (zPos > 0 ? 1.f : -1.f) }, _color, { (zPos<0 ? (float)(x  ) / _res : 1-(float)(x  ) / _res), (float)(y  ) / _res } },
+                            { { curCoords.x + (_size / _res), curCoords.y + (_size / _res), zPos }, { 0, 0, (zPos > 0 ? 1.f : -1.f) }, _color, { (zPos<0 ? (float)(x+1) / _res : 1-(float)(x+1) / _res), (float)(y+1) / _res } },
+                            { { curCoords.x + (_size / _res), curCoords.y,                  zPos }, { 0, 0, (zPos > 0 ? 1.f : -1.f) }, _color, { (zPos<0 ? (float)(x+1) / _res : 1-(float)(x+1) / _res), (float)(y  ) / _res } },
+                        },
+                        {
+                            { { curCoords.x,                  curCoords.y,                  zPos }, { 0, 0, (zPos > 0 ? 1.f : -1.f) }, _color, { (zPos<0 ? (float)(x  ) / _res : 1-(float)(x  ) / _res), (float)(y  ) / _res } },
+                            { { curCoords.x,                  curCoords.y + (_size / _res), zPos }, { 0, 0, (zPos > 0 ? 1.f : -1.f) }, _color, { (zPos<0 ? (float)(x  ) / _res : 1-(float)(x  ) / _res), (float)(y+1) / _res } },
+                            { { curCoords.x + (_size / _res), curCoords.y + (_size / _res), zPos }, { 0, 0, (zPos > 0 ? 1.f : -1.f) }, _color, { (zPos<0 ? (float)(x+1) / _res : 1-(float)(x+1) / _res), (float)(y+1) / _res } },
+                        },
+                    };
+
+                    drawTriangles(triangles, 2);
+                }
+            }
+        }
+    }
+}
+
+void Renderer::drawSphere(const Color& _color, const float& _r, const int& _lon, const int& _lat)
 {
     for (int j = 0; j < _lat; j++)
     {
