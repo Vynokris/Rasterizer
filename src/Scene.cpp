@@ -19,8 +19,8 @@ Scene::Scene()
 
     // FIRST TRIANGLE       |        pos        |  |      normal      |  |         color          |  |     uv     |
     triangles.push_back({ { { -0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f,-1.0f }, { 1.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } },
-                          { {  0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f,-1.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } },
-                          { {  0.5f, 0.5f, 0.0f }, { 0.0f, 0.0f,-1.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } } });
+                          { {  0.2f,-0.6f, 0.0f }, { 0.0f, 0.0f,-1.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } },
+                          { {  1.0f,-0.3f, 0.0f }, { 0.0f, 0.0f,-1.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } } });
     
     // LIGHT 1
     lights.push_back({ 5, 1, 0.2, 0.1, {  2,  1.5,  2 }, RED   });
@@ -84,13 +84,13 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     _renderer.modelPopMat();
 
     // Draw a sphere.
-    _renderer.modelPushMat();
-    _renderer.modelTranslate(2, 0, 2);
-    _renderer.modelRotateX(-fmod(time/2, 2*PI));
-    _renderer.modelRotateY(-fmod(time/2, 2*PI));
-    _renderer.modelRotateZ(-fmod(time/2, 2*PI));
-    _renderer.drawSphere({ 1, 1, 1, 1 }, 0.7, 32, 32);
-    _renderer.modelPopMat();
+    // _renderer.modelPushMat();
+    // _renderer.modelTranslate(2, 0, 2);
+    // _renderer.modelRotateX(-fmod(time/2, 2*PI));
+    // _renderer.modelRotateY(-fmod(time/2, 2*PI));
+    // _renderer.modelRotateZ(-fmod(time/2, 2*PI));
+    // _renderer.drawSphere({ 1, 1, 1, 1 }, 0.7, 32, 32);
+    // _renderer.modelPopMat();
     
     
     deltaTime = _deltaTime;
