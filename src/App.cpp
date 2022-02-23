@@ -128,18 +128,21 @@ void App::update()
         // Update the exit key.
         if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE)) break;
 
+        ImGuiIO& io = ImGui::GetIO();
+
         // Update the camera position and rotation according to keybinds.
         if (mouseCaptured)
         {
             inputs.deltaX       = mouseDeltaX;
             inputs.deltaY       = mouseDeltaY;
+            inputs.mouseWheel   = io.MouseWheel;
             inputs.moveForward  = ImGui::IsKeyDown(GLFW_KEY_W);
             inputs.moveBackward = ImGui::IsKeyDown(GLFW_KEY_S);
             inputs.moveLeft     = ImGui::IsKeyDown(GLFW_KEY_A);
             inputs.moveRight    = ImGui::IsKeyDown(GLFW_KEY_D);
-            inputs.moveUpper    = ImGui::IsKeyDown(GLFW_KEY_SPACE);
-            inputs.moveLower    = ImGui::IsKeyDown(GLFW_KEY_LEFT_SHIFT);
-            camera.update(ImGui::GetIO().DeltaTime, inputs);
+            inputs.moveUp       = ImGui::IsKeyDown(GLFW_KEY_SPACE);
+            inputs.moveDown     = ImGui::IsKeyDown(GLFW_KEY_LEFT_SHIFT);
+            camera.update(io.DeltaTime, inputs);
         }
 
         // Clear buffers.
@@ -150,7 +153,7 @@ void App::update()
         renderer.setView(camera.getViewMat());
 
         // Render scene.
-        scene.update(ImGui::GetIO().DeltaTime, renderer, camera);
+        scene.update(io.DeltaTime, renderer, camera);
 
         // Update texture.
         renderer.framebuffer.updateTexture();
@@ -169,7 +172,7 @@ void App::update()
         static int counter = 0;
         static float deltaTimes = 0, fps = 0;
         counter++;
-        deltaTimes += ImGui::GetIO().DeltaTime;
+        deltaTimes += io.DeltaTime;
         if (counter >= 10)
         {
             counter = 0;
