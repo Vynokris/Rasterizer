@@ -2,7 +2,7 @@
 
 #include <glad/gl.h>
 #include <cstdint>
-#include <my_math.hpp>
+#include "my_math.hpp"
 
 #pragma pack(push, 1)
 struct BmpHeader
@@ -36,13 +36,7 @@ public:
     TextureData() : pixels(0), width(0), height(0), padding(0) {}
     ~TextureData() {  }
 
-    Color getPixelColor(const int& _x, const int& _y, const float& alpha = 1);
+    Color getPixelColor(const int& _x, const int& _y, const float& _alpha = 1);
 };
 
 TextureData loadBmpData(const char* _filename);
-
-GLuint loadTextureFromData(const TextureData& _textureData, GLuint _texture = 0, const bool& _deleteData = false);
-
-GLuint loadBmpTexture(const char* _filename);
-
-GLuint loadTestTexture();
