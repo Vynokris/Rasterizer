@@ -19,7 +19,7 @@ private:
     float fov, aspect, near, far,
           pitch, yaw, speed, acceleration;
           
-    Vector3 pos, direction;
+    Vector3 pos, direction, lookAtPoint;
 
     ViewMode viewMode = ViewMode::FIRST_PERSON;
 
@@ -46,15 +46,16 @@ public:
     matrix::Mat4 getViewMat()      const;
 
     // Returns the look at transformation matrix.
-    matrix::Mat4 getLookAtMat(const Vector3& _target) const;
+    matrix::Mat4 getLookAtMat() const;
 
     // Setters.
-    void setPosition(const Vector3& _pos);
-    void setRotation(const float& _pitch, const float& _yaw);
-    void setViewMode(const ViewMode& _viewMode);
-
-    // Sets the rotation of the camera to match the lookAt rotation.
-    void setLookAtRotation(const Vector3& _target);
+    void setPosition      (const Vector3& _pos);
+    void setRotation      (const float& _pitch, const float& _yaw);
+    void setViewMode      (const ViewMode& _viewMode);
+    void setLookAtPoint   (const Vector3& _target);
+    
+    // Sets the rotation of the camera to match the lookAt matrix rotation.
+    void setLookAtRotation();
 
     // Misc.
     void showImGuiControls();
