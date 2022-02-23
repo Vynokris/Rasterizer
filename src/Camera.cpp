@@ -2,6 +2,7 @@
 #include <imgui.h>
 #include <my_math.hpp>
 #include <Camera.hpp>
+#include <cstdio>
 
 using namespace arithmetic;
 using namespace matrix;
@@ -20,13 +21,28 @@ Camera::Camera(const unsigned int& _width,
 {
     aspect = (float) width / height;
     pitch = yaw = speed = 0;
+    lookAtPoint.z = 2;
 }
 
 void Camera::update(const float& _deltaTime, const CameraInputs& _inputs)
 {
-    // Rotate camera (Yaw locked between -90° and 90°, Pitch reset to 0 when it reaches 360°).
-    setRotation(fmodf(pitch + _inputs.deltaX / 180, 2*PI), 
-                clamp(yaw   - _inputs.deltaY / 180, -PI/2 + 0.001, PI/2 - 0.001));
+    // Set speed according to deltatime.
+    speed = _deltaTime * acceleration;
+
+    switch(viewMode)
+    {
+    case ViewMode::FIRST_PERSON:
+        // Rotate camera (Yaw locked between -90° and 90°, Pitch reset to 0 when it reaches 360°).
+        setRotation(fmodf(pitch + _inputs.deltaX / 180, 2*PI), 
+                    clamp(yaw   - _inputs.deltaY / 180, -PI/2 + 0.001, PI/2 - 0.001));
+        break;
+    case ViewMode::THIRD_PERSON:
+        // Update the camera's rotation to be towards the target.
+        setLookAtRotation();
+        break;
+    default:
+        break;
+    }
 
     // Set direction accoring to inputs.
     Vector3 dir;
@@ -37,12 +53,9 @@ void Camera::update(const float& _deltaTime, const CameraInputs& _inputs)
     if (_inputs.moveLower)    dir.y +=  1;
     if (_inputs.moveForward)  dir.z += -1;
 
-    // Set speed according to deltatime.
-    speed = _deltaTime * acceleration;
-
     // Update position.
     pos   += getSphericalCoords(speed, PI/2, 2*PI - pitch)        * dir.x
-          +  getSphericalCoords(speed, PI/2, 2*PI - pitch - PI/2) * dir.z;
+            +  getSphericalCoords(speed, PI/2, 2*PI - pitch - PI/2) * dir.z;
     pos.y += dir.y * speed;
 }
 
@@ -72,9 +85,9 @@ Mat4 Camera::getViewMat() const
     return output * getTransformMatrix(-pos, { yaw, pitch, 0 }, { 1, 1, 1 }, true);
 }
 
-Mat4 Camera::getLookAtMat(const Vector3& _target) const
+Mat4 Camera::getLookAtMat() const
 {
-    Vector3 zAxis = (_target - pos).getNormalized();
+    Vector3 zAxis = (lookAtPoint - pos).getNormalized();
     Vector3 xAxis = (Vector3{0, 1, 0} ^ zAxis).getNormalized();
     Vector3 yAxis = (zAxis ^ xAxis).getNormalized();
 
@@ -89,11 +102,13 @@ Mat4 Camera::getLookAtMat(const Vector3& _target) const
 void Camera::setPosition(const Vector3& _pos)                    { pos      = _pos;               }
 void Camera::setRotation(const float& _pitch, const float& _yaw) { pitch    = _pitch; yaw = _yaw; }
 void Camera::setViewMode(const ViewMode& _viewMode)              { viewMode = _viewMode;          }
+void Camera::setLookAtPoint(const Vector3& _target)              { lookAtPoint = _target;         }
 
-void Camera::setLookAtRotation(const Vector3& _target)
+void Camera::setLookAtRotation()
 {
-    Vector3 zAxis = (_target - pos).getNormalized();
-    setRotation(zAxis.getAnglePhi(), zAxis.getAngleTheta());
+    Vector3 zAxis = (lookAtPoint - pos).getNormalized();
+    setRotation(fmod(zAxis.getAngleTheta(), 2*PI), 
+                fmod(zAxis.getAnglePhi(),   2*PI));
 }
 
 void Camera::showImGuiControls()
@@ -109,4 +124,6 @@ void Camera::showImGuiControls()
     ImGui::Text("Position: %.2f, %.2f, %.2f", pos.x, pos.y, pos.z);
     ImGui::Text("Pitch: %.2f° | Yaw = %.2f°", radToDeg(pitch), radToDeg(yaw));
     ImGui::SliderFloat("Speed", &acceleration, 0.05, 10);
+    if (viewMode == ViewMode::THIRD_PERSON)
+        ImGui::SliderFloat3("Look at point", &lookAtPoint.x, -5, 5);
 }

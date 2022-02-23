@@ -809,15 +809,8 @@ Vector3 Vector3::getCopiedSign(const Vector3& source) const { return Vector3(std
 float Vector3::getDistanceFromPoint(const Vector3& p) const { return Vector3(*this, p).getLength(); }
 
 // Returns the angle (in radians) of the given vector.
-float Vector3::getAngleTheta() const  {  return acosf(z / getLength()); }
-float Vector3::getAnglePhi()   const 
-{ 
-    if (x > 0)
-        return atanf(y / x);
-    if (x < 0)
-        return atanf(y / x) + PI;
-    return PI / 2;
-}
+float Vector3::getAngleTheta() const { return 2*PI - Vector2(x, z).getAngle() + PI/2; }
+float Vector3::getAnglePhi()   const { return 2*PI - Vector2(Vector2(x, z).getLength(), y).getAngle(); }
 
 // Returns the angle (in radians) between two vectors.
 float Vector3::getAngleThetaWithVector3(const Vector3& v) const
