@@ -314,7 +314,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
         for (p.x = minX; p.x <= maxX; p.x++) 
         {
             // If p is on or inside all edges, render pixel.
-            if (w0 >= 0 && w1 >= 0 && w2 >= 0) 
+            if ((w0 | w1 | w2) >= 0) 
             {
                 // Make the barycentric coordinates percentages.
                 float w0n = w0 / (float)(w0 + w1 + w2);
@@ -364,8 +364,8 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                                    clamp(depth * (perspectiveUV[0].y * w0n + perspectiveUV[1].y * w1n + perspectiveUV[2].y * w2n), 0, 1) };
 
                     // Get the pixel color from the current texture.
-                    Color texColor = texture.getPixelColor(floorInt(lerp(uv.x, 0, abs(texture.width ))), 
-                                                           floorInt(lerp(uv.y, 0, abs(texture.height))),
+                    Color texColor = texture.getPixelColor(floorInt(uv.x * abs(texture.width )), 
+                                                           floorInt(uv.y * abs(texture.height)),
                                                            pCol.a);
 
                     // Apply the texture color to the pixel color.
