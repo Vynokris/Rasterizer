@@ -105,11 +105,11 @@ void App::update()
 
     // Load a texture.
     TextureData baseTexture = loadBmpData("art/UrAppreciated.bmp");
-    // renderer.setTexture(baseTexture);
+    renderer.setTexture(baseTexture);
 
     bool mouseCaptured = false;
-    double mouseX = 0.0, mouseY = 0.0;
-    float mouseDeltaX = 0.0, mouseDeltaY = 0.0;
+    double mouseX      = 0, mouseY      = 0;
+    float  mouseDeltaX = 0, mouseDeltaY = 0;
 
     while (glfwWindowShouldClose(window) == false)
     {
@@ -128,11 +128,11 @@ void App::update()
         // Update the exit key.
         if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE)) break;
 
-        // Update the camera position and rotation.
+        // Update the camera position and rotation according to keybinds.
         if (mouseCaptured)
         {
-            inputs.deltaX = mouseDeltaX;
-            inputs.deltaY = mouseDeltaY;
+            inputs.deltaX       = mouseDeltaX;
+            inputs.deltaY       = mouseDeltaY;
             inputs.moveForward  = ImGui::IsKeyDown(GLFW_KEY_W);
             inputs.moveBackward = ImGui::IsKeyDown(GLFW_KEY_S);
             inputs.moveLeft     = ImGui::IsKeyDown(GLFW_KEY_A);
@@ -142,17 +142,17 @@ void App::update()
             camera.update(ImGui::GetIO().DeltaTime, inputs);
         }
 
-        // Clear buffers
+        // Clear buffers.
         renderer.framebuffer.clear(camera.getFar());
 
-        // Setup matrices
+        // Setup matrices.
         renderer.setProjection(camera.getPerspective());
         renderer.setView(camera.getViewMat());
 
-        // Render scene
+        // Render scene.
         scene.update(ImGui::GetIO().DeltaTime, renderer, camera);
 
-        // Update texture
+        // Update texture.
         renderer.framebuffer.updateTexture();
 
         // Display debug controls.

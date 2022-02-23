@@ -6,7 +6,7 @@
 #include <Framebuffer.hpp>
 #include <Camera.hpp>
 #include <Light.hpp>
-#include <BmpLoader.hpp>
+#include <Texture.hpp>
 
 struct Viewport
 {

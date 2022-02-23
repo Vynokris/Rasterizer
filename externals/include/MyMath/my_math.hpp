@@ -185,6 +185,7 @@ namespace geometry2D
             template <typename T> void    operator/=(const T &val);
                                   float   operator& (const Vector2& v) const;
                                   float   operator^ (const Vector2& v) const;
+                                  Vector2 operator- ()             const;
 
             // -- Methods -- //
 
@@ -203,8 +204,6 @@ namespace geometry2D
 
             // Negates both of the coordinates of the given vector.
             void negate();
-            // Negates both of the coordinates of the given vector.
-            Vector2 getNegated() const;
 
             // Copies the signs from the source vector to the destination vector.
             void copysign(const Vector2& source);
@@ -452,6 +451,7 @@ namespace geometry3D
             template <typename T> void    operator/=(const T &val);
                                   float   operator& (const Vector3& val) const;
                                   Vector3 operator^ (const Vector3& val) const;
+                                  Vector3 operator- ()                   const;
 
             // -- Methods -- //
 
@@ -470,8 +470,6 @@ namespace geometry3D
 
             // Negates both of the coordinates of the given vector.
             void negate();
-            // Negates both of the coordinates of the given vector.
-            Vector3 getNegated() const;
 
             // Copies the signs from the source vector to the destination vector.
             void copysign(const Vector3& source);
@@ -527,6 +525,7 @@ namespace geometry3D
             template <typename T> void    operator/=(const T &val);
                                   float   operator& (const Vector4& val) const;
                                   Vector3 operator^ (const Vector4& val) const;
+                                  Vector4 operator- ()                   const;
 
             // -- Methods -- //
 
@@ -550,8 +549,6 @@ namespace geometry3D
 
             // Negates both of the coordinates of this vector.
             void negate();
-            // Negates both of the coordinates of this vector.
-            Vector4 getNegated() const;
 
             // Copies the signs from the source vector to the destination vector.
             void copysign(Vector4 source);
