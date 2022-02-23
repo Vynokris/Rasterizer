@@ -29,21 +29,6 @@ void Camera::update(const float& _deltaTime, const CameraInputs& _inputs)
     // Set speed according to deltatime.
     speed = _deltaTime * acceleration;
 
-    switch(viewMode)
-    {
-    case ViewMode::FIRST_PERSON:
-        // Rotate camera (Yaw locked between -90° and 90°, Pitch reset to 0 when it reaches 360°).
-        setRotation(fmodf(pitch + _inputs.deltaX / 180, 2*PI), 
-                    clamp(yaw   - _inputs.deltaY / 180, -PI/2 + 0.001, PI/2 - 0.001));
-        break;
-    case ViewMode::THIRD_PERSON:
-        // Update the camera's rotation to be towards the target.
-        setLookAtRotation();
-        break;
-    default:
-        break;
-    }
-
     // Set direction accoring to inputs.
     Vector3 dir;
     if (_inputs.moveBackward) dir.z +=  1;
@@ -53,10 +38,40 @@ void Camera::update(const float& _deltaTime, const CameraInputs& _inputs)
     if (_inputs.moveLower)    dir.y +=  1;
     if (_inputs.moveForward)  dir.z += -1;
 
-    // Update position.
-    pos   += getSphericalCoords(speed, PI/2, 2*PI - pitch)        * dir.x
-            +  getSphericalCoords(speed, PI/2, 2*PI - pitch - PI/2) * dir.z;
-    pos.y += dir.y * speed;
+    switch(viewMode)
+    {
+    case ViewMode::FIRST_PERSON:
+        // Rotate camera (Yaw locked between -90° and 90°, Pitch reset to 0 when it reaches 360°).
+        setRotation(fmodf(pitch + _inputs.deltaX / 180, 2*PI), 
+                    clamp(yaw   - _inputs.deltaY / 180, -PI/2 + 0.001, PI/2 - 0.001));
+
+        // Move according to the camera's pitch.
+        pos   += getSphericalCoords(speed, PI/2, 2*PI - pitch       ) * dir.x
+              +  getSphericalCoords(speed, PI/2, 2*PI - pitch - PI/2) * dir.z;
+        pos.y += dir.y * speed;
+
+        break;
+
+    case ViewMode::THIRD_PERSON:
+        // Rotate the camera to face the target.
+        setLookAtRotation();
+
+        // Make the player unable to pass directly above/under the target.
+        if      (Vector3(pos, lookAtPoint).getAnglePhi() >  PI/2-0.2)
+            dir.y = clampUnder(dir.y, 0);
+        else if (Vector3(pos, lookAtPoint).getAnglePhi() < -PI/2+0.2)
+            dir.y = clampAbove(dir.y, 0);
+
+        // Move according to the camera's yaw and pitch.
+        pos   += getSphericalCoords(speed,              PI/2, 2*PI - pitch       ) * dir.x
+              +  getSphericalCoords(speed, 2*PI - yaw       , 2*PI - pitch - PI/2) * dir.y
+              +  getSphericalCoords(speed, 2*PI - yaw + PI/2, 2*PI - pitch - PI/2) * dir.z;
+
+        break;
+
+    default:
+        break;
+    }
 }
 
 Mat4     Camera::getWorldTransform() const { return getViewMat().inv4(); }
@@ -87,7 +102,7 @@ Mat4 Camera::getViewMat() const
 
 Mat4 Camera::getLookAtMat() const
 {
-    Vector3 zAxis = (lookAtPoint - pos).getNormalized();
+    Vector3 zAxis =  Vector3(pos, lookAtPoint).getNormalized();
     Vector3 xAxis = (Vector3{0, 1, 0} ^ zAxis).getNormalized();
     Vector3 yAxis = (zAxis ^ xAxis).getNormalized();
 
@@ -106,9 +121,8 @@ void Camera::setLookAtPoint(const Vector3& _target)              { lookAtPoint =
 
 void Camera::setLookAtRotation()
 {
-    Vector3 zAxis = (lookAtPoint - pos).getNormalized();
-    setRotation(fmod(zAxis.getAngleTheta(), 2*PI), 
-                fmod(zAxis.getAnglePhi(),   2*PI));
+    Vector3 camToTarget = Vector3(pos, lookAtPoint);
+    setRotation(camToTarget.getAngleTheta(), camToTarget.getAnglePhi());
 }
 
 void Camera::showImGuiControls()

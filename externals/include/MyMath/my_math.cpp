@@ -285,13 +285,13 @@ Vector2 Vector2::getMiddle()                          const { return Vector2(x /
 float Vector2::getLength()                            const { return sqrt(arithmetic::sqpow(x) + arithmetic::sqpow(y)); }
 
 // Modifies the length of the given vector to correspond to the given value.
-void Vector2::setLength(const float& length)                { *(this) = Vector2(this->getAngle(), length, true); }
+void Vector2::setLength(const float& length)                { *(this) = Vector2(getAngle(), length, true); }
 
 // Normalizes the given vector so that its length is 1.
-void Vector2::normalize()                                   { x /= this->getLength(); y /= this->getLength(); }
+void Vector2::normalize()                                   { x /= getLength(); y /= getLength(); }
 
 // Normalizes the given vector so that its length is 1.
-Vector2 Vector2::getNormalized()                      const { return Vector2(x / this->getLength(), y / this->getLength()); }
+Vector2 Vector2::getNormalized()                      const { return Vector2(x / getLength(), y / getLength()); }
 
 // Negates both of the coordinates of the given vector.
 void Vector2::negate()                                      { *(this) = Vector2(-x, -y); }
@@ -309,12 +309,12 @@ Vector2 Vector2::getNormal()                          const { return Vector2(-y,
 float Vector2::getDistanceFromPoint(const Vector2& p) const { return Vector2(*this, p).getLength(); }
 
 // Returns the angle (in radians) of the given vector.
-float Vector2::getAngle()                             const { return std::copysign(std::acos(this->getNormalized().x), std::asin(this->getNormalized().y)); }
+float Vector2::getAngle()                             const { return std::copysign(std::acos(getNormalized().x), std::asin(getNormalized().y)); }
 
 // Returns the angle (in radians) between two vectors.
 float Vector2::getAngleWithVector2(const Vector2& v)  const
 {
-    float this_angle = this->getAngle();
+    float this_angle = getAngle();
     float v_angle    = v.getAngle();
     return (this_angle >= v_angle ? (this_angle - v_angle) : (v_angle - this_angle));
 }
@@ -322,8 +322,8 @@ float Vector2::getAngleWithVector2(const Vector2& v)  const
 // Rotates the given vector by the given angle.
 void Vector2::rotate(const float& angle)
 {
-    float this_length = this->getLength();
-    float this_angle  = this->getAngle();
+    float this_length = getLength();
+    float this_angle  = getAngle();
     *(this) = Vector2(this_angle + angle, this_length, true);
 }
 
@@ -516,7 +516,7 @@ int Polygon::getVerticesNum() const { return sides; }
 Vector2 Polygon::getVertex(const int& index) const
 {
     assert (0 <= index && index < sides);
-    return this->getSide(index).a;
+    return getSide(index).a;
 }
 
 // Moves the polygon by the given vector.
@@ -809,8 +809,8 @@ Vector3 Vector3::getCopiedSign(const Vector3& source) const { return Vector3(std
 float Vector3::getDistanceFromPoint(const Vector3& p) const { return Vector3(*this, p).getLength(); }
 
 // Returns the angle (in radians) of the given vector.
-float Vector3::getAngleTheta() const { return 2*PI - Vector2(x, z).getAngle() + PI/2; }
-float Vector3::getAnglePhi()   const { return 2*PI - Vector2(Vector2(x, z).getLength(), y).getAngle(); }
+float Vector3::getAngleTheta() const { return fmod(2*PI - Vector2(x, z).getAngle() + PI/2, 2*PI); }
+float Vector3::getAnglePhi()   const { return (2*PI - Vector2(Vector2(x, z).getLength(), y).getAngle()) - 2*PI; }
 
 // Returns the angle (in radians) between two vectors.
 float Vector3::getAngleThetaWithVector3(const Vector3& v) const
