@@ -40,25 +40,28 @@ void Renderer::modelScale    (const float& _scaleX, const float& _scaleY, const 
 
 void Renderer::drawPixel(const unsigned int& _x, const unsigned int& _y, const float& _depth, Color _color)
 {
-    int index = _y * framebuffer.getWidth() + _x;
+    int    index  = _y * framebuffer.getWidth() + _x;
+    float& bufferDepth = framebuffer.depthBuffer[index];
+    Color& bufferColor = framebuffer.colorBuffer[index];
+    bool   isCloser    = _depth < bufferDepth;
 
     // Alpha blending.
     bool blendAlpha = false;
-    if (_color.a < 1 || framebuffer.colorBuffer[index].a < 1)
+    if (_color.a < 1 || bufferColor.a < 1)
     {
         blendAlpha = true;
-        float alpha = (_depth <= framebuffer.depthBuffer[index] ? _color.a : (1 - framebuffer.colorBuffer[index].a));
-        _color = _color * alpha + framebuffer.colorBuffer[index] * (1 - alpha);
+        float alpha = (isCloser ? _color.a : (1 - bufferColor.a));
+        _color = _color * alpha + bufferColor * (1 - alpha);
     }
 
     // Draw the pixel (color or depth) if it is closer than the previus one.
-    if (_depth <= framebuffer.depthBuffer[index] || blendAlpha)
+    if (isCloser || blendAlpha)
     {
-        framebuffer.depthBuffer[index] = _depth;
+        bufferDepth = _depth;
         switch (renderMode)
         {
-        case RenderMode::ZBUFFER:   framebuffer.colorBuffer[index] = { _depth, _depth, _depth, 1 }; break;
-        default:                    framebuffer.colorBuffer[index] = _color;                        break;
+        case RenderMode::ZBUFFER:   bufferColor = { _depth, _depth, _depth, 1 }; break;
+        default:                    bufferColor = _color;                        break;
         }
     }
 }
@@ -310,7 +313,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
         for (p.x = minX; p.x <= maxX; p.x++) 
         {
             // If p is on or inside all edges, render pixel.
-            if ((w0 | w1 | w2) >= 0) 
+            if (w0 >= 0 && w1 >= 0 && w2 >= 0) 
             {
                 // Make the barycentric coordinates percentages.
                 float w0n = w0 / (float)(w0 + w1 + w2);
@@ -360,9 +363,9 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                                    clamp(depth * (perspectiveUV[0].y * w0n + perspectiveUV[1].y * w1n + perspectiveUV[2].y * w2n), 0, 1) };
 
                     // Get the pixel color from the current texture.
-                    Color texColor = texture.getPixelColor(floorInt(clampAbove(lerp(uv.x, 0, abs(texture.width )), 0)), 
-                                                        floorInt(clampAbove(lerp(uv.y, 0, abs(texture.height)), 0)),
-                                                        pCol.a);
+                    Color texColor = texture.getPixelColor(floorInt(lerp(uv.x, 0, abs(texture.width ))), 
+                                                           floorInt(lerp(uv.y, 0, abs(texture.height))),
+                                                           pCol.a);
 
                     // Apply the texture color to the pixel color.
                     if (texture.applyVertexColor)
