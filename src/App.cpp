@@ -178,12 +178,10 @@ void App::update()
         }
 
         // Display the rasterizer's output.
-        bool is_open = false;
-
-        if (ImGui::Begin("Render", &is_open, ImGuiWindowFlags_NoTitleBar))
+        bool isOpen = false;
+        if (ImGui::Begin("Render", &isOpen, ImGuiWindowFlags_NoTitleBar))
         {
-            if (mouseCaptured == false) ImGui::Text("FPS: %.f | Delay: %.2f ms (Hold RMB / press WASD to look / move around) ", fps, roundf(ImGui::GetIO().DeltaTime * 100));
-            else                        ImGui::Text("FPS: %.f | Delay: %.2f ms", fps, roundf(ImGui::GetIO().DeltaTime * 100));
+            ImGui::Text("FPS: %.f | Delay: %.2f ms (Hold RMB / press WASD to look / move around) ", fps, ImGui::GetIO().DeltaTime * 100);
 
             ImGui::Image((ImTextureID)(size_t)renderer.framebuffer.getColorTexture(), { (float)renderer.framebuffer.getWidth(), (float)renderer.framebuffer.getHeight() });
             if (ImGui::IsItemHovered() && ImGui::IsMouseDown(ImGuiMouseButton_Right))
