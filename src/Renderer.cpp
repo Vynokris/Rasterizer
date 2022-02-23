@@ -575,8 +575,9 @@ void Renderer::drawSphere(const Color& _color, const float& _r, const int& _lon,
 
 // --- Material and texture setters --- //
 
-void Renderer::setTexture (const TextureData& _textureData) { texture  = _textureData; }
-void Renderer::setMaterial(const Material& _material)       { material = _material;    }
+void     Renderer::setTexture (const TextureData& _textureData) { texture  = _textureData; }
+Material Renderer::getMaterial() const                          { return material;         }
+void     Renderer::setMaterial(const Material& _material)       { material = _material;    }
 
 // ---------- Miscellaneous ---------- //
 
