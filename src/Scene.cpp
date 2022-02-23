@@ -20,16 +20,11 @@ Scene::Scene()
                           { {  0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f,-1.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } },
                           { {  0.5f, 0.5f, 0.0f }, { 0.0f, 0.0f,-1.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } } });
     
-    // SECOND TRIANGLE      |        pos        |  |      normal      |  |         color          |  |     uv     |
-    triangles.push_back({ { { -0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f,-1.0f }, { 1.0f, 1.0f, 0.0f, 1.0f }, {  0.0f, 0.0f } },
-                          { { -0.5f, 0.5f, 0.0f }, { 0.0f, 0.0f,-1.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, {  0.0f, 1.0f } },
-                          { {  0.5f, 0.5f, 0.0f }, { 0.0f, 0.0f,-1.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, {  1.0f, 1.0f } } });
-    
     // LIGHT 1
-    lights.push_back({ {  2,  2,  2 }, Vector3(), RED   });
-    lights.push_back({ {  2, -2, -2 }, Vector3(), GREEN });
-    lights.push_back({ { -2,  2, -2 }, Vector3(), BLUE  });
-    lights.push_back({ {  0, -1,  4 }, Vector3(), WHITE });
+    lights.push_back({ 1, 0, 0, {  2,  2,  2 }, RED   });
+    lights.push_back({ 1, 0, 0, {  2, -2, -2 }, GREEN });
+    lights.push_back({ 1, 0, 0, { -2,  2, -2 }, BLUE  });
+    lights.push_back({ 1, 0, 0, {  0, -1,  4 }, WHITE });
 }
 
 Scene::~Scene()
@@ -49,6 +44,11 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
         default: break;
     }
     _renderer.setProjection(_camera.getPerspective());
+
+    _renderer.modelPushMat();
+    _renderer.modelTranslate(0, 0, 2);
+    _renderer.drawTriangles(triangles.data(), 1);
+    _renderer.modelPopMat();
 
     // Draw cube.
     _renderer.modelPushMat();
