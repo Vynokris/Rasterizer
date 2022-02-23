@@ -8,10 +8,9 @@ using namespace arithmetic;
 using namespace matrix;
 using namespace geometry3D;
 
-Camera::Camera(const unsigned int& _width,
-               const unsigned int& _height,
-               const float& _fov, const float& _near,
-               const float& _far, const float& _acceleration)
+Camera::Camera(const unsigned int& _width, const unsigned int& _height,
+               const float& _fov, const float& _near, const float& _far, 
+               const float& _acceleration)
     : width       (_width) ,
       height      (_height),
       fov         (_fov)   ,
@@ -24,7 +23,7 @@ Camera::Camera(const unsigned int& _width,
     lookAtPoint.z = 2;
 }
 
-void Camera::update(const float& _deltaTime, const CameraInputs& _inputs)
+void Camera::update(const float& _deltaTime, CameraInputs _inputs)
 {
     // Set speed according to deltatime.
     speed = _deltaTime * acceleration;
@@ -34,13 +33,14 @@ void Camera::update(const float& _deltaTime, const CameraInputs& _inputs)
     if (_inputs.moveBackward) dir.z +=  1;
     if (_inputs.moveLeft)     dir.x += -1;
     if (_inputs.moveRight)    dir.x +=  1;
-    if (_inputs.moveUpper)    dir.y += -1;
-    if (_inputs.moveLower)    dir.y +=  1;
+    if (_inputs.moveUp)       dir.y += -1;
+    if (_inputs.moveDown)     dir.y +=  1;
     if (_inputs.moveForward)  dir.z += -1;
 
     switch(viewMode)
     {
     case ViewMode::FIRST_PERSON:
+    {
         // Rotate camera (Yaw locked between -90° and 90°, Pitch reset to 0 when it reaches 360°).
         setRotation(fmodf(pitch + _inputs.deltaX / 180, 2*PI), 
                     clamp(yaw   - _inputs.deltaY / 180, -PI/2 + 0.001, PI/2 - 0.001));
@@ -51,26 +51,45 @@ void Camera::update(const float& _deltaTime, const CameraInputs& _inputs)
         pos.y += dir.y * speed;
 
         break;
-
+    }
     case ViewMode::THIRD_PERSON:
+    {
         // Rotate the camera to face the target.
         setLookAtRotation();
 
-        // Make the player unable to pass directly above/under the target.
-        if      (Vector3(pos, lookAtPoint).getAnglePhi() >  PI/2-0.2)
-            dir.y = clampUnder(dir.y, 0);
-        else if (Vector3(pos, lookAtPoint).getAnglePhi() < -PI/2+0.2)
-            dir.y = clampAbove(dir.y, 0);
+        // Move using WS+mouse.
+        if (lookAtMovement == LookAtMovement::MOUSE)
+        {
+            // Make the player unable to pass directly above/under the target.
+            if      (Vector3(pos, lookAtPoint).getAnglePhi() >  PI/2-0.2) _inputs.deltaY = clampUnder(_inputs.deltaY, 0);
+            else if (Vector3(pos, lookAtPoint).getAnglePhi() < -PI/2+0.2) _inputs.deltaY = clampAbove(_inputs.deltaY, 0);
 
-        // Move according to the camera's yaw and pitch.
-        pos   += getSphericalCoords(speed,              PI/2, 2*PI - pitch       ) * dir.x
-              +  getSphericalCoords(speed, 2*PI - yaw       , 2*PI - pitch - PI/2) * dir.y
-              +  getSphericalCoords(speed, 2*PI - yaw + PI/2, 2*PI - pitch - PI/2) * dir.z;
+            // Move according to the camera's yaw and pitch.
+            Vector3 newPos = pos + getSphericalCoords(speed, PI/2      , 2*PI - pitch       ) * _inputs.deltaX / 8
+                                 + getSphericalCoords(speed, 2*PI - yaw, 2*PI - pitch - PI/2) * _inputs.deltaY / 8;
+            lookAtDist  += speed * _inputs.mouseWheel * -3;
+            newPos -=        lookAtPoint;
+            newPos.setLength(lookAtDist);
+            newPos +=        lookAtPoint;
+            pos = newPos;
+        }
+
+        // Move using WASD+space/shift.
+        else if (lookAtMovement == LookAtMovement::KEYBOARD)
+        {
+            // Make the player unable to pass directly above/under the target.
+            if      (Vector3(pos, lookAtPoint).getAnglePhi() >  PI/2-0.2) dir.y = clampUnder(dir.y, 0);
+            else if (Vector3(pos, lookAtPoint).getAnglePhi() < -PI/2+0.2) dir.y = clampAbove(dir.y, 0);
+
+            // Move according to the camera's yaw and pitch.
+            pos += getSphericalCoords(speed,              PI/2, 2*PI - pitch       ) * dir.x
+                +  getSphericalCoords(speed, 2*PI - yaw       , 2*PI - pitch - PI/2) * dir.y
+                +  getSphericalCoords(speed, 2*PI - yaw + PI/2, 2*PI - pitch - PI/2) * dir.z;
+        }
 
         break;
-
-    default:
-        break;
+    }
+    default: break;
     }
 }
 
@@ -127,17 +146,30 @@ void Camera::setLookAtRotation()
 
 void Camera::showImGuiControls()
 {
-    // View mode combo box.
-    static const char* items[]{"1st person", "3rd person"};
-    static int curItem = 0;
-
-    ImGui::Combo("View Mode", &curItem, items, IM_ARRAYSIZE(items));
-    setViewMode((ViewMode)curItem);
-
-    // Displayed camera members.
+    // Camera info.
     ImGui::Text("Position: %.2f, %.2f, %.2f", pos.x, pos.y, pos.z);
-    ImGui::Text("Pitch: %.2f° | Yaw = %.2f°", radToDeg(pitch), radToDeg(yaw));
-    ImGui::SliderFloat("Speed", &acceleration, 0.05, 10);
-    if (viewMode == ViewMode::THIRD_PERSON)
+    ImGui::Text("Pitch:    %.2f°", radToDeg(pitch));
+    ImGui::Text("Yaw:      %.2f°", radToDeg(yaw)  );
+
+    // View mode combo box.
+    static const char* viewItems[]{"1st person", "3rd person"};
+    static int curViewItem = 0;
+    ImGui::Combo("View Mode", &curViewItem, viewItems, IM_ARRAYSIZE(viewItems));
+    viewMode = (ViewMode)curViewItem;
+
+    // Parameters specific to third person view mode.
+    if (viewMode == ViewMode::THIRD_PERSON) 
+    {
+        // LookAt movement combo box.
+        static const char* movementItems[]{"Mouse", "Keyboard"};
+        static int curMovementItem = 0;
+        ImGui::Combo("Movement mode", &curMovementItem, movementItems, IM_ARRAYSIZE(movementItems));
+        lookAtMovement = (LookAtMovement)curMovementItem;
+        
+        // Modifier for look at point pos.
         ImGui::SliderFloat3("Look at point", &lookAtPoint.x, -5, 5);
+    }
+
+    // Modifier for camera speed.
+    ImGui::SliderFloat("Speed", &acceleration, 0.05, 10);
 }

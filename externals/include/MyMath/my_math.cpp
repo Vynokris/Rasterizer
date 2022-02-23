@@ -778,7 +778,7 @@ Vector3 Vector3::getMiddle()   const { return Vector3(x / 2, y / 2, z / 2); }
 float Vector3::getLength()     const { return sqrt(arithmetic::sqpow(x) + arithmetic::sqpow(y) + arithmetic::sqpow(z)); }
 
 // Modifies the length of the given vector to correspond to the given value.
-void Vector3::setLength(const float& length)                { *(this) = Vector3(getAngleTheta(), getAnglePhi(), length, true); }
+void Vector3::setLength(const float& length) { normalize(); (*this) *= length; }
 
 // Normalizes the given vector so that its length is 1.
 void Vector3::normalize() 
