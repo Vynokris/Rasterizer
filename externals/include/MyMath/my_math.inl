@@ -23,12 +23,12 @@ inline bool Vector2::operator==<Vector2>(const Vector2& val) const
 template <typename T>
 inline bool Vector2::operator!=(const T& val) const
 {
-    return (x != val && y != val);
+    return (x != val || y != val);
 }
 template<>
 inline bool Vector2::operator!=<Vector2>(const Vector2& val) const
 {
-    return (x != val.x && y != val.y);
+    return (x != val.x || y != val.y);
 }
 
 // Vector2 addition.
@@ -153,12 +153,12 @@ inline bool Vector3::operator==<Vector3>(const Vector3& val) const
 template <typename T>
 inline bool Vector3::operator!=(const T& val) const
 {
-    return (x != val && y != val && z != val);
+    return (x != val || y != val || z != val);
 }
 template<>
 inline bool Vector3::operator!=<Vector3>(const Vector3& val) const
 {
-    return (x != val.x && y != val.y && z != val.z);
+    return (x != val.x || y != val.y || z != val.z);
 }
 
 // Vector3 addition.
@@ -291,12 +291,12 @@ inline bool Vector4::operator==<Vector4>(const Vector4& val) const
 template <typename T>
 inline bool Vector4::operator!=(const T& val) const
 {
-    return (x != val && y != val && z != val && w != val);
+    return (x != val || y != val || z != val || w != val);
 }
 template<>
 inline bool Vector4::operator!=<Vector4>(const Vector4& val) const
 {
-    return (x != val.x && y != val.y && z != val.z && w != val.z);
+    return (x != val.x || y != val.y || z != val.z || w != val.z);
 }
 
 // Vector4 addition.
