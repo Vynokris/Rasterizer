@@ -6,6 +6,8 @@
 #include <Light.hpp>
 #include <Scene.hpp>
 
+#define MAX_LIGHTS 10
+
 using namespace std;
 using namespace geometry3D;
 
@@ -26,10 +28,10 @@ Scene::Scene()
                           { {  0.5f, 0.5f, 0.0f }, { 0.0f, 0.0f,-1.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }, {  1.0f, 1.0f } } });
     
     // LIGHT 1
-    lights.push_back({ {  2,  2,  2 }, Vector3(), RED   });
-    lights.push_back({ {  2, -2, -2 }, Vector3(), GREEN });
-    lights.push_back({ { -2,  2, -2 }, Vector3(), BLUE  });
-    lights.push_back({ {  0, -1,  4 }, Vector3(), WHITE });
+    lights.push_back({ {  2,  2,  2 }, RED   });
+    lights.push_back({ {  2, -2, -2 }, GREEN });
+    lights.push_back({ { -2,  2, -2 }, BLUE  });
+    lights.push_back({ {  0, -1,  4 }, WHITE });
 }
 
 Scene::~Scene()
@@ -74,25 +76,41 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     time      += deltaTime;
 }
 
-std::vector<Light> Scene::getLights() const { return lights; }
+std::vector<Light>* Scene::getLights() { return &lights; }
 
 void Scene::showImGuiControls()
 {
     // Display all lights
-    if (ImGui::CollapsingHeader("Lights", ImGuiTreeNodeFlags_DefaultOpen))
+    if (ImGui::CollapsingHeader("Lights"))
     {
-        static int index = 0;
-        for (Light light : lights)
+        // Light instatiation.
+        if (ImGui::Button("Add", { 50, 18 }) && (int)lights.size() < MAX_LIGHTS) lights.push_back({ Vector3(), WHITE });
+                
+        // Lights parameters.
+        for (int i = 0; i < (int)lights.size(); i++)
         {
-            index++;
-
             string lightName = "Light ";
-            lightName += to_string(index);
-            if (ImGui::CollapsingHeader(lightName.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+            lightName += to_string(i);
+
+            ImGui::PushID(i);
+            if(ImGui::Button("Remove") && (int)lights.size() > 0) lights.pop_back();
+
+            // Compute lights items padding.
+            ImVec2 p0      = ImGui::GetCursorScreenPos();
+            ImVec2 offset  = ImGui::GetItemRectSize();
+            ImVec2 padding = { p0.x + offset.x + 5, p0.y };
+
+            // Draw header with items inside.
+            ImGui::SameLine();
+            if (ImGui::CollapsingHeader(lightName.c_str()))
             {
-                // TODO (VALUES AND SLIDERS).
+                ImGui::SetCursorScreenPos(padding);
+                ImGui::BeginGroup();
+                ImGui::SliderFloat3("Position", &lights[i].pos.x, -10, 10);
+                ImGui::ColorEdit4("Color",      &lights[i].color.r);
+                ImGui::EndGroup();
             }
+            ImGui::PopID();
         }
-        index = 0;
     }
 }
