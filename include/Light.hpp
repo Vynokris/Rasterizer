@@ -2,7 +2,7 @@
 
 #include "my_math.hpp"
 
-struct Material { float diffuse, specular, shiness, attenuation; };
+struct Material { float diffuse, specular, shiness; };
 
 struct Light
 {

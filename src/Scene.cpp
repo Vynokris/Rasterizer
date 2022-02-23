@@ -53,6 +53,7 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     _renderer.setProjection(_camera.getPerspective());
 
     // Draw cube.
+    /*
     _renderer.modelPushMat();
     _renderer.modelTranslate(-2, 0, 2);
     //_renderer.modelRotateX(fmod(time/2, 2*PI));
@@ -61,6 +62,7 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     // _renderer.drawCube({ 1, 1, 1, 1 });
     _renderer.drawDividedCube({ 1, 1, 1, 1 }, 1, 10);
     _renderer.modelPopMat();
+    */
 
     // Draw sphere.
     _renderer.modelPushMat();
@@ -68,7 +70,7 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     _renderer.modelRotateX(-fmod(time/2, 2*PI));
     _renderer.modelRotateY(-fmod(time/2, 2*PI));
     _renderer.modelRotateZ(-fmod(time/2, 2*PI));
-    _renderer.drawSphere({ 1, 1, 1, 1 }, 0.7, 32, 32);
+    _renderer.drawSphere({ 1, 1, 1, 1 }, 0.7, 128, 128);
     _renderer.modelPopMat();
     
     
@@ -78,9 +80,19 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
 
 std::vector<Light>* Scene::getLights() { return &lights; }
 
-void Scene::showImGuiControls()
+void Scene::showImGuiControls(Renderer& _renderer)
 {
-    // Display all lights
+    // Material pannel.
+    if (ImGui::CollapsingHeader("Material"))
+    {
+        static Material output = _renderer.getMaterial();
+        ImGui::SliderFloat("Diffuse",  &output.diffuse,  0, 10);
+        ImGui::SliderFloat("Specular", &output.specular, 0, 10);
+        ImGui::SliderFloat("Shiness",  &output.shiness,  0, 10);
+        _renderer.setMaterial(output);
+    }
+    
+    // Light pannel.
     if (ImGui::CollapsingHeader("Lights"))
     {
         // Light instatiation.
@@ -93,7 +105,7 @@ void Scene::showImGuiControls()
             lightName += to_string(i);
 
             ImGui::PushID(i);
-            if(ImGui::Button("Remove") && (int)lights.size() > 0) lights.pop_back();
+            if(ImGui::Button("Remove") && (int)lights.size() > 0) lights.erase(lights.begin() + i);
 
             // Compute lights items padding.
             ImVec2 p0      = ImGui::GetCursorScreenPos();
