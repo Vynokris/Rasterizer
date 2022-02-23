@@ -273,6 +273,9 @@ float Vector2::operator&(const Vector2& val) const { return (x * val.x) + (y * v
 // Vector2 cross product.
 float Vector2::operator^(const Vector2& val) const { return (x * val.y) - (y * val.x); }
 
+// Vector2 negation.
+Vector2 Vector2::operator-()                 const { return { -x, -y }; }
+
 // ------------ VECTOR2 METHODS ----------- //
 
 // Returns the middle of the given vector.
@@ -292,9 +295,6 @@ Vector2 Vector2::getNormalized()                      const { return Vector2(x /
 
 // Negates both of the coordinates of the given vector.
 void Vector2::negate()                                      { *(this) = Vector2(-x, -y); }
-
-// Negates both of the coordinates of the given vector.
-Vector2 Vector2::getNegated()                         const { return Vector2(-x, -y); }
 
 // Copies the signs from the source vector to the destination vector.
 void Vector2::copysign(const Vector2& source)               { *(this) = Vector2(std::copysign(x, source.x), std::copysign(y, source.y)); }
@@ -766,6 +766,9 @@ float Vector3::operator&(const Vector3& v)   const { return (x * v.x) + (y * v.y
 // Vector3 cross product.
 Vector3 Vector3::operator^(const Vector3& v) const { return Vector3((y * v.z - z * v.y), (z * v.x - x * v.z), (x * v.y - y * v.x)); }
 
+// Vector3 negation.
+Vector3 Vector3::operator-()                 const { return { -x, -y, -z }; }
+
 // ------------ VECTOR3 METHODS ----------- //
 
 // Returns the middle of the given vector.
@@ -795,9 +798,6 @@ Vector3 Vector3::getNormalized() const
 
 // Negates both of the coordinates of the given vector.
 void Vector3::negate()                                      { *(this) = Vector3(-x, -y, -z); }
-
-// Negates both of the coordinates of the given vector.
-Vector3 Vector3::getNegated()                         const { return Vector3(-x, -y, -z); }
 
 // Copies the signs from the source vector to the destination vector.
 void Vector3::copysign(const Vector3& source)               { *(this) = Vector3(std::copysign(x, source.x), std::copysign(y, source.y), std::copysign(z, source.z)); }
@@ -868,6 +868,9 @@ float Vector4::operator&(const Vector4& v)   const { return (x * v.x) + (y * v.y
 // Vector4 cross product.
 Vector3 Vector4::operator^(const Vector4& v) const { return Vector3((y * v.z - z * v.y), (z * v.x - x * v.z), (x * v.y - y * v.x)); }
 
+// Vector4 negation.
+Vector4 Vector4::operator-()                 const { return { -x, -y, -z, w }; }
+
 // ------------ VECTOR4 METHODS ----------- //
 
 // Returns the middle of the given vector.
@@ -903,9 +906,6 @@ Vector4 Vector4::getNormalized() const
 
 // Negates both of the coordinates of the given vector.
 void Vector4::negate() { *(this) = Vector4(-x, -y, -z, w); }
-
-// Negates both of the coordinates of the given vector.
-Vector4 Vector4::getNegated() const { return Vector4(-x, -y, -z, w); }
 
 // Copies the signs from the source vector to the destination vector.
 void Vector4::copysign(Vector4 source) { *(this) = Vector4(std::copysign(x, source.x), std::copysign(y, source.y), std::copysign(z, source.z), w); }
@@ -967,7 +967,7 @@ Plane3::Plane3(const Vector3& _normal, const float& _distance) : normal(_normal.
 int Plane3::doesSegmentClip(const Segment3& seg) const
 {
     // Get the origin point of the plane.
-    Vector3 origin = normal.getNegated() * distance;
+    Vector3 origin = -normal * distance;
 
     // Get the distance from each point to the plane.
     // float distA = (seg.a.pos & normal) - distance;
@@ -998,7 +998,7 @@ int Plane3::doesSegmentClip(const Segment3& seg) const
 Segment3 Plane3::clipSegment(Segment3 seg) const
 {
     // Get the origin point of the plane.
-    Vector3 origin = normal.getNegated() * distance;
+    Vector3 origin = -normal * distance;
 
     // Get the distance from each point to the plane.
     // float distA = (seg.a.pos & normal) - distance;

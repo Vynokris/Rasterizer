@@ -9,10 +9,6 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-#include "Renderer.hpp"
-#include "Scene.hpp"
-#include "Camera.hpp"
-#include "Framebuffer.hpp"
 #include "App.hpp"
 
 
@@ -44,8 +40,6 @@ int main(int argc, char* argv[])
     case EAppState::WINDOWFAILED:
     case EAppState::GLADFAILED:
         throw;
-    case EAppState::SUCCESS:
-        break;
     default:
         break;
     }

@@ -32,6 +32,10 @@ private:
     // Tracks the state of the app.
     EAppState state = NONE;
 
+    // Frame creation and addition.
+    void newFrame(bool _mouseCaptured = true);
+    void endFrame();
+
 public:
     // The app's main window.
     GLFWwindow* window;
@@ -45,9 +49,4 @@ public:
 
     // Getter.
     inline EAppState getState() { return state; }
-
-private:
-    // Frame creation and addition.
-    void newFrame(bool _mouseCaptured = true);
-    void endFrame();
 };

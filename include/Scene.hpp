@@ -11,16 +11,16 @@ class Renderer;
 class Scene
 {
 private:
-    double time = 0.f, deltaTime = 0.f;
-    std::vector<Triangle3> triangles;
+    double time = 0, deltaTime = 0;
     std::vector<Light> lights;
-    float scale = 1.f;
     
 public:
     Scene();
-    ~Scene();
+    ~Scene() {}
 
     void update(const float& _deltaTime, Renderer& _renderer, const Camera& _camera);
+
     std::vector<Light>* getLights();
+
     void showImGuiControls(Renderer& _renderer);
 };

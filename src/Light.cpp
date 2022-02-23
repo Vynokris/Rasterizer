@@ -6,7 +6,7 @@
 using namespace std;
 using namespace arithmetic;
 
-Color computePhong(const vector<Light>& _lights, const Material& _mat, Vector3 _pixel, const Vector3& _normal, const Vector3& _view)
+Color computePhong(const vector<Light>& _lights, const Material& _mat, const Vector3& _pixel, const Vector3& _normal, const Vector3& _view)
 {
     Color lightIntensity = { 0, 0, 0, 0 };
 
@@ -22,8 +22,8 @@ Color computePhong(const vector<Light>& _lights, const Material& _mat, Vector3 _
         float diffuseFactor  = clamp(_normal & lightToPixel, 0, 1);
         float reflectionDot  = lightReflexion & camToPixel;
         float specularFactor = 0;
-        if (reflectionDot > 0 && _mat.shiness > 0)
-            specularFactor = pow(reflectionDot, _mat.shiness * 64);
+        if (reflectionDot > 0 && _mat.shininess > 0)
+            specularFactor = pow(reflectionDot, _mat.shininess * 64);
 
         // Compute the attenuation factor.
         float attenuation = 0;

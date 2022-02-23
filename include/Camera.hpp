@@ -2,11 +2,7 @@
 
 #include <my_math.hpp>
 
-enum class ViewMode : int
-{
-    FIRST_PERSON,
-    THIRD_PERSON,
-};
+enum class ViewMode : int { FIRST_PERSON, THIRD_PERSON };
 
 struct CameraInputs
 {
@@ -28,12 +24,12 @@ private:
     ViewMode viewMode = ViewMode::FIRST_PERSON;
 
 public:
-    Camera(const unsigned int _width, const unsigned int _height,
-           const float _fov, const float _near, const float _far,
-           const float _acceleration);
+    Camera(const unsigned int& _width, const unsigned int& _height,
+           const float& _fov, const float& _near, const float& _far,
+           const float& _acceleration);
 
     // Main methods.
-    void update(const float _deltaTime, const CameraInputs& _inputs);
+    void update(const float& _deltaTime, const CameraInputs& _inputs);
 
     // Getters.
     Mat4     getWorldTransform() const;
@@ -46,9 +42,6 @@ public:
     // Returns the perspective projection matrix.
     matrix::Mat4 getPerspective()  const;
 
-    // Returns the orthographic projection matrix.
-    matrix::Mat4 getOrthographic() const;
-
     // Returns the view transformation matrix.
     matrix::Mat4 getViewMat()      const;
 
@@ -57,7 +50,7 @@ public:
 
     // Setters.
     void setPosition(const Vector3& _pos);
-    void setRotation(const float _pitch, const float _yaw);
+    void setRotation(const float& _pitch, const float& _yaw);
     void setViewMode(const ViewMode& _viewMode);
 
     // Sets the rotation of the camera to match the lookAt rotation.
