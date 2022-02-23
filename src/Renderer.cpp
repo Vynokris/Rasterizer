@@ -8,10 +8,11 @@
 #include "Light.hpp"
 #include "Renderer.hpp"
 
+using namespace std;
 using namespace arithmetic;
 using namespace geometry3D;
 
-Renderer::Renderer(const unsigned int& _width, const unsigned int& _height, const std::vector<Light>& _lights)
+Renderer::Renderer(const unsigned int& _width, const unsigned int& _height, vector<Light>* _lights)
         : viewport(0, 0, _width, _height)
         , lights(_lights)
         , framebuffer(_width, _height)
@@ -273,7 +274,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
         for (int i = 0; i < 3; i++)
         {
             if (renderMode == RenderMode::LIT)
-                lightIntensity[i] = computePhong(lights, material, worldCoords[i].toVector3(), worldNormal, cameraPos);
+                lightIntensity[i] = computePhong(*lights, material, worldCoords[i].toVector3(), worldNormal, cameraPos);
             else 
                 lightIntensity[i] = WHITE;
         }
@@ -340,7 +341,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                     else if (lightingMode == LightingMode::BLINN)
                     {
                         Vector3 pixelPos = (worldCoords[0] * w0n + worldCoords[1] * w1n + worldCoords[2] * w2n).toVector3();
-                        pLight           = computePhong(lights, material, pixelPos, worldNormal, cameraPos);
+                        pLight           = computePhong(*lights, material, pixelPos, worldNormal, cameraPos);
                     }
                 }
 
@@ -409,6 +410,7 @@ void Renderer::drawDividedQuad(const Color& _color, const float& _size, const bo
     // Get the quad's normal.
     Vector3 normal = (Vector3({ -_size / 2, -_size / 2, 0 }, {  _size / 2, -_size / 2, 0 }) 
                    ^  Vector3({ -_size / 2, -_size / 2, 0 }, { -_size / 2,  _size / 2, 0 })).getNormalized();
+    if (_negateNormals) normal.negate();
 
     Triangle3 triangles[2] = 
     {
@@ -439,7 +441,7 @@ void Renderer::drawCube(const Color& _color, const float& _size)
 
         modelPushMat();
         modelTranslate(0, 0, _size / 2);
-        drawDividedQuad(_color, _size, (i >= 4 ? true : false));
+        drawDividedQuad(_color, _size);
         modelPopMat();
     }
     modelPopMat();
