@@ -95,7 +95,7 @@ void App::update()
     // Initialize app objects.
     Scene scene;
 
-    Material material = { 1, 1, 0.2, 1 };
+    Material material = { 1, 1, 0.2 };
 
     Renderer renderer(1500, 950, scene.getLights());
     renderer.setMaterial(material);
@@ -160,7 +160,7 @@ void App::update()
         {
             if (ImGui::CollapsingHeader("Renderer", ImGuiTreeNodeFlags_DefaultOpen)) renderer.showImGuiControls();
             if (ImGui::CollapsingHeader("Camera",   ImGuiTreeNodeFlags_DefaultOpen)) camera.showImGuiControls();
-            scene.showImGuiControls();
+            scene.showImGuiControls(renderer);
         }
         ImGui::End();
         

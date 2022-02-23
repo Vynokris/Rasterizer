@@ -22,5 +22,5 @@ public:
 
     void update(const float& _deltaTime, Renderer& _renderer, const Camera& _camera);
     std::vector<Light>* getLights();
-    void showImGuiControls();
+    void showImGuiControls(Renderer& _renderer);
 };
