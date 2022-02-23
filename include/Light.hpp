@@ -6,7 +6,7 @@ struct Material { float diffuse, specular, shiness, attenuation; };
 
 struct Light
 {
-    float constantAttenuation, linearAttenuation, quadraticAttenuation;
+    float range, constantAttenuation, linearAttenuation, quadraticAttenuation;
     Vector3 pos;
     Color color;
 };

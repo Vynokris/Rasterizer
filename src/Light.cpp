@@ -16,7 +16,7 @@ Color computePhong(const vector<Light>& _lights, const Material& _mat, Vector3 _
         Vector3 camToPixel       = Vector3(_pixel, _view).getNormalized();
         Vector3 lightToPixel     = Vector3(_pixel, light.pos).getNormalized();
         Vector3 lightReflexion   = (_normal * 2 * (lightToPixel & _normal) - lightToPixel).getNormalized();
-        float   lightToPixelDist = lightToPixel.getLength();
+        float   lightToPixelDist = Vector3(_pixel, light.pos).getLength();
 
         // Compute the intensity of diffuse and specular light.
         float diffuseFactor  = clamp(_normal & lightToPixel, 0, 1);
@@ -25,14 +25,18 @@ Color computePhong(const vector<Light>& _lights, const Material& _mat, Vector3 _
         if (reflectionDot > 0 && _mat.shiness > 0)
             specularFactor = pow(reflectionDot, _mat.shiness * 64);
 
+        // Compute the attenuation factor.
+        float attenuation = 0;
+        if (lightToPixelDist < light.range)
+        {
+            attenuation = 1 / (light.constantAttenuation                           + 
+                               light.linearAttenuation    *       lightToPixelDist + 
+                               light.quadraticAttenuation * sqpow(lightToPixelDist));
+        }
+
         // Compute the colors of diffuse and specular light.
         float diffuse  = _mat.diffuse  * diffuseFactor;
         float specular = _mat.specular * specularFactor;
-
-        // Compute the attenuation factor.
-        float attenuation = 1 / (light.constantAttenuation                           + 
-                                 light.linearAttenuation    *       lightToPixelDist + 
-                                 light.quadraticAttenuation * sqpow(lightToPixelDist));
 
         // Compute the output color.
         lightIntensity += light.color * (diffuse + specular) * attenuation;
