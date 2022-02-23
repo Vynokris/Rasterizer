@@ -71,10 +71,11 @@ public:
     void drawDividedCube  (const Color& _color, const float& _size = 1.f, const float& _res = 1.f);
     void drawSphere       (const Color& _color, const float& _r, const int& _lon, const int& _lat);
 
-    // --- Material and texture setters --- //
+    // --- Material and texture methods --- //
 
-    void setTexture (const TextureData& _textureData);
-    void setMaterial(const Material& _material);
+    void     setTexture (const TextureData& _textureData);
+    Material getMaterial() const;
+    void     setMaterial(const Material& _material);
 
     // ---------- Miscellaneous ---------- //
     
