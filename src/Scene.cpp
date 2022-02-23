@@ -33,8 +33,8 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     // Set the view matrix.
     switch (_camera.getViewMode())
     {
-        case ViewMode::FIRST_PERSON: _renderer.setView(_camera.getViewMat());              break;
-        case ViewMode::THIRD_PERSON: _renderer.setView(_camera.getLookAtMat({ 0, 0, 2 })); break;
+        case ViewMode::FIRST_PERSON: _renderer.setView(_camera.getViewMat());   break;
+        case ViewMode::THIRD_PERSON: _renderer.setView(_camera.getLookAtMat()); break;
         default: break;
     }
 
@@ -56,7 +56,7 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     _renderer.modelRotateX(-fmod(time/2, 2*PI));
     _renderer.modelRotateY(-fmod(time/2, 2*PI));
     _renderer.modelRotateZ(-fmod(time/2, 2*PI));
-    _renderer.drawSphere({ 1, 1, 1, 1 }, 0.7, 32, 32);
+    _renderer.drawSphere({ 1, 1, 1, 1 }, 0.7, 16, 16);
     _renderer.modelPopMat();
 }
 
