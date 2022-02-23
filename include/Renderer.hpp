@@ -34,7 +34,7 @@ private:
     Mat4 projectionMat;
 
     // Scene components copied datas.
-    std::vector<Light> lights;
+    std::vector<Light>* lights;
 
     RenderMode   renderMode;
     LightingMode lightingMode;
@@ -42,7 +42,7 @@ private:
 public:
     Framebuffer framebuffer;
     
-    Renderer(const unsigned int& _width, const unsigned int& _height, const std::vector<Light>& _lights);
+    Renderer(const unsigned int& _width, const unsigned int& _height, std::vector<Light>* _lights);
 
     // -- Setters for the three matrices -- //
 
