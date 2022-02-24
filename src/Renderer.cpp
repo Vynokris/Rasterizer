@@ -563,14 +563,14 @@ void Renderer::drawSphere(const Color& _color, const float& _r, const int& _lon,
             Triangle3 triangles[2] = 
             {
                 {
-                    { c0, normal, _color, { 0, 0 } },
-                    { c1, normal, _color, { 0, 1 } },
+                    { c0, normal, _color, { 0, 1 } },
+                    { c1, normal, _color, { 1, 1 } },
                     { c2, normal, _color, { 1, 0 } },
                 },
                 {
-                    { c0, normal, _color, { 1, 1 } },
+                    { c0, normal, _color, { 0, 1 } },
                     { c2, normal, _color, { 1, 0 } },
-                    { c3, normal, _color, { 0, 1 } },
+                    { c3, normal, _color, { 0, 0 } },
                 }
             };
     
