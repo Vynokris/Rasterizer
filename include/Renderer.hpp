@@ -10,7 +10,8 @@
 
 struct Viewport
 {
-    Viewport(const int _x, const int _y, unsigned int _width, unsigned int _height)
+    Viewport(const int _x, const int _y,
+             unsigned int _width, unsigned int _height)
              : x(_x), y(_y), width(_width), height(_height) {}
 
     int x, y;
@@ -24,14 +25,13 @@ enum class LightingMode : int { PHONG, BLINN };
 class Renderer
 {
 private:
-    // TODO: Make object class and apply texture and material.
     TextureData texture;
     Material    material; 
     Viewport    viewport;
 
     std::vector<Mat4> modelMat;
-    Mat4 viewMat;
-    Mat4 projectionMat;
+    Mat4              viewMat;
+    Mat4              projectionMat;
 
     // Scene components copied datas.
     std::vector<Light>* lights;
@@ -42,7 +42,9 @@ private:
 public:
     Framebuffer framebuffer;
     
-    Renderer(const unsigned int& _width, const unsigned int& _height, std::vector<Light>* _lights);
+    Renderer(const unsigned int& _width,
+             const unsigned int& _height,
+             std::vector<Light>* _lights);
 
     // -- Setters for the three matrices -- //
 
@@ -60,11 +62,13 @@ public:
     void modelRotateZ  (const float& _angle);
     void modelScale    (const float& _scaleX, const float& _scaleY, const float& _scaleZ);
 
-    // --------- Drawing functions -------- //
+    // ---- Drawing related functions ---- //
 
     void drawPixel        (const unsigned int& _x, const unsigned int& _y, const float& _depth, Color _color);
     void drawLine         (const geometry3D::Vertex& _p0, const geometry3D::Vertex& _p1);
-    bool transformVertices(int _count, Vertex* _vertices, Vector3* _local, Vector4* _world, Vector4* _view, Vector4* _clip, Vector3* _ndc, Vector3* _screen, Vector3* _perspectiveUV);
+    bool transformVertices(int _count, Vertex* _vertices, Vector3* _local, Vector4* _world,
+                           Vector4* _view, Vector4* _clip, Vector3* _ndc, Vector3* _screen, Vector3* _perspectiveUV);
+    bool wireframeTriangle(Vector3* _screenCoords, Vertex* _vertices);
     void drawTriangles    (geometry3D::Triangle3* _triangles, const unsigned int& _count);
     void drawDividedQuad  (const Color& _color, const float& _size = 1.f, const bool& _negateNormals = false);
     void drawCube         (const Color& _color, const float& _size = 1.f);

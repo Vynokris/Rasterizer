@@ -178,6 +178,11 @@ static void swapTriangleVertices(Vector3* _screenCoords, Vector4* _worldCoords, 
     }
 }
 
+static bool isTowardsCamera(const Vector3& _worldPos, const Vector3& _worldNormal, const Vector3& _camPos)
+{
+    return (_worldNormal & Vector3(_camPos, _worldPos)) <= 0;
+}
+
 bool Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local, Vector4* _world, Vector4* _view, Vector4* _clip, Vector3* _ndc, Vector3* _screen, Vector3* _perspectiveUV)
 {
     for (int i = 0; i < _count; i++)
@@ -194,7 +199,7 @@ bool Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local,
         // View space (3D) -> Clip space (4D).
         _clip[i] = _view[i] * projectionMat;
 
-        //! Temporarily clip triangles by nuking them when one vertex is offscreen.
+        // Clip triangles by nuking them when one vertex is offscreen.
         if (!((-abs(_clip[i].w) <= _clip[i].x) && (_clip[i].x <= abs(_clip[i].w)) &&
               (-abs(_clip[i].w) <= _clip[i].y) && (_clip[i].y <= abs(_clip[i].w)) &&
               (-abs(_clip[i].w) <= _clip[i].z) && (_clip[i].z <= abs(_clip[i].w))))
@@ -219,9 +224,20 @@ bool Renderer::transformVertices(int _count, Vertex* _vertices, Vector3* _local,
     return true;
 }
 
-static bool isTowardsCamera(const Vector3 _worldPos, const Vector3& _worldNormal, const Vector3& _camPos)
+bool Renderer::wireframeTriangle(Vector3* _screenCoords, Vertex* _vertices)
 {
-    return (_worldNormal & Vector3(_camPos, _worldPos)) <= 0;
+    if (renderMode == RenderMode::WIREFRAME)
+    {
+        drawLine({ _screenCoords[0], _vertices[0].normal, _vertices[0].color, _vertices[0].uv }, 
+                 { _screenCoords[1], _vertices[1].normal, _vertices[1].color, _vertices[1].uv });
+        drawLine({ _screenCoords[1], _vertices[1].normal, _vertices[1].color, _vertices[1].uv }, 
+                 { _screenCoords[2], _vertices[2].normal, _vertices[2].color, _vertices[2].uv });
+        drawLine({ _screenCoords[2], _vertices[2].normal, _vertices[2].color, _vertices[2].uv }, 
+                 { _screenCoords[0], _vertices[0].normal, _vertices[0].color, _vertices[0].uv });
+        return true;
+    }
+
+    return false;
 }
 
 void Renderer::drawTriangle(Triangle3 _triangle)
@@ -235,36 +251,26 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     Vector3 perspectiveUV[3];
 
     // Get the triangle's world position.
-    Vector3 trianglePos = (Vector4(_triangle.getCenterOfMass().pos, 1) 
-                        * modelMat.back()).toVector3();
+    Vector3 trianglePos = (Vector4(_triangle.getCenterOfMass().pos, 1) * modelMat.back()).toVector3();
 
     // Get the triangle's normal in world coordinates.
     Vector3 worldNormal = (Vector4((_triangle.a.normal + _triangle.b.normal + _triangle.c.normal) / 3, 0)
                         * modelMat.back()).toVector3().getNormalized();
 
     // Get the camera's position.
-    Vector3 cameraPos = (Vector4(0, 0, 0, 1)
-                      * viewMat.inv4()).toVector3();
+    Vector3 cameraPos = (Vector4(0, 0, 0, 1) * viewMat.inv4()).toVector3();
 
     // Back face culling.
-    if (!isTowardsCamera(trianglePos, worldNormal, cameraPos))
+    if (!isTowardsCamera(trianglePos, worldNormal, cameraPos)) 
         return;
 
     // Transform the triangle's vertices through the renderer's matrices and clip using clipCoords.w.
     if (!transformVertices(3, &_triangle.a, localCoords, worldCoords, viewCoords, clipCoords, ndcCoords, screenCoords, perspectiveUV))
         return;
 
-    // Draw triangle wireframe.
-    if (renderMode == RenderMode::WIREFRAME)
-    {
-        drawLine({ screenCoords[0], _triangle.a.normal, _triangle.a.color, _triangle.a.uv }, 
-                 { screenCoords[1], _triangle.b.normal, _triangle.b.color, _triangle.b.uv });
-        drawLine({ screenCoords[1], _triangle.b.normal, _triangle.b.color, _triangle.b.uv }, 
-                 { screenCoords[2], _triangle.c.normal, _triangle.c.color, _triangle.c.uv });
-        drawLine({ screenCoords[2], _triangle.c.normal, _triangle.c.color, _triangle.c.uv }, 
-                 { screenCoords[0], _triangle.a.normal, _triangle.a.color, _triangle.a.uv });
+    // Draw triangle wireframe
+    if (wireframeTriangle(screenCoords, &_triangle.a)) 
         return;
-    }
 
     // Compute Blinn-Phong lighting for each vertex and light.
     Color lightIntensity[3] = { { 1, 1, 1, 1 }, { 1, 1, 1, 1 }, { 1, 1, 1, 1 }, };
@@ -279,10 +285,8 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     int maxY = max(screenCoords[0].y, max(screenCoords[1].y, screenCoords[2].y));
 
     // Clip against screen bounds.
-    minX = clamp(minX, 0, (int)viewport.width  - 1);
-    minY = clamp(minY, 0, (int)viewport.height - 1);
-    maxX = clamp(maxX, 0, (int)viewport.width  - 1);
-    maxY = clamp(maxY, 0, (int)viewport.height - 1);
+    minX = clamp(minX, 0, (int)viewport.width  - 1); minY = clamp(minY, 0, (int)viewport.height - 1);
+    maxX = clamp(maxX, 0, (int)viewport.width  - 1); maxY = clamp(maxY, 0, (int)viewport.height - 1);
     
     // Triangle setup.
     int A01 = screenCoords[0].y - screenCoords[1].y, B01 = screenCoords[1].x - screenCoords[0].x;
