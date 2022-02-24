@@ -261,7 +261,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     Vector3 cameraPos = (Vector4(0, 0, 0, 1) * viewMat.inv4()).toVector3();
 
     // Back face culling.
-    if (!isTowardsCamera(trianglePos, worldNormal, cameraPos)) 
+    if (cullBackFaces && !isTowardsCamera(trianglePos, worldNormal, cameraPos)) 
         return;
 
     // Transform the triangle's vertices through the renderer's matrices and clip using clipCoords.w.
@@ -346,7 +346,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                 Color pCol { 0, 0, 0, 1 };
 
                 // Compute interpolation of vertex colors.
-                if (texture.pixels == nullptr || texture.applyVertexColor)
+                if (texture.pixels == nullptr || vertexHueOnTextures)
                 {
                     // Get the pixel color from barycentric coordinates.
                     pCol.r = _triangle.a.color.r * w0n + _triangle.b.color.r * w1n + _triangle.c.color.r * w2n; 
@@ -368,7 +368,7 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                                                            pCol.a);
 
                     // Apply the pixel hue to the texture color.
-                    if (texture.applyVertexColor)
+                    if (vertexHueOnTextures)
                     {
                         HSV pHSV = RGBtoHSV(texColor);
                         pCol = HSVtoRGB({ pCol.getHue(), pHSV.s, pHSV.v }, pCol.a);
@@ -581,9 +581,11 @@ void Renderer::drawSphere(const Color& _color, const float& _r, const int& _lon,
 
 // --- Material and texture setters --- //
 
-void     Renderer::setTexture (const TextureData& _textureData) { texture  = _textureData; }
-Material Renderer::getMaterial() const                          { return material;         }
-void     Renderer::setMaterial(const Material& _material)       { material = _material;    }
+void     Renderer::setTexture (const TextureData& _textureData)     { texture  = _textureData;        }
+Material Renderer::getMaterial() const                              { return material;                }
+void     Renderer::setMaterial(const Material& _material)           { material = _material;           }
+void     Renderer::applyVertexColorToTextures(const bool& _boolean) { vertexHueOnTextures = _boolean; }
+void     Renderer::doBackfaceCulling(const bool& _boolean)          { cullBackFaces = _boolean;       }
 
 // ---------- Miscellaneous ---------- //
 
@@ -605,6 +607,4 @@ void Renderer::showImGuiControls()
 
     ImGui::Combo("Lighting Mode", &lModeCur, lModeItems, IM_ARRAYSIZE(lModeItems));
     lightingMode = (LightingMode)lModeCur;
-
-    ImGui::Checkbox("Apply vertex colors to texture", &texture.applyVertexColor);
 }
