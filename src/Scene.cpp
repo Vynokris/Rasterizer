@@ -53,9 +53,9 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     // Draw a sphere.
     _renderer.modelPushMat();
     _renderer.modelTranslate(2, 0, 2);
-    _renderer.modelRotateX(-fmod(time/2, 2*PI));
-    _renderer.modelRotateY(-fmod(time/2, 2*PI));
-    _renderer.modelRotateZ(-fmod(time/2, 2*PI));
+    //_renderer.modelRotateX(-fmod(time/2, 2*PI));
+    //_renderer.modelRotateY(-fmod(time/2, 2*PI));
+    //_renderer.modelRotateZ(-fmod(time/2, 2*PI));
     _renderer.drawSphere({ 1, 1, 1, 1 }, 0.7, 16, 16);
     _renderer.modelPopMat();
 }
