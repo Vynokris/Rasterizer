@@ -2,7 +2,6 @@
 
 #include <vector>
 
-#include <Renderer.hpp>
 #include <Framebuffer.hpp>
 #include <Camera.hpp>
 #include <Light.hpp>
@@ -28,6 +27,9 @@ private:
     TextureData texture;
     Material    material; 
     Viewport    viewport;
+
+    bool vertexHueOnTextures = false;
+    bool cullBackFaces       = true;
 
     std::vector<Mat4> modelMat;
     Mat4              viewMat;
@@ -69,6 +71,7 @@ public:
     bool transformVertices(int _count, Vertex* _vertices, Vector3* _local, Vector4* _world,
                            Vector4* _view, Vector4* _clip, Vector3* _ndc, Vector3* _screen, Vector3* _perspectiveUV);
     bool wireframeTriangle(Vector3* _screenCoords, Vertex* _vertices);
+    void drawTriangle     (geometry3D::Triangle3 _triangle);
     void drawTriangles    (geometry3D::Triangle3* _triangles, const unsigned int& _count);
     void drawDividedQuad  (const Color& _color, const float& _size = 1.f, const bool& _negateNormals = false);
     void drawCube         (const Color& _color, const float& _size = 1.f);
@@ -80,11 +83,10 @@ public:
     void     setTexture (const TextureData& _textureData);
     Material getMaterial() const;
     void     setMaterial(const Material& _material);
+    void     applyVertexColorToTextures(const bool& _boolean);
+    void     doBackfaceCulling(const bool& _boolean);
 
     // ---------- Miscellaneous ---------- //
     
     void showImGuiControls();
-
-private:
-    void drawTriangle(geometry3D::Triangle3 _triangle);
 };

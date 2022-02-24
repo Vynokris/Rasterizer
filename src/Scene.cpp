@@ -13,12 +13,17 @@ using namespace geometry3D;
 
 Scene::Scene()
 {
-    // Setup lights.
+    // Setup default lights.
     lights.clear();
     lights.push_back({ 5, 1, 0.2, 0.1, {  2,  1.5,  2 }, RED   });
     lights.push_back({ 5, 1, 0.2, 0.1, {  2, -2,   -2 }, GREEN });
     lights.push_back({ 5, 1, 0.2, 0.1, { -1,  1.5, -2 }, BLUE  });
     lights.push_back({ 5, 1, 0.2, 0.1, {  2,  0,    4 }, WHITE });
+
+    // Setup default shapes.
+    shapeManager.addShape({ ShapeTypes::CUBE,   1, { -2, 0, 2 }, { 0, 0, 0 }, { 1, 1, 0.2 } });
+    shapeManager.addShape({ ShapeTypes::SPHERE, 1, {  2, 0, 2 }, { 0, 0, 0 }, { 1, 1, 0.2 } });
+    shapeManager.getShape(1).subdivisions = 10;
 }
 
 void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _camera)
@@ -41,39 +46,14 @@ void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _
     // Set the projection matrix.
     _renderer.setProjection(_camera.getPerspective());
 
-    // Draw a cube.
-    _renderer.modelPushMat();
-    _renderer.modelTranslate(-2, 0, 2);
-    _renderer.modelRotateX(fmod(time/2, 2*PI));
-    _renderer.modelRotateY(fmod(time/2, 2*PI));
-    _renderer.modelRotateZ(fmod(time/2, 2*PI));
-    _renderer.drawDividedCube({ 1, 1, 1, 1 }, 1, 10);
-    _renderer.modelPopMat();
-
-    // Draw a sphere.
-    _renderer.modelPushMat();
-    _renderer.modelTranslate(2, 0, 2);
-    _renderer.modelRotateX(-fmod(time/2, 2*PI));
-    _renderer.modelRotateY(-fmod(time/2, 2*PI));
-    _renderer.modelRotateZ(-fmod(time/2, 2*PI));
-    _renderer.drawSphere({ 1, 1, 1, 1 }, 0.7, 16, 16);
-    _renderer.modelPopMat();
+    // Draw all of the scene's shapes.
+    shapeManager.drawShapes(_renderer);
 }
 
 vector<Light>* Scene::getLights() { return &lights; }
 
 void Scene::showImGuiControls(Renderer& _renderer)
-{
-    // Material pannel.
-    if (ImGui::CollapsingHeader("Material"))
-    {
-        static Material output = _renderer.getMaterial();
-        ImGui::SliderFloat("Diffuse",  &output.diffuse,  0, 10);
-        ImGui::SliderFloat("Specular", &output.specular, 0, 10);
-        ImGui::SliderFloat("Shininess",  &output.shininess,  0, 10);
-        _renderer.setMaterial(output);
-    }
-    
+{    
     // Light pannel.
     if (ImGui::CollapsingHeader("Lights"))
     {
@@ -116,4 +96,7 @@ void Scene::showImGuiControls(Renderer& _renderer)
             ImGui::PopID();
         }
     }
+
+    // Shapes pannel.
+    shapeManager.showImGuiControls();
 }

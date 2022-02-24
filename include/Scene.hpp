@@ -5,6 +5,7 @@
 #include <Light.hpp>
 #include <Camera.hpp>
 #include <Renderer.hpp>
+#include <ShapeManager.hpp>
 
 class Renderer;
 
@@ -13,6 +14,7 @@ class Scene
 private:
     double time = 0, deltaTime = 0;
     std::vector<Light> lights;
+    ShapeManager shapeManager;
     
 public:
     Scene();

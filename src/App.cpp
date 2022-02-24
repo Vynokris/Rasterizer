@@ -95,17 +95,10 @@ void App::update()
     // Initialize app objects.
     Scene scene;
 
-    Material material = { 1, 1, 0.2 };
-
     Renderer renderer(1500, 950, scene.getLights());
-    renderer.setMaterial(material);
 
     CameraInputs inputs;
     Camera camera(renderer.framebuffer.getWidth(), renderer.framebuffer.getHeight(), 90.f, 0.001f, 1000.f, 2.5f);
-
-    // Load a texture.
-    TextureData baseTexture = loadBmpData("art/UrAppreciated.bmp");
-    renderer.setTexture(baseTexture);
 
     bool mouseCaptured = false;
     double mouseX      = 0, mouseY      = 0;
@@ -168,15 +161,16 @@ void App::update()
         ImGui::End();
         
         
-        // Compute smooth FPS.
+        // Compute smooth FPS and delta time.
         static int counter = 0;
-        static float deltaTimes = 0, fps = 0;
+        static float deltaTimes = 0, smoothFps = 0, smoothDeltaTime = 0;
         counter++;
         deltaTimes += io.DeltaTime;
         if (counter >= 10)
         {
             counter = 0;
-            fps = 1 / (deltaTimes / 10);
+            smoothFps = 1 / (deltaTimes / 10);
+            smoothDeltaTime = deltaTimes / 10;
             deltaTimes = 0;
         }
 
@@ -184,7 +178,7 @@ void App::update()
         bool isOpen = false;
         if (ImGui::Begin("Render", &isOpen, ImGuiWindowFlags_NoTitleBar))
         {
-            ImGui::Text("FPS: %.f | Delay: %.2f ms (Hold RMB / press WASD to look / move around) ", fps, ImGui::GetIO().DeltaTime * 100);
+            ImGui::Text("FPS: %.f | Delay: %.2f ms (Hold RMB / press WASD to look / move around) ", smoothFps, smoothDeltaTime * 100);
 
             ImGui::Image((ImTextureID)(size_t)renderer.framebuffer.getColorTexture(), { (float)renderer.framebuffer.getWidth(), (float)renderer.framebuffer.getHeight() });
             if (ImGui::IsItemHovered() && ImGui::IsMouseDown(ImGuiMouseButton_Right))
@@ -202,8 +196,6 @@ void App::update()
 
         endFrame();
     }
-
-    delete[] baseTexture.pixels;
 }
 
 //destructor who kill glfw and clean the window buffer
