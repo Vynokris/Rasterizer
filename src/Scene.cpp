@@ -75,7 +75,7 @@ void Scene::showImGuiControls(Renderer& _renderer)
         for (int i = 0; i < (int)lights.size(); i++)
         {
             string lightName = "Light " + to_string(i);
-            ImGui::PushID(i);
+            ImGui::PushID(MAX_SHAPES + i);
 
             // Draw header with items inside.
             if (ImGui::CollapsingHeader(lightName.c_str()))
@@ -89,15 +89,15 @@ void Scene::showImGuiControls(Renderer& _renderer)
                     lights.erase(lights.begin() + i);
 
                 // Position and color.
-                ImGui::SliderFloat3("Position", &lights[i].pos.x, -10, 10);
-                ImGui::ColorEdit4("Color",      &lights[i].color.r);
+                ImGui::DragFloat3("Position", &lights[i].pos.x, 0.25);
+                ImGui::ColorEdit4("Color",    &lights[i].color.r);
 
                 // Light attributes.
                 ImGui::PushItemWidth(100);
-                ImGui::InputFloat("Light range",  &lights[i].range);
-                ImGui::InputFloat("Constant attenuation", &lights[i].constantAttenuation);
-                ImGui::InputFloat("Linear attenuation", &lights[i].linearAttenuation);
-                ImGui::InputFloat("Quadratic attenuation", &lights[i].quadraticAttenuation);
+                ImGui::DragFloat("Light range",           &lights[i].range               , 0.05, 0, 20);
+                ImGui::DragFloat("Constant attenuation",  &lights[i].constantAttenuation , 0.05, 0, 5);
+                ImGui::DragFloat("Linear attenuation",    &lights[i].linearAttenuation   , 0.05, 0, 5);
+                ImGui::DragFloat("Quadratic attenuation", &lights[i].quadraticAttenuation, 0.05, 0, 5);
                 ImGui::PopItemWidth();
 
                 ImGui::EndGroup();
