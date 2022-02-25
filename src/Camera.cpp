@@ -31,11 +31,11 @@ void Camera::update(const float& _deltaTime, CameraInputs _inputs)
     // Set direction accoring to inputs.
     Vector3 dir;
     if (_inputs.moveBackward) dir.z +=  1;
-    if (_inputs.moveLeft)     dir.x += -1;
+    if (_inputs.moveForward)  dir.z += -1;
     if (_inputs.moveRight)    dir.x +=  1;
+    if (_inputs.moveLeft)     dir.x += -1;
     if (_inputs.moveUp)       dir.y += -1;
     if (_inputs.moveDown)     dir.y +=  1;
-    if (_inputs.moveForward)  dir.z += -1;
 
     switch(viewMode)
     {
@@ -65,9 +65,9 @@ void Camera::update(const float& _deltaTime, CameraInputs _inputs)
             else if (Vector3(pos, lookAtPoint).getAnglePhi() < -PI/2+0.2) _inputs.deltaY = clampAbove(_inputs.deltaY, 0);
 
             // Move according to the camera's yaw and pitch.
-            Vector3 newPos = pos + getSphericalCoords(speed, PI/2      , 2*PI - pitch       ) * _inputs.deltaX / 8
-                                 + getSphericalCoords(speed, 2*PI - yaw, 2*PI - pitch - PI/2) * _inputs.deltaY / 8;
-            lookAtDist  += speed * _inputs.mouseWheel * -3;
+            Vector3 newPos = pos + getSphericalCoords(speed, PI/2      , 2*PI - pitch       ) * -_inputs.deltaX / 8
+                                 + getSphericalCoords(speed, 2*PI - yaw, 2*PI - pitch - PI/2) * -_inputs.deltaY / 8;
+            lookAtDist += speed * _inputs.mouseWheel * -3;
             newPos -=        lookAtPoint;
             newPos.setLength(lookAtDist);
             newPos +=        lookAtPoint;
