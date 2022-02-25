@@ -169,7 +169,7 @@ void ShapeManager::showImGuiControls()
             {
                 // Compute item padding.
                 ImVec2 p1 = ImGui::GetCursorScreenPos();
-                ImGui::SetCursorScreenPos({ p1.x+10, p1.y });
+                ImGui::SetCursorScreenPos({ p1.x+7, p1.y });
                 ImGui::BeginGroup();
                 ImGui::PushID(i);
 
