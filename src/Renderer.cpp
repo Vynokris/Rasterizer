@@ -599,6 +599,11 @@ void Renderer::showImGuiControls()
     static const char* lModeItems[]{ "Phong", "Blinn" };
     static int lModeCur = 0;
     
+    // Compute items padding.
+    ImVec2 p0 = ImGui::GetCursorScreenPos();
+    ImGui::SetCursorScreenPos({ p0.x+7, p0.y });
+    ImGui::BeginGroup();
+
     // Displaying components.
     ImGui::ColorEdit4("BG Color", &framebuffer.clearColor.r);
 
@@ -607,4 +612,6 @@ void Renderer::showImGuiControls()
 
     ImGui::Combo("Lighting Mode", &lModeCur, lModeItems, IM_ARRAYSIZE(lModeItems));
     lightingMode = (LightingMode)lModeCur;
+
+    ImGui::EndGroup();
 }

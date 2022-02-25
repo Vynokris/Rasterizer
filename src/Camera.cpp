@@ -146,6 +146,11 @@ void Camera::setLookAtRotation()
 
 void Camera::showImGuiControls()
 {
+    // Compute items padding.
+    ImVec2 p0 = ImGui::GetCursorScreenPos();
+    ImGui::SetCursorScreenPos({ p0.x+7, p0.y });
+    ImGui::BeginGroup();
+
     // Camera info.
     ImGui::Text("Position: %.2f, %.2f, %.2f", pos.x, pos.y, pos.z);
     ImGui::Text("Pitch:    %.2f°", radToDeg(pitch));
@@ -172,4 +177,6 @@ void Camera::showImGuiControls()
 
     // Modifier for camera speed.
     ImGui::SliderFloat("Speed", &acceleration, 0.05, 10);
+
+    ImGui::EndGroup();
 }
