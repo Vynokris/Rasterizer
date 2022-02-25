@@ -631,7 +631,7 @@ matrix::Matrix<4, 4> geometry3D::getTransformMatrix(const Vector3& position, con
                getZRotationMatrix  (rotation.z) *
                getScaleMatrix      (scale);
     }
-    // For world coordinates.
+    // For objects in world space.
     else
     {
         return getScaleMatrix      (scale)      *
