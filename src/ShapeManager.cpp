@@ -81,8 +81,6 @@ void ShapeManager::delShape(const int& _index)
 {
     if (0 <= _index && _index < getShapeNum())
         shapes.erase(shapes.begin() + _index);
-    else
-        printf("JAAAAJ\n");
 }
 
 void ShapeManager::drawShapes(Renderer& _renderer)
