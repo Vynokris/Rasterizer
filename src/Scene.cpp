@@ -81,13 +81,13 @@ void Scene::showImGuiControls(Renderer& _renderer)
                 ImGui::SetCursorScreenPos(padding);
                 ImGui::BeginGroup();
 
-                ImGui::SliderFloat3("Position", &lights[i].pos.x, -10, 10);
-                ImGui::ColorEdit4("Color",      &lights[i].color.r);
+                ImGui::DragFloat3("Position", &lights[i].pos.x, 0.25);
+                ImGui::ColorEdit4("Color",    &lights[i].color.r);
 
                 ImGui::PushItemWidth(100);
-                ImGui::InputFloat("Light range",  &lights[i].range);
-                ImGui::InputFloat("Constant attenuation", &lights[i].constantAttenuation);
-                ImGui::InputFloat("Linear attenuation", &lights[i].linearAttenuation);
+                ImGui::InputFloat("Light range",           &lights[i].range);
+                ImGui::InputFloat("Constant attenuation",  &lights[i].constantAttenuation);
+                ImGui::InputFloat("Linear attenuation",    &lights[i].linearAttenuation);
                 ImGui::InputFloat("Quadratic attenuation", &lights[i].quadraticAttenuation);
                 ImGui::PopItemWidth();
 
