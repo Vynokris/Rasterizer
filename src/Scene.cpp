@@ -57,33 +57,42 @@ void Scene::showImGuiControls(Renderer& _renderer)
     // Light pannel.
     if (ImGui::CollapsingHeader("Lights"))
     {
+        // Compute items padding.
+        ImVec2 p0 = ImGui::GetCursorScreenPos();
+        ImGui::SetCursorScreenPos({ p0.x+7, p0.y });
+        ImGui::BeginGroup();
+
         // Light instatiation.
-        if (ImGui::Button("Add", { 50, 18 }) && (int)lights.size() < MAX_LIGHTS) lights.push_back({ 5, 1, 0.2, 0.1, Vector3(), WHITE });
-                
+        if (ImGui::Button("Create a new light", ImGui::GetItemRectSize()) && (int)lights.size() < MAX_LIGHTS) 
+            lights.push_back({ 5, 1, 0.2, 0.1, Vector3(), WHITE });
+        ImGui::EndGroup();
+            
+        // Compute light info padding.
+        ImGui::SetCursorScreenPos({ p0.x+10, p0.y+23 });
+        ImGui::BeginGroup();
+        
         // Lights parameters.
         for (int i = 0; i < (int)lights.size(); i++)
         {
-            string lightName = "Light ";
-            lightName += to_string(i);
-
+            string lightName = "Light " + to_string(i);
             ImGui::PushID(i);
-            if(ImGui::Button("Remove") && (int)lights.size() > 0) lights.erase(lights.begin() + i);
-
-            // Compute lights items padding.
-            ImVec2 p0      = ImGui::GetCursorScreenPos();
-            ImVec2 offset  = ImGui::GetItemRectSize();
-            ImVec2 padding = { p0.x + offset.x + 5, p0.y };
 
             // Draw header with items inside.
-            ImGui::SameLine();
             if (ImGui::CollapsingHeader(lightName.c_str()))
             {
-                ImGui::SetCursorScreenPos(padding);
+                ImVec2 p1 = ImGui::GetCursorScreenPos();
+                ImGui::SetCursorScreenPos({ p1.x+7, p1.y });
                 ImGui::BeginGroup();
 
+                // Remove light button.
+                if(ImGui::Button("Remove") && (int)lights.size() > 0) 
+                    lights.erase(lights.begin() + i);
+
+                // Position and color.
                 ImGui::SliderFloat3("Position", &lights[i].pos.x, -10, 10);
                 ImGui::ColorEdit4("Color",      &lights[i].color.r);
 
+                // Light attributes.
                 ImGui::PushItemWidth(100);
                 ImGui::InputFloat("Light range",  &lights[i].range);
                 ImGui::InputFloat("Constant attenuation", &lights[i].constantAttenuation);
@@ -95,6 +104,7 @@ void Scene::showImGuiControls(Renderer& _renderer)
             }
             ImGui::PopID();
         }
+        ImGui::EndGroup();
     }
 
     // Shapes pannel.
