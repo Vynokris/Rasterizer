@@ -55,7 +55,7 @@ void Renderer::drawPixel(const unsigned int& _x, const unsigned int& _y, const f
         _color = _color * alpha + bufferColor * (1 - alpha);
     }
 
-    // Draw the pixel (color or depth) if it is closer than the previus one.
+    // Draw the pixel (color or depth) if it is closer than the previous one.
     if (isCloser || blendAlpha)
     {
         bufferDepth = _depth;
