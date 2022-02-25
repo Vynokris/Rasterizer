@@ -167,9 +167,9 @@ void Camera::showImGuiControls()
         lookAtMovement = (LookAtMovement)curMovementItem;
         
         // Modifier for look at point pos.
-        ImGui::SliderFloat3("Look at point", &lookAtPoint.x, -5, 5);
+        ImGui::DragFloat3("Look at point", &lookAtPoint.x, 0.5, -5, 5);
     }
 
     // Modifier for camera speed.
-    ImGui::SliderFloat("Speed", &acceleration, 0.05, 10);
+    ImGui::DragFloat("Speed", &acceleration, 0.05, 0.05, 10);
 }
