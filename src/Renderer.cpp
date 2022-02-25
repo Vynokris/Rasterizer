@@ -48,10 +48,10 @@ void Renderer::drawPixel(const unsigned int& _x, const unsigned int& _y, const f
 
     // Alpha blending.
     bool blendAlpha = false;
-    if (_color.a < 1 || bufferColor.a < 1)
+    if (_color.a <= 0.99 || bufferColor.a <= 0.99)
     {
         blendAlpha = true;
-        float alpha = (isCloser ? _color.a : (1 - bufferColor.a));
+        float alpha = (isCloser ? _color.a : ((_color.a + 1 - bufferColor.a) / 2));
         _color = _color * alpha + bufferColor * (1 - alpha);
     }
 
@@ -345,15 +345,11 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                 // Define the pixel color.
                 Color pCol { 0, 0, 0, 1 };
 
-                // Compute interpolation of vertex colors.
-                if (texture.pixels == nullptr || vertexHueOnTextures)
-                {
-                    // Get the pixel color from barycentric coordinates.
-                    pCol.r = _triangle.a.color.r * w0n + _triangle.b.color.r * w1n + _triangle.c.color.r * w2n; 
-                    pCol.g = _triangle.a.color.g * w0n + _triangle.b.color.g * w1n + _triangle.c.color.g * w2n; 
-                    pCol.b = _triangle.a.color.b * w0n + _triangle.b.color.b * w1n + _triangle.c.color.b * w2n; 
-                    pCol.a = _triangle.a.color.a * w0n + _triangle.b.color.a * w1n + _triangle.c.color.a * w2n;
-                }
+                // Interpolate between vertex colors using barycentric coordinates.
+                pCol.r = _triangle.a.color.r * w0n + _triangle.b.color.r * w1n + _triangle.c.color.r * w2n; 
+                pCol.g = _triangle.a.color.g * w0n + _triangle.b.color.g * w1n + _triangle.c.color.g * w2n; 
+                pCol.b = _triangle.a.color.b * w0n + _triangle.b.color.b * w1n + _triangle.c.color.b * w2n; 
+                pCol.a = _triangle.a.color.a * w0n + _triangle.b.color.a * w1n + _triangle.c.color.a * w2n;
 
                 // Get the texture's color.
                 if (texture.pixels != nullptr)
@@ -376,7 +372,9 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                     // Apply the texture color to the pixel color.
                     else
                     {
-                        pCol = texColor;
+                        pCol.r = texColor.r;
+                        pCol.g = texColor.g;
+                        pCol.b = texColor.b;
                     }
                 }
 
