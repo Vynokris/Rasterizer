@@ -1,7 +1,7 @@
 #include <ShapeManager.hpp>
 #include <filesystem>
 #include <iostream>
-namespace fs = std::filesystem;
+#include <tinydir.h>
 
 
 ShapeManager::ShapeManager()
@@ -11,24 +11,35 @@ ShapeManager::ShapeManager()
     textureNames.push_back("None");
     textures.push_back(texture);
     
-    // Load textures.
-    for (const fs::directory_entry& entry : fs::directory_iterator("art"))
-    {
-        if (entry.path().extension().string() == ".bmp")
-        {
-            // Get the file path and name.
-            std::string filePath = entry.path().string().c_str();
-            std::string fileName = entry.path().filename().string();
+    // Open the art directory.
+    tinydir_dir dir;
+    tinydir_open(&dir, "art");
 
-            // Get rid of the .bmp extension.
-            fileName = fileName.substr(0, fileName.length()-4);
-            
-            // Load the texture and save the name.
-            texture = loadBmpData(filePath.c_str());
-            textureNames.push_back(fileName);
-            textures.push_back(texture);
+    // Loop over all the files in the dirextory.
+    while (dir.has_next)
+    {
+        tinydir_file file;
+        tinydir_readfile(&dir, &file);
+
+        // Get the file name.
+        std::string fileName = file.name;
+        if (fileName == ".." || fileName == ".") 
+        {
+            tinydir_next(&dir);
+            continue;
         }
+
+        // Load the texture.
+        texture = loadBmpData(("art/" + fileName).c_str());
+        textures.push_back(texture);
+
+        // Remove the file extension and save the name.
+        fileName = fileName.substr(0, fileName.length()-4);
+        textureNames.push_back(fileName);
+
+        tinydir_next(&dir);
     }
+    tinydir_close(&dir);
 }
 
 ShapeManager::~ShapeManager()
