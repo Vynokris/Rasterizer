@@ -89,6 +89,10 @@ void ShapeManager::drawShapes(Renderer& _renderer)
 {
     for (Shape shape : shapes)
     {
+        // If the shpe's alpha is 0, don't draw it.
+        if (shape.color.a <= 0.01)
+            continue;
+
         // Tell the renderer to use the shape's material and texture.
         _renderer.setMaterial(shape.material);
         _renderer.setTexture(textures[shape.textureID]);
