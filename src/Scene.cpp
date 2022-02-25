@@ -15,15 +15,16 @@ Scene::Scene()
 {
     // Setup default lights.
     lights.clear();
-    lights.push_back({ 5, 1, 0.2, 0.1, {  2,  1.5,  2 }, RED   });
-    lights.push_back({ 5, 1, 0.2, 0.1, {  2, -2,   -2 }, GREEN });
-    lights.push_back({ 5, 1, 0.2, 0.1, { -1,  1.5, -2 }, BLUE  });
-    lights.push_back({ 5, 1, 0.2, 0.1, {  2,  0,    4 }, WHITE });
+    lights.push_back({ 5, 1, 0.2, 0.1, {  0,  1.5, 2 }, RED   });
+    lights.push_back({ 5, 1, 0.2, 0.1, {  2,  0,   2 }, GREEN });
+    lights.push_back({ 5, 1, 0.2, 0.1, { -3, -1.5, 0 }, WHITE  });
+    lights.push_back({ 5, 1, 0.2, 0.1, {  0,  0,   4 }, BLUE });
 
     // Setup default shapes.
-    shapeManager.addShape({ ShapeTypes::CUBE,   1, { -2, 0, 2 }, { 0, 0, 0 }, { 1, 1, 0.2 } });
-    shapeManager.addShape({ ShapeTypes::SPHERE, 1, {  2, 0, 2 }, { 0, 0, 0 }, { 1, 1, 0.2 } });
-    shapeManager.getShape(1).subdivisions = 10;
+    shapeManager.addShape({ ShapeTypes::CUBE,   1, { -0.5, 0, 2 }, { 0, 0, 0 }, { 1, 1, 0.2 } });
+    shapeManager.addShape({ ShapeTypes::SPHERE, 1, {  0.5, 0, 2 }, { 0, 0, 0 }, { 1, 1, 0.2 } });
+    shapeManager.getShape(0).color = { 1, 1, 1, 0.7 };
+    shapeManager.getShape(1).subdivisions = 20;
 }
 
 void Scene::update(const float& _deltaTime, Renderer& _renderer, const Camera& _camera)

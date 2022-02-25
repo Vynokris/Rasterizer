@@ -52,6 +52,7 @@ void Renderer::drawPixel(const unsigned int& _x, const unsigned int& _y, const f
     if (_color.a <= 0.99 || bufferColor.a <= 0.99)
     {
         blendAlpha = true;
+        if (bufferColor.a > 0.99) blendAlpha = false;
         float alpha = (isCloser ? _color.a : ((_color.a + 1 - bufferColor.a) / 2));
         _color = _color * alpha + bufferColor * (1 - alpha);
     }
@@ -662,9 +663,9 @@ void Renderer::showImGuiControls()
     // Display durations.
     ImGui::Begin("Rendering clocks");
     {
-        ImGui::Text("Triangles: %d X %.fus", triangleCounter, (float)triangleDuration / CLOCKS_PER_SEC * 1000000);
-        ImGui::Text("Lighting : %d X %.fus", lightingCounter, (float)lightingDuration / CLOCKS_PER_SEC * 1000000);
-        ImGui::Text("Vertex transforms: %d X %.fus", transformCounter, (float)transformDuration / CLOCKS_PER_SEC * 1000000);
+        ImGui::Text("Triangles: %d X %.fus", triangleCounter, (float)triangleDuration * 1000000 / CLOCKS_PER_SEC);
+        ImGui::Text("Lighting : %d X %.fus", lightingCounter, (float)lightingDuration * 1000000 / CLOCKS_PER_SEC);
+        ImGui::Text("Vertex transforms: %d X %.fus", transformCounter, (float)transformDuration * 1000000 / CLOCKS_PER_SEC);
     }
     ImGui::End();
 }
