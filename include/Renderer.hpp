@@ -31,6 +31,15 @@ private:
     bool vertexHueOnTextures = false;
     bool cullBackFaces       = true;
 
+    // Counters and clocks.
+    int     triangleCounter   = 0;
+    clock_t triangleDuration  = 0;
+    int     lightingCounter   = 0;
+    clock_t lightingDuration  = 0;
+    int     transformCounter  = 0;
+    clock_t transformDuration = 0;
+
+    // The three transformation matrices.
     std::vector<Mat4> modelMat;
     Mat4              viewMat;
     Mat4              projectionMat;
@@ -83,10 +92,11 @@ public:
     void     setTexture (const TextureData& _textureData);
     Material getMaterial() const;
     void     setMaterial(const Material& _material);
-    void     applyVertexColorToTextures(const bool& _boolean);
-    void     doBackfaceCulling(const bool& _boolean);
 
     // ---------- Miscellaneous ---------- //
     
+    void applyVertexColorToTextures(const bool& _boolean);
+    void doBackfaceCulling(const bool& _boolean);
+    void resetCounters();
     void showImGuiControls();
 };

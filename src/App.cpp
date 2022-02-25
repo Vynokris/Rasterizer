@@ -137,6 +137,22 @@ void App::update()
             inputs.moveDown     = ImGui::IsKeyDown(GLFW_KEY_LEFT_SHIFT);
             camera.update(io.DeltaTime, inputs);
         }
+        
+        // Compute smooth FPS and delta time.
+        static int counter = 0;
+        static float deltaTimes = 0, smoothFps = 0, smoothDeltaTime = 0;
+        counter++;
+        deltaTimes += io.DeltaTime;
+        if (counter >= 10)
+        {
+            counter = 0;
+            smoothFps = 1 / (deltaTimes / 10);
+            smoothDeltaTime = deltaTimes / 10;
+            deltaTimes = 0;
+        }
+
+        // Reset the renderer's counters.
+        renderer.resetCounters();
 
         // Clear buffers.
         renderer.framebuffer.clear(camera.getFar());
@@ -159,20 +175,6 @@ void App::update()
             scene.showImGuiControls(renderer);
         }
         ImGui::End();
-        
-        
-        // Compute smooth FPS and delta time.
-        static int counter = 0;
-        static float deltaTimes = 0, smoothFps = 0, smoothDeltaTime = 0;
-        counter++;
-        deltaTimes += io.DeltaTime;
-        if (counter >= 10)
-        {
-            counter = 0;
-            smoothFps = 1 / (deltaTimes / 10);
-            smoothDeltaTime = deltaTimes / 10;
-            deltaTimes = 0;
-        }
 
         // Display the rasterizer's output.
         bool isOpen = false;

@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cassert>
+#include <ctime>
 
 #include <imgui.h>
 #include <my_math.hpp>
@@ -264,19 +265,46 @@ void Renderer::drawTriangle(Triangle3 _triangle)
     if (cullBackFaces && !isTowardsCamera(trianglePos, worldNormal, cameraPos)) 
         return;
 
+    // Start a clock.
+    clock_t transformClock = clock();
+
     // Transform the triangle's vertices through the renderer's matrices and clip using clipCoords.w.
     if (!transformVertices(3, &_triangle.a, localCoords, worldCoords, viewCoords, clipCoords, ndcCoords, screenCoords, perspectiveUV))
         return;
+    
+    // End the clock.
+    transformClock = clock() - transformClock;
+    transformDuration = (transformDuration + transformClock) / 2;
+    transformCounter += 3;
 
     // Draw triangle wireframe
     if (wireframeTriangle(screenCoords, &_triangle.a)) 
         return;
 
+    // Increment the triangle counter.
+    triangleCounter++;
+
     // Compute Blinn-Phong lighting for each vertex and light.
     Color lightIntensity[3] = { { 1, 1, 1, 1 }, { 1, 1, 1, 1 }, { 1, 1, 1, 1 }, };
     if (lightingMode == LightingMode::PHONG && renderMode == RenderMode::LIT)
-        for (int i = 0; i < 3; i++)
+    {
+        // Start a clock.
+        clock_t lightingClock = clock();
+
+        // Calculate lights.
+        for (int i = 0; i < 3; i++, lightingCounter++)
             lightIntensity[i] = computePhong(*lights, material, worldCoords[i].toVector3(), worldNormal, cameraPos);
+        
+        // End the clock.
+        lightingClock = clock() - lightingClock;
+
+        // Update the lighting duration.
+        lightingDuration = (lightingDuration + lightingClock) / 2;
+
+    }
+
+    // Start a clock to get the duration of triangle drawing.
+    clock_t triangleClock = clock();
 
     // Compute the triangle's bounding box.
     int minX = min(screenCoords[0].x, min(screenCoords[1].x, screenCoords[2].x));
@@ -337,8 +365,19 @@ void Renderer::drawTriangle(Triangle3 _triangle)
                     }
                     else if (lightingMode == LightingMode::BLINN)
                     {
+                        // Start a clock.
+                        clock_t lightingClock = clock();
+
+                        // Compute blinn lighting.
                         Vector3 pixelPos = (worldCoords[0] * w0n + worldCoords[1] * w1n + worldCoords[2] * w2n).toVector3();
                         pLight           = computePhong(*lights, material, pixelPos, worldNormal, cameraPos);
+                        
+                        // End the clock.
+                        lightingClock = clock() - lightingClock;
+
+                        // Update the lighting duration and counter.
+                        lightingDuration = (lightingDuration + lightingClock) / 2;
+                        lightingCounter++;
                     }
                 }
 
@@ -396,6 +435,12 @@ void Renderer::drawTriangle(Triangle3 _triangle)
         w1_row += B20;
         w2_row += B01;
     }
+
+    // End the triangle drawing clock here.
+    triangleClock = clock() - triangleClock;
+
+    // Update the triangle duration value.
+    triangleDuration = (triangleDuration + triangleClock) / 2;
 }
 
 void Renderer::drawTriangles(Triangle3* _triangles, const unsigned int& _count)
@@ -584,6 +629,7 @@ Material Renderer::getMaterial() const                              { return mat
 void     Renderer::setMaterial(const Material& _material)           { material = _material;           }
 void     Renderer::applyVertexColorToTextures(const bool& _boolean) { vertexHueOnTextures = _boolean; }
 void     Renderer::doBackfaceCulling(const bool& _boolean)          { cullBackFaces = _boolean;       }
+void     Renderer::resetCounters()                                  { triangleCounter = 0; lightingCounter = 0; transformCounter = 0; }
 
 // ---------- Miscellaneous ---------- //
 
@@ -612,4 +658,13 @@ void Renderer::showImGuiControls()
     lightingMode = (LightingMode)lModeCur;
 
     ImGui::EndGroup();
+
+    // Display durations.
+    ImGui::Begin("Rendering clocks");
+    {
+        ImGui::Text("Triangles: %d X %.fus", triangleCounter, (float)triangleDuration / CLOCKS_PER_SEC * 1000000);
+        ImGui::Text("Lighting : %d X %.fus", lightingCounter, (float)lightingDuration / CLOCKS_PER_SEC * 1000000);
+        ImGui::Text("Vertex transforms: %d X %.fus", transformCounter, (float)transformDuration / CLOCKS_PER_SEC * 1000000);
+    }
+    ImGui::End();
 }
