@@ -81,6 +81,8 @@ void ShapeManager::delShape(const int& _index)
 {
     if (0 <= _index && _index < getShapeNum())
         shapes.erase(shapes.begin() + _index);
+    else
+        printf("JAAAAJ\n");
 }
 
 void ShapeManager::drawShapes(Renderer& _renderer)
@@ -185,14 +187,14 @@ void ShapeManager::showImGuiControls()
                 ImGui::Text("World transform:");
 
                 // Position, rotation, size.
-                ImGui::SliderFloat3("Position", &shapes[i].pos.x, -10,  10);
-                ImGui::SliderFloat3("Rotation", &shapes[i].rot.x,  0,   2*PI);
+                ImGui::DragFloat3("Position", &shapes[i].pos.x, 0.25);
+                ImGui::DragFloat3("Rotation", &shapes[i].rot.x, PI/12, 0,  2*PI);
                 if (shapeType != ShapeTypes::TRIANGLE)
-                    ImGui::SliderFloat ("Size",     &shapes[i].size,   0.1, 5);
+                    ImGui::DragFloat ("Size", &shapes[i].size, 0.25, 0);
 
                 // Subdivisions.
                 if (shapeType == ShapeTypes::DIVIDED_CUBE || shapeType == ShapeTypes::SPHERE)
-                    ImGui::SliderInt("Subdivisions", &shapes[i].subdivisions, 3, 100);
+                    ImGui::DragInt("Subdivisions", &shapes[i].subdivisions, 1, 3, 100);
                 
                 // Triangle vertices.
                 if (shapeType == ShapeTypes::TRIANGLE)
@@ -206,7 +208,7 @@ void ShapeManager::showImGuiControls()
                         std::string posStr = std::to_string(i+1) + (i==0 ? "st" : (i==1 ? "nd" : "rd")) + " position";
                         std::string colStr = std::to_string(i+1) + (i==0 ? "st" : (i==1 ? "nd" : "rd")) + " color";
 
-                        if (ImGui::SliderFloat3(posStr.c_str(), &curVertex->pos.x, -10, 10))
+                        if (ImGui::DragFloat3(posStr.c_str(), &curVertex->pos.x, 0.5))
                         {
                             Vector3 newNormal = Vector3(shapes[i].triangleData.a.pos, shapes[i].triangleData.b.pos)
                                               ^ Vector3(shapes[i].triangleData.a.pos, shapes[i].triangleData.c.pos);
@@ -229,9 +231,9 @@ void ShapeManager::showImGuiControls()
                 }
 
                 // Material.
-                ImGui::SliderFloat("Diffuse",   &shapes[i].material.diffuse,   0, 10);
-                ImGui::SliderFloat("Specular",  &shapes[i].material.specular,  0, 10);
-                ImGui::SliderFloat("Shininess", &shapes[i].material.shininess, 0, 10);
+                ImGui::DragFloat("Diffuse",   &shapes[i].material.diffuse,   0.25, 0, 10);
+                ImGui::DragFloat("Specular",  &shapes[i].material.specular,  0.25, 0, 10);
+                ImGui::DragFloat("Shininess", &shapes[i].material.shininess, 0.25, 0, 10);
 
                 // Vertex hue on texture.
                 if (shapeType != ShapeTypes::TRIANGLE && shapes[i].textureID != 0)
