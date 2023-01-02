@@ -1,4 +1,4 @@
-# Alemi Engine
+# Rasterizer
 
 ## General Information
 
