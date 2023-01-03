@@ -9,7 +9,7 @@ The end goal of the project was to create a program that renders objects in 3D, 
 
 ## Preview
 
-<img src="./screenshots/showcase.gif" style="width:700px;"/>
+<img src="./screenshots/preview.gif" style="width:700px;"/>
 
 <br>
 
