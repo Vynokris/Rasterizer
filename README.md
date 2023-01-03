@@ -2,11 +2,18 @@
 
 ## General Information
 
+This project was done for the ISART Digital school by Rémi Serra and Alexandre Perché. <br>
 The end goal of the project was to create a program that renders objects in 3D, computes lighting, and has a camera from which the scene is viewed. This is all done on one CPU thread, so the performance isn't ideal, although the code is somewhat optimised.
 
 <br>
 
-## Implemented features
+## Preview
+
+<img src="./screenshots/showcase.gif" style="width:700px;"/>
+
+<br>
+
+## Features
 
 ### Objects:
 - Rasterization of triangles in 3D space.
@@ -49,7 +56,7 @@ The end goal of the project was to create a program that renders objects in 3D, 
 
 <br>
 
-## Missing features
+## Shortcomings
 The following features were not added because of lack of time, or bad compatibility with the current state of the codebase.
 - Meshes.
 - Anti-aliasing.
@@ -64,6 +71,7 @@ The following features were not added because of lack of time, or bad compatibil
 - Launch the ```Rasterizer``` executable file.
 
 ### Windows
+- You need to have clang installed (run ```clang -v``` to check).
 - Execute ```build.bat``` to build the project using clang compiler.
 - Or execute the ```make``` command in Cygwin.
 - Launch the ```Rasterizer.exe``` file.
