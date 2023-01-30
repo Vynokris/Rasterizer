@@ -20,7 +20,7 @@ The end goal of the project was to create a program that renders objects in 3D, 
 - Drawing functions for:
     - Quads
     - Cubes
-    - Subdivided cubesW
+    - Subdivided cubes
     - Spheres
 - Object depth buffer.
 - Alpha-blending between objects.
